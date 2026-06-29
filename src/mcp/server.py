@@ -19,14 +19,16 @@ mcp = FastMCP("triage-tools")
 
 # --------------------------------------------------------------------------------------
 # Mock data — kept internally consistent with the labels/notes in data/eval_set.jsonl.
-# order 10231 -> double charge (refundable); u_1001 locked; u_2002 abuse_warned (+ history);
-# u_9999 absent -> not_found. Policies cover refund / account_access / abuse / billing.
+# orders: 10231 & 10242 -> double charge (refundable); 10199 -> single charge; 10255 -> already
+# refunded. accounts: u_1001 locked; u_2002 & u_4004 abuse_warned (+ history); u_9999 absent ->
+# not_found. Policies cover refund / account_access / abuse / billing.
 # --------------------------------------------------------------------------------------
 _ACCOUNTS: dict[str, dict] = {
     "u_1000": {"plan": "pro", "status": "active", "signup_date": "2023-01-15", "flags": []},
     "u_1001": {"plan": "free", "status": "locked", "signup_date": "2022-07-02", "flags": ["login_locked"]},
     "u_2002": {"plan": "pro", "status": "active", "signup_date": "2021-03-10", "flags": ["abuse_warned"]},
     "u_3003": {"plan": "free", "status": "active", "signup_date": "2024-05-20", "flags": []},
+    "u_4004": {"plan": "pro", "status": "active", "signup_date": "2020-11-01", "flags": ["abuse_warned"]},
 }
 
 _ORDERS: dict[str, dict] = {
@@ -45,6 +47,21 @@ _ORDERS: dict[str, dict] = {
         "charges": [{"charge_id": "ch_9", "amount": 19.99, "ts": "2026-04-15T08:00:00Z"}],
         "refund_status": "none",
     },
+    # Second duplicate-charge order (refundable) so refund cases aren't all order 10231.
+    "10242": {
+        "user_id": "u_3003", "amount": 120.00, "currency": "USD", "date": "2026-05-20",
+        "charges": [
+            {"charge_id": "ch_2a", "amount": 120.00, "ts": "2026-05-20T09:00:00Z"},
+            {"charge_id": "ch_2b", "amount": 120.00, "ts": "2026-05-20T09:00:03Z"},
+        ],
+        "refund_status": "none",
+    },
+    # Already refunded => a repeat refund request should get an informational reply, not a re-refund.
+    "10255": {
+        "user_id": "u_1000", "amount": 49.99, "currency": "USD", "date": "2026-03-10",
+        "charges": [{"charge_id": "ch_5", "amount": 49.99, "ts": "2026-03-10T12:00:00Z"}],
+        "refund_status": "refunded",
+    },
 }
 
 _TICKET_HISTORY: dict[str, list[dict]] = {
@@ -53,6 +70,9 @@ _TICKET_HISTORY: dict[str, list[dict]] = {
     ],
     "u_2002": [
         {"ticket_id": "t_500", "summary": "Harassment report — user warned", "resolution": "warned"},
+    ],
+    "u_4004": [
+        {"ticket_id": "t_700", "summary": "Spam in comments — user warned", "resolution": "warned"},
     ],
 }
 

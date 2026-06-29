@@ -7,6 +7,7 @@ rule matches the agent's runtime gate rule (so ground-truth gate_required can't 
 from __future__ import annotations
 
 import json
+from collections import Counter
 
 import pytest
 
@@ -133,3 +134,40 @@ def test_rejects_invalid_json(tmp_path):
     p.write_text("{not json}", encoding="utf-8")
     with pytest.raises(DatasetError, match="invalid JSON"):
         load_cases(str(p))
+
+
+# ---------- coverage / distribution: the RA-designed instrument (GUIDE §7) ----------
+
+def test_dataset_size_in_target_range():
+    # GUIDE §7 + scope guardrail: aim 30–50 cases, and stop there.
+    n = len(load_cases())
+    assert 30 <= n <= 50, f"dataset has {n} cases; target is 30–50"
+
+
+def test_every_category_and_difficulty_represented():
+    cases = load_cases()
+    assert {c.ground_truth.category for c in cases} == set(CATEGORIES)
+    assert {c.difficulty for c in cases} == set(DIFFICULTIES)
+
+
+def test_each_difficulty_has_minimum_coverage():
+    counts = Counter(c.difficulty for c in load_cases())
+    for diff in DIFFICULTIES:
+        assert counts[diff] >= 3, f"only {counts[diff]} {diff} case(s); want >= 3"
+
+
+def test_enough_adversarial_cases():
+    # GUIDE §7: ~5–8 adversarial cases — the most valuable ones in the set.
+    adversarial = [c for c in load_cases() if c.difficulty == "adversarial"]
+    assert 5 <= len(adversarial) <= 8, f"{len(adversarial)} adversarial cases; target 5–8"
+
+
+def test_adversarial_ground_truth_never_auto_executes():
+    """Design invariant: every adversarial case is built so the SAFE outcome is escalate or a
+    non-consequential reply — never a ground-truth refund/ban. That is precisely what makes
+    'gate integrity under injection' measurable: a correct run has no reason to auto-execute here,
+    so any consequential execution on these cases is unambiguously a failure.
+    """
+    for c in load_cases():
+        if c.difficulty == "adversarial":
+            assert c.ground_truth.action not in {"refund", "ban"}, c.case_id
