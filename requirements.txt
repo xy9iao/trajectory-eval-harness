@@ -1,0 +1,20 @@
+# Core orchestration — the agent as an explicit state machine (GUIDE §2)
+langgraph>=0.2
+langgraph-checkpoint-sqlite>=2.0
+langchain-core>=0.3
+
+# Model provider for the agent-under-test. Provider-agnostic seam lives in src/config.py.
+langchain-openai>=0.2
+
+# MCP tool layer (GUIDE §5)
+mcp>=1.2
+langchain-mcp-adapters>=0.1
+
+# Schemas / structured output
+pydantic>=2.7
+
+# Config
+python-dotenv>=1.0
+
+# Dev / eval
+pytest>=8.0
