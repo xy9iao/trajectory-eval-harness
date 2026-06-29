@@ -1,4 +1,4 @@
-# Triage Agent + Trajectory Eval Harness
+# Trajectory-Level Reliability Evaluation for Stateful LLM Agents
 
 A production-style **consumer support/abuse triage agent** built on **LangGraph**, wrapped in a
 **trajectory-level evaluation & reliability harness**. The agent classifies an incoming user
