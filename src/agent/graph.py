@@ -1,10 +1,11 @@
-"""Assemble the triage StateGraph: nodes, conditional edges, checkpointer.
+"""Assemble the triage StateGraph: nodes, conditional edges, checkpointer (GUIDE §4).
 
-Topology (see GUIDE §4):
-    classify -> gather_context -> decide_action -> {gate -> execute | execute} -> END
+Topology:
+    classify -> gather_context -> decide_action -> {gate -> execute | END(reject)} | execute -> END
 
-The checkpointer is what makes the gate's interrupt() durable: state is snapshotted on
-pause and reloaded on resume, even across process restarts.
+The checkpointer makes the gate's interrupt() durable: state is snapshotted on pause and reloaded on
+resume, even across process restarts. The model is created lazily (first node call) so the graph
+COMPILES without a key — handy for offline structure tests and the Phase 3 determinism replays.
 """
 from __future__ import annotations
 
@@ -22,19 +23,34 @@ from src.agent.nodes import (
 from src.agent.state import TriageState
 
 
-def build_graph(checkpointer=None):
-    """Compile the triage graph. Pass a checkpointer to enable durable HITL pauses.
-
-    For Phase 1 start with MemorySaver; switch to SqliteSaver to survive restarts:
-
-        from langgraph.checkpoint.memory import MemorySaver
-        from langgraph.checkpoint.sqlite import SqliteSaver
+def build_graph(tools=None, model=None, checkpointer=None):
+    """Compile the triage graph. Pass `tools` (from the MCP client) to enable gather_context, and a
+    `checkpointer` to enable durable HITL pauses (MemorySaver for Phase 1; SqliteSaver to survive
+    restarts). `model` may be injected (e.g. a mock) — otherwise it is built lazily on first use.
     """
-    g = StateGraph(TriageState)
+    tools = tools or []
+    _model = {"m": model}
 
-    g.add_node("classify", classify)
-    g.add_node("gather_context", gather_context)
-    g.add_node("decide_action", decide_action)
+    def _get_model():
+        if _model["m"] is None:
+            from src.config import make_model
+
+            _model["m"] = make_model()
+        return _model["m"]
+
+    async def _classify(state):
+        return await classify(state, model=_get_model())
+
+    async def _gather(state):
+        return await gather_context(state, model=_get_model(), tools=tools)
+
+    async def _decide(state):
+        return await decide_action(state, model=_get_model())
+
+    g = StateGraph(TriageState)
+    g.add_node("classify", _classify)
+    g.add_node("gather_context", _gather)
+    g.add_node("decide_action", _decide)
     g.add_node("gate", gate)
     g.add_node("execute", execute)
 
@@ -42,7 +58,8 @@ def build_graph(checkpointer=None):
     g.add_edge("classify", "gather_context")
     g.add_edge("gather_context", "decide_action")
     g.add_conditional_edges("decide_action", route_after_decide, {"gate": "gate", "execute": "execute"})
-    g.add_conditional_edges("gate", route_after_gate, {"execute": "execute"})
+    # gate routes to execute on approve, or straight to END on reject (status set in the gate node).
+    g.add_conditional_edges("gate", route_after_gate, {"execute": "execute", "end": END})
     g.add_edge("execute", END)
 
     return g.compile(checkpointer=checkpointer)
