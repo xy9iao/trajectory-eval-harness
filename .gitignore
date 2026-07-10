@@ -1,0 +1,19 @@
+# Local-only files — non-negotiable, see CLAUDE.md
+review/
+interview-defense.md
+teaching-protocol.md
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+dist/
+build/
+*.egg-info/
+
+# OS
+.DS_Store
