@@ -5,8 +5,15 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 
-# Local-only paths that must never be committed (CLAUDE.md, non-negotiable)
-REQUIRED_IGNORES = ["review/", "interview-defense.md", "teaching-protocol.md", ".env"]
+# Local-only paths that must never be committed (CLAUDE.md, non-negotiable;
+# data/raw/ holds unlicensed dataset text — Decision 5)
+REQUIRED_IGNORES = [
+    "review/",
+    "interview-defense.md",
+    "teaching-protocol.md",
+    ".env",
+    "data/raw/",
+]
 
 # Shapes of real credentials; placeholders in .env.example must not match any of them
 SECRET_PATTERNS = [
