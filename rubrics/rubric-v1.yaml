@@ -1,0 +1,83 @@
+# Rubric v1 — resume-JD match assessment (Decision 6)
+#
+# Structure is scaffolded; every judgment slot is marked TODO(owner) and is
+# owner-authored — weights, criteria wording, and anchors are the research
+# content interviews will probe.
+#
+# Anchor rule (Decision 5, Route A): anchors reference dataset pairs by split +
+# row index + character spans at pinned revision 08978e2 — never pasted
+# resume/JD text (the dataset is unlicensed and must not enter the repo).
+
+version: "1.0"
+status: draft # becomes active when the owner signs off; revisions bump the version (1.1, ...)
+
+scale:
+  min: 0
+  max: 5
+  # TODO(owner): one line per band anchor — what a 0, a 3, and a 5 mean
+  # generically, before per-dimension criteria refine them.
+  meaning:
+    "0": TODO(owner)
+    "3": TODO(owner)
+    "5": TODO(owner)
+
+aggregation:
+  method: weighted_mean
+  # Weights live on the dimensions and must sum to 1.0 (a validation test
+  # enforces this once the rubric leaves draft). Advance/do-not-advance
+  # thresholds and the gate boundary band are P1 gate config, not rubric
+  # content — the rubric only defines how to score.
+
+dimensions:
+  # Dimension list below follows the handoff's suggested four; the owner
+  # confirms, renames, splits, or drops dimensions before sign-off.
+
+  - id: skills_coverage
+    name: Skills coverage
+    weight: TODO(owner)
+    question: TODO(owner) # the single question this dimension answers
+    criteria:
+      # Observable, evidence-citable statements per band (Decision 7): a
+      # criterion is well-formed only if a scorer can point at resume/JD spans
+      # that satisfy it. Bands 5/3/1 are written; 4/2/0 interpolate.
+      "5": TODO(owner)
+      "3": TODO(owner)
+      "1": TODO(owner)
+    anchors: []
+    # Filled during labeling, 1-2 per dimension, e.g.:
+    #   - score: 4
+    #     pair: { split: train, row: 1234 }
+    #     evidence_spans:
+    #       - { doc: resume, start: 210, end: 292 }
+    #       - { doc: jd, start: 55, end: 130 }
+    #     reasoning: TODO(owner) — one sentence on why this span pattern earns this score
+
+  - id: experience_level
+    name: Experience level
+    weight: TODO(owner)
+    question: TODO(owner)
+    criteria:
+      "5": TODO(owner)
+      "3": TODO(owner)
+      "1": TODO(owner)
+    anchors: []
+
+  - id: hard_requirements
+    name: Hard requirements
+    weight: TODO(owner)
+    question: TODO(owner)
+    criteria:
+      "5": TODO(owner)
+      "3": TODO(owner)
+      "1": TODO(owner)
+    anchors: []
+
+  - id: education_domain_fit
+    name: Education / domain fit
+    weight: TODO(owner)
+    question: TODO(owner)
+    criteria:
+      "5": TODO(owner)
+      "3": TODO(owner)
+      "1": TODO(owner)
+    anchors: []
