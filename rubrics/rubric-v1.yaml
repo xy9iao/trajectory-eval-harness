@@ -1,15 +1,18 @@
 # Rubric v1 — resume-JD match assessment (Decision 6)
 #
-# Structure is scaffolded; every judgment slot is marked TODO(owner) and is
-# owner-authored — weights, criteria wording, and anchors are the research
-# content interviews will probe.
+# skills_coverage: AUTHORED (owner-signed, this session). Seven decisions and
+# their rationale are recorded in design_notes below and mirrored in the p0
+# report's rubric chapter.
+# Remaining three dimensions: TODO(owner) — fill using the same pattern
+# (answer the dimension's judgment questions first, then write 5/3/1,
+# then stress-test against rows 4699 and 3143 before sign-off).
 #
 # Anchor rule (Decision 5, Route A): anchors reference dataset pairs by split +
 # row index + character spans at pinned revision 08978e2 — never pasted
 # resume/JD text (the dataset is unlicensed and must not enter the repo).
 
 version: "1.0"
-status: draft # becomes active when the owner signs off; revisions bump the version (1.1, ...)
+status: draft # skills_coverage signed off; version bumps to active when all four dimensions are done
 
 scale:
   min: 0
@@ -27,35 +30,110 @@ aggregation:
   # enforces this once the rubric leaves draft). Advance/do-not-advance
   # thresholds and the gate boundary band are P1 gate config, not rubric
   # content — the rubric only defines how to score.
+  #
+  # SOFT VETO (owner decision, this session): when hard_requirements is
+  # unmet, the aggregate score is CAPPED (cap value = P1 gate config) and
+  # the pair is FORCE-GATED for human review. Rationale: real screening
+  # treats stated hard requirements as near-veto; capping + gating (rather
+  # than auto-reject) keeps the human as final decision-maker (Decision 10)
+  # and deliberately generates gate-integrity test scenarios for P2.
+  # A veto-vs-no-veto rubric comparison is a deferred P2 experiment
+  # (recorded in p0 report, future experiments).
+  soft_veto:
+    trigger_dimension: hard_requirements
+    effect: [cap_aggregate, force_gate]
+    cap_value: TBD # P1 gate config
 
 dimensions:
-  # Dimension list below follows the handoff's suggested four; the owner
-  # confirms, renames, splits, or drops dimensions before sign-off.
 
   - id: skills_coverage
     name: Skills coverage
-    weight: TODO(owner)
-    question: TODO(owner) # the single question this dimension answers
+    weight: 0.30 # provisional; re-balanced when all four dimensions are filled (sum = 1.0)
+    question: >
+      Are the skills the JD asks for evidenced in the resume — and at what
+      strength: hands-on use, listed only, or adjacent?
+    scope_notes:
+      # Dimension boundaries (owner decisions, this session):
+      - >
+        Years-of-experience requirements attached to a skill (e.g. "5+ years
+        Java") are scored under experience_level, NOT here. This dimension
+        answers only "is the skill present and how strong is the evidence";
+        the quantity gap belongs to experience_level. (Revision episode 1:
+        original criteria could not band "strong evidence, insufficient
+        years" — fixed by this boundary.)
+      - >
+        Degree/education requirements are scored under education_domain_fit,
+        not here.
+      - >
+        Preferred / nice-to-have skills do NOT move the band (stance A).
+        Screening checks the floor; simplicity also serves pass^k stability.
+    coverage_determination:
+      # Per-requirement coverage is a DISCRETE three-value judgment, not a
+      # ratio (Revision episode 2: a proportional scheme was proposed and
+      # retracted — it reintroduced per-item arithmetic aggregation, i.e.
+      # Plan B, contradicting the whole-dimension banding decision below):
+      - covered: every component of the requirement is at least keyword-level
+          present (or clearly adjacent)
+      - partial: some components present, some absent — does not trigger the
+          1-band, but locks out the 5-band
+      - absent: the requirement (or the majority of a bundled requirement,
+          e.g. "Microservices, Docker, Kubernetes") has no keyword and no
+          adjacent equivalent — triggers the low band
     criteria:
-      # Observable, evidence-citable statements per band (Decision 7): a
-      # criterion is well-formed only if a scorer can point at resume/JD spans
-      # that satisfy it. Bands 5/3/1 are written; 4/2/0 interpolate.
-      "5": TODO(owner)
-      "3": TODO(owner)
-      "1": TODO(owner)
-    anchors: []
-    # Filled during labeling, 1-2 per dimension, e.g.:
-    #   - score: 4
-    #     pair: { split: train, row: 1234 }
-    #     evidence_spans:
-    #       - { doc: resume, start: 210, end: 292 }
-    #       - { doc: jd, start: 55, end: 130 }
-    #     reasoning: TODO(owner) — one sentence on why this span pattern earns this score
+      # Whole-dimension banding (Plan A): the band is determined by the
+      # combination of per-requirement determinations, not by per-item
+      # arithmetic. Bands 5/3/1 written; 4/2/0 interpolate.
+      "5": >
+        Every must-have skill requirement is covered WITH hands-on evidence
+        (appears in a project or work-experience entry showing actual use,
+        not only in a skills list). No requirement is partial or absent.
+        Adjacent substitutes do not count toward a 5.
+      "3": >
+        Every must-have skill requirement is at least covered at keyword
+        level (skills-list mention counts) or by a clearly adjacent skill
+        (transferable evidence, e.g. PostgreSQL for MySQL — adjacency caps
+        that requirement's contribution at this band). Some requirements
+        lack hands-on evidence; partial coverage of bundled requirements
+        may appear here but locks out band 5.
+      "1": >
+        One or more must-have skill requirements are absent — no keyword,
+        no adjacent equivalent (for bundled requirements: the majority of
+        components absent).
+    design_notes:
+      # Owner decisions, this session — mirrored in p0 report:
+      - "Q1: 5-band requires evidence-of-use; 3-band accepts keyword-level → high band keeps verification power, low band stays objective and stable"
+      - "Q2 (stance A): preferred skills never move the band — floor-checking semantics + fewer judgment points for pass^k"
+      - "Q3: adjacent skill = transferable evidence, not direct satisfaction → supports mid-band, never top band (rationale is capability-transfer, not experimental convenience)"
+      - "Boundary: years → experience_level; degrees → education_domain_fit"
+      - "Bundled requirements: discrete three-value determination (covered / partial / absent), not a ratio"
+      - "Banding granularity: whole-dimension (Plan A); per-item aggregation (Plan B) deferred to P2 as a contrast-rubric experiment"
+      - "Soft veto lives at aggregation layer, not in this dimension"
+    anchors:
+      - score: TODO(owner) # finalize 1 or 2 — the first real labeling call
+        pair: { split: train, row: 4699 }
+        evidence_spans:
+          # TODO(owner): verify exact char offsets with
+          #   view_pair --span before committing
+          - { doc: jd, start: TODO, end: TODO }     # "Microservices, Docker, Kubernetes proficiency"
+          - { doc: resume, start: TODO, end: TODO } # sole Microservices mention; Docker/K8s absent
+        reasoning: >
+          Bundled must-have "Microservices, Docker, Kubernetes": one
+          keyword-level mention (Microservices), Docker and Kubernetes
+          entirely absent, no adjacent equivalents → majority absent →
+          determination "absent" → triggers the low band regardless of
+          other requirements (AWS keyword-level, data modeling partial —
+          relational hands-on / NoSQL absent, Python-Git partial — GitOps
+          absent). Dataset labels this pair "Good Fit"; this rubric places
+          skills_coverage at the bottom band — first formal
+          owner-vs-dataset disagreement sample.
 
   - id: experience_level
     name: Experience level
     weight: TODO(owner)
     question: TODO(owner)
+    # NOTE (from skills_coverage boundary decision): this dimension owns
+    # "stated years vs. evidenced years" comparisons, including
+    # skill-attached years requirements like "5+ years Java".
     criteria:
       "5": TODO(owner)
       "3": TODO(owner)
@@ -66,6 +144,7 @@ dimensions:
     name: Hard requirements
     weight: TODO(owner)
     question: TODO(owner)
+    # NOTE: this dimension is the soft-veto trigger (see aggregation).
     criteria:
       "5": TODO(owner)
       "3": TODO(owner)
@@ -76,6 +155,8 @@ dimensions:
     name: Education / domain fit
     weight: TODO(owner)
     question: TODO(owner)
+    # NOTE (from skills_coverage boundary decision): degree requirements
+    # (e.g. "BS/MS in software engineering") are scored here.
     criteria:
       "5": TODO(owner)
       "3": TODO(owner)
