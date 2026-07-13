@@ -15,7 +15,7 @@ Method: HuggingFace API (license from dataset metadata; split sizes from `datase
 
 | Dataset | Source | Size | Label type | License | Redistributable? | Verdict / notes |
 |---|---|---|---|---|---|---|
-| [cnamuangtoun/resume-job-description-fit](https://huggingface.co/datasets/cnamuangtoun/resume-job-description-fit) | HF | 8,000 pairs (6,241 train / 1,759 test); only **280 unique JDs** in train | 3-class fit label (`No Fit` confirmed in rows; documented classes No/Potential/Good Fit — re-verify on download) | **None declared** → all-rights-reserved default | **No** | Best text realism: multi-section real-style resumes, real-company JDs. Most adopted (1,039 downloads / 79 likes). Usable only via download-script + checksum route; even *use* is a legal gray zone — record honestly if selected |
+| [cnamuangtoun/resume-job-description-fit](https://huggingface.co/datasets/cnamuangtoun/resume-job-description-fit) | HF | 8,000 pairs (6,241 train / 1,759 test); only **280 unique JDs** in train | 3-class `label`, verified on download 2026-07-13 — train: No Fit 3,143 / Potential Fit 1,556 / Good Fit 1,542; test: 857 / 444 / 458 | **None declared** → all-rights-reserved default | **No** | **SELECTED (Route A).** Best text realism: multi-section real-style resumes, real-company JDs. Most adopted (1,039 downloads / 79 likes). Usable only via download-script + checksum route; even *use* is a legal gray zone — recorded honestly |
 | [AzharAli05/Resume-Screening-Dataset](https://huggingface.co/datasets/AzharAli05/Resume-Screening-Dataset) | HF | 10,174 rows | Binary `Decision` (select/reject) + free-text `Reason_for_decision` | **MIT** | **Yes** | Labels map directly onto advance/do-not-advance + rationale. Text appears synthetic/templated — weakens evidence-citation depth and P3 injection realism |
 | [jainishkumar/resume-job-description-matching-dataset](https://www.kaggle.com/datasets/jainishkumar/resume-job-description-matching-dataset) | Kaggle | 500 pairs, 10 domains | Continuous `match_score` (0.05–0.98, well spread) **and** 3-class `match_label` | **CC0** | **Yes** | Purpose-built synthetic (creator chose synthetic explicitly for redistributability). Structured multi-section resumes/JDs. Dual label types suit agreement analysis (kappa on classes, correlation on scores). New & unproven (53 downloads); labels are programmatic (domain/skill overlap), not human judgment |
 | [netsol/resume-score-details](https://huggingface.co/datasets/netsol/resume-score-details) | HF | 1,031 samples | Rich macro/micro criterion scores + justifications | "cc" — **variant unspecified** | Unclear | Fully GPT-4o synthetic *including the scores* → LLM-labeled reference would be circular for evaluating an LLM agent. Schema is worth reading as rubric-design inspiration regardless |
@@ -46,4 +46,16 @@ Every fully-redistributable pair dataset found is **synthetic**; the one with ge
 - **Option C — jainishkumar (CC0, committable).** Cleanest license, dual label types; only 500 pairs (enough — the reference set is ~30); newest and least proven.
 - **Option D — component route: snehaanbhawal resumes (CC0) × a JD pool.** Maximum control: engineer the 30 pairs to exercise every rubric dimension and the gate boundary; real resume text; fully committable subset. Cost: no pre-existing pair labels, so the "public dataset base layer" of the layered ground truth (Decision 4) is thinner.
 
-**Owner selection: PENDING** — rejected rows keep their reasons; this table moves into the p0 phase report.
+### Selection — 2026-07-13: Route A
+
+**Owner selected `cnamuangtoun/resume-job-description-fit` via the script + checksum route.** Recorded consequences:
+
+- `download_dataset.py` (stdlib-only) pulls both CSVs pinned to dataset revision `08978e21714984bb417547d2c0f9b477f5298163` and verifies sha256 checksums. Raw text lands in `data/raw/`, which is **gitignored** and enforced by `tests/test_repo_hygiene.py` — the repo redistributes nothing.
+- The 30-pair reference file will store **row indices, labels, and span offsets — never resume/JD text** — so it stays committable and is reproducible via the download script.
+- Verified at selection time (local run, 2026-07-13): columns `resume_text`, `job_description_text`, `label`; train 6,241 rows, test 1,759 rows; label distributions as in the table above.
+- Accepted risks, recorded honestly: no declared license → research **use** is a legal gray zone (nothing is redistributed); upstream removal is possible (mitigated by pinned revision + checksums; upstream unchanged since 2024-07-25).
+- Labeling-protocol constraint: train pairs reuse ~280 unique JDs → the ~30-pair reference sample must spread across distinct JDs.
+
+Fetch: `python3 data/download_dataset.py`
+
+Rejected rows keep their reasons; this table moves into the p0 phase report.

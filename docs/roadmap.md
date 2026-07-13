@@ -22,7 +22,7 @@ Derived from the project handoff ([handoff-trajectory-eval-harness.md](handoff-t
 
 **Acceptance:**
 
-- [ ] Chosen dataset documented with license status
+- [x] Chosen dataset documented with license status (`data/README.md` — survey 2026-07-13, Route A selection recorded in decisions.md log)
 - [ ] Rubric v1 committed
 - [ ] 30 labeled pairs (including `gate_expected`) in a versioned reference file
 - [ ] Labeling protocol reproducible

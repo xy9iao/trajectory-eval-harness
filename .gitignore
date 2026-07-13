@@ -4,6 +4,9 @@ interview-defense.md
 teaching-protocol.md
 .env
 
+# Unlicensed dataset text — never committed (Decision 5); fetch via data/download_dataset.py
+data/raw/
+
 # Python
 __pycache__/
 *.py[cod]
