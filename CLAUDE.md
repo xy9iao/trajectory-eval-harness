@@ -62,6 +62,8 @@ The owner has no prior research training and no day-to-day human supervisor. **R
 
 No time boxes. A phase closes when its acceptance criteria pass; the next phase does not begin before closure. Current phase and acceptance criteria live in `docs/roadmap.md`. Every phase ends with a public report in `docs/phase-reports/`.
 
+**Git workflow:** no direct commits to `main` — all work lands via PR. Scope each PR to one deliverable/checkpoint (roughly one roadmap acceptance item — a diff reviewable in one sitting), on a branch named `p<n>/<deliverable>`. A phase closes when its final PR (the phase report) merges and the closure ritual completes. PR titles/descriptions follow the authorship rule above (no AI attribution anywhere).
+
 ## Language
 
 The owner works in a mix of Chinese and English. Match the owner's language in conversation; **all repo content (code, comments, docs, commits) is English.**
