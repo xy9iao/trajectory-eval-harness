@@ -9,17 +9,27 @@ data row. An index is only stable against the byte-identical CSV that
 download_dataset.py pins and checksums — reorder the file and the index
 points elsewhere.
 
+Anchor-span workflow: `--find` locates text and prints its start:end char
+offsets; `--span` prints exactly the slice at given offsets so a recorded
+anchor can be re-verified. Offsets are always into the RAW string; the only
+display transformation is newline → "⏎", which is 1:1 so offsets stay true.
+
 Usage:
     python data/view_pair.py train 4699
-    python data/view_pair.py test 12
+    python data/view_pair.py train 4699 --find "Docker"
+    python data/view_pair.py train 4699 --doc resume --find "Applied Computing"
+    python data/view_pair.py train 4699 --doc jd --span 210:255
 """
 
+import argparse
 import csv
 import sys
 from pathlib import Path
 
 RAW_DIR = Path(__file__).resolve().parent / "raw"
 SPLITS = ("train", "test")
+DOC_COLUMNS = {"jd": "job_description_text", "resume": "resume_text"}
+FIND_CONTEXT = 40
 
 # Resume cells run to several thousand characters; the default field limit
 # raises _csv.Error on them.
@@ -30,7 +40,7 @@ def load_row(split: str, index: int) -> dict[str, str]:
     path = RAW_DIR / f"{split}.csv"
     if not path.exists():
         raise FileNotFoundError(f"{path} not found — run `python data/download_dataset.py` first")
-    with path.open(newline="") as f:
+    with path.open(newline="", encoding="utf-8") as f:
         for i, row in enumerate(csv.DictReader(f)):
             if i == index:
                 return row
@@ -61,25 +71,77 @@ def render(split: str, index: int, row: dict[str, str]) -> str:
     )
 
 
+def show(text: str) -> str:
+    # 1:1 char replacement — printed offsets stay true to the raw string
+    return text.replace("\n", "⏎")
+
+
+def find_offsets(text: str, needle: str) -> list[tuple[int, int]]:
+    lowered, target = text.lower(), needle.lower()
+    spans = []
+    start = lowered.find(target)
+    while start != -1:
+        spans.append((start, start + len(needle)))
+        start = lowered.find(target, start + 1)
+    return spans
+
+
+def run_find(row: dict[str, str], docs: list[str], needle: str) -> int:
+    hits = 0
+    for doc in docs:
+        text = row[DOC_COLUMNS[doc]]
+        for start, end in find_offsets(text, needle):
+            context = show(text[max(0, start - FIND_CONTEXT) : end + FIND_CONTEXT])
+            print(f"{doc}  {start}:{end}  …{context}…")
+            hits += 1
+    if hits == 0:
+        print(f"no match for {needle!r} in {'/'.join(docs)}")
+    return 0 if hits else 1
+
+
+def run_span(row: dict[str, str], doc: str, span: str) -> int:
+    start_s, sep, end_s = span.partition(":")
+    if not sep or not start_s.isdigit() or not end_s.isdigit():
+        print(f"--span expects START:END with integers, got {span!r}")
+        return 2
+    start, end = int(start_s), int(end_s)
+    text = row[DOC_COLUMNS[doc]]
+    if not 0 <= start < end <= len(text):
+        print(f"span {start}:{end} out of bounds for {doc} (0..{len(text)})")
+        return 1
+    print(f"{doc}[{start}:{end}] = {show(text[start:end])!r}")
+    return 0
+
+
 def main() -> int:
-    if len(sys.argv) != 3 or sys.argv[1] not in SPLITS:
-        print(f"usage: python data/view_pair.py {{{'|'.join(SPLITS)}}} <row_index>")
-        return 2
-    split = sys.argv[1]
-    try:
-        index = int(sys.argv[2])
-    except ValueError:
-        print(f"row index must be an integer, got {sys.argv[2]!r}")
-        return 2
-    if index < 0:
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    parser.add_argument("split", choices=SPLITS)
+    parser.add_argument("row", type=int)
+    parser.add_argument("--doc", choices=list(DOC_COLUMNS), help="restrict to one document")
+    parser.add_argument("--find", metavar="TEXT", help="case-insensitive; prints start:end offsets")
+    parser.add_argument("--span", metavar="START:END", help="print exactly that slice (verify)")
+    args = parser.parse_args()
+
+    if args.row < 0:
         print("row index must be >= 0 (0-based)")
         return 2
+    if args.span is not None and args.doc is None:
+        print("--span requires --doc (a span is per-document)")
+        return 2
     try:
-        row = load_row(split, index)
+        row = load_row(args.split, args.row)
     except (FileNotFoundError, IndexError) as e:
         print(e)
         return 1
-    print(render(split, index, row))
+
+    if args.find is not None:
+        docs = [args.doc] if args.doc else list(DOC_COLUMNS)
+        return run_find(row, docs, args.find)
+    if args.span is not None:
+        return run_span(row, args.doc, args.span)
+    print(render(args.split, args.row, row))
     return 0
 
 

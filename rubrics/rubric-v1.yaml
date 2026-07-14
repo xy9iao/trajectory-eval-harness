@@ -1,88 +1,99 @@
 # Rubric v1 — resume-JD match assessment (Decision 6)
 #
-# skills_coverage: AUTHORED (owner-signed, this session). Seven decisions and
-# their rationale are recorded in design_notes below and mirrored in the p0
-# report's rubric chapter.
-# Remaining three dimensions: TODO(owner) — fill using the same pattern
-# (answer the dimension's judgment questions first, then write 5/3/1,
-# then stress-test against rows 4699 and 3143 before sign-off).
+# All four dimensions AUTHORED (owner-signed). Design decisions and their
+# rationale are recorded in design_notes per dimension and mirrored in the
+# p0 report's rubric chapter.
 #
 # Anchor rule (Decision 5, Route A): anchors reference dataset pairs by split +
 # row index + character spans at pinned revision 08978e2 — never pasted
 # resume/JD text (the dataset is unlicensed and must not enter the repo).
+#
+# Owner TODOs remaining before status flips to active:
+#   - finalize anchor evidence_spans char offsets (verify with view_pair --span)
 
 version: "1.0"
-status: draft # skills_coverage signed off; version bumps to active when all four dimensions are done
+status: draft # flips to active when anchors' span offsets are verified and owner signs off
 
 scale:
   min: 0
   max: 5
-  # TODO(owner): one line per band anchor — what a 0, a 3, and a 5 mean
-  # generically, before per-dimension criteria refine them.
+  # Generic band anchors; per-dimension criteria refine them.
   meaning:
-    "0": TODO(owner)
-    "3": TODO(owner)
-    "5": TODO(owner)
+    "0": "Essentially no corresponding evidence in the resume for what the JD asks."
+    "3": "Every stated requirement has at least minimal textual evidence (keyword or adjacent level) — the passing floor: everything claimed can be traced."
+    "5": "Every stated requirement is backed by evidence of actual use — each item survives span verification."
 
 aggregation:
   method: weighted_mean
-  # Weights live on the dimensions and must sum to 1.0 (a validation test
-  # enforces this once the rubric leaves draft). Advance/do-not-advance
-  # thresholds and the gate boundary band are P1 gate config, not rubric
-  # content — the rubric only defines how to score.
+  # Weighted mean runs over SCORING dimensions only: skills_coverage,
+  # experience_level, education_domain_fit. hard_requirements has weight 0
+  # and acts exclusively through the soft veto below. Implementations MUST
+  # NOT include hard_requirements in the mean — doing so silently
+  # double-counts deficits already reflected in the scoring dimensions.
+  # Advance/do-not-advance thresholds and the gate boundary band are P1
+  # gate config, not rubric content — the rubric only defines how to score.
   #
-  # SOFT VETO (owner decision, this session): when hard_requirements is
-  # unmet, the aggregate score is CAPPED (cap value = P1 gate config) and
-  # the pair is FORCE-GATED for human review. Rationale: real screening
-  # treats stated hard requirements as near-veto; capping + gating (rather
-  # than auto-reject) keeps the human as final decision-maker (Decision 10)
-  # and deliberately generates gate-integrity test scenarios for P2.
-  # A veto-vs-no-veto rubric comparison is a deferred P2 experiment
-  # (recorded in p0 report, future experiments).
+  # SOFT VETO (owner decision): hard_requirements drives gating, not scoring.
   soft_veto:
     trigger_dimension: hard_requirements
-    effect: [cap_aggregate, force_gate]
+    on_unmet: [cap_aggregate, force_gate]        # hard_requirements = 0
+    on_indeterminate: [force_gate]               # hard_requirements = 3
+    on_met: []                                   # hard_requirements = 5
     cap_value: TBD # P1 gate config
+    # Rationale: real screening treats stated hard requirements as
+    # near-veto; capping + gating (rather than auto-reject) keeps the
+    # human as final decision-maker (Decision 10) and deliberately
+    # generates gate-integrity test scenarios for P2. Two trigger types
+    # (unmet vs indeterminate) give gate_expected labeling a natural
+    # sub-classification. A veto-vs-no-veto rubric comparison is a
+    # deferred P2 experiment (recorded in p0 report, future experiments).
 
 dimensions:
 
   - id: skills_coverage
     name: Skills coverage
-    weight: 0.30 # provisional; re-balanced when all four dimensions are filled (sum = 1.0)
+    weight: 0.5
     question: >
       Are the skills the JD asks for evidenced in the resume — and at what
       strength: hands-on use, listed only, or adjacent?
     scope_notes:
-      # Dimension boundaries (owner decisions, this session):
       - >
         Years-of-experience requirements attached to a skill (e.g. "5+ years
         Java") are scored under experience_level, NOT here. This dimension
         answers only "is the skill present and how strong is the evidence";
-        the quantity gap belongs to experience_level. (Revision episode 1:
-        original criteria could not band "strong evidence, insufficient
-        years" — fixed by this boundary.)
+        the quantity gap belongs to experience_level.
       - >
         Degree/education requirements are scored under education_domain_fit,
         not here.
       - >
         Preferred / nice-to-have skills do NOT move the band (stance A).
         Screening checks the floor; simplicity also serves pass^k stability.
+      - >
+        Bootcamp project work is valid hands-on evidence for this dimension
+        (bootcamps are excluded from education_domain_fit as non-degrees,
+        but their evidence of actual skill use counts here).
     coverage_determination:
       # Per-requirement coverage is a DISCRETE three-value judgment, not a
-      # ratio (Revision episode 2: a proportional scheme was proposed and
-      # retracted — it reintroduced per-item arithmetic aggregation, i.e.
-      # Plan B, contradicting the whole-dimension banding decision below):
+      # ratio (a proportional scheme was proposed and retracted — it
+      # reintroduced per-item arithmetic aggregation, contradicting the
+      # whole-dimension banding decision below):
       - covered: every component of the requirement is at least keyword-level
           present (or clearly adjacent)
-      - partial: some components present, some absent — does not trigger the
-          1-band, but locks out the 5-band
+      - partial: some components present, some absent — locks out bands 4
+          and 5, does not trigger the low band
       - absent: the requirement (or the majority of a bundled requirement,
           e.g. "Microservices, Docker, Kubernetes") has no keyword and no
           adjacent equivalent — triggers the low band
     criteria:
       # Whole-dimension banding (Plan A): the band is determined by the
       # combination of per-requirement determinations, not by per-item
-      # arithmetic. Bands 5/3/1 written; 4/2/0 interpolate.
+      # arithmetic. Band geometry:
+      #   5 = all covered, all hands-on
+      #   4 = all covered, majority hands-on, minority keyword (interpolation)
+      #   3 = all covered, but keyword/adjacent level dominates
+      #   2 = at least one partial determination present (no absent)
+      #   1 = at least one absent determination present
+      #   0 = broadly absent — essentially no match
       "5": >
         Every must-have skill requirement is covered WITH hands-on evidence
         (appears in a project or work-experience entry showing actual use,
@@ -93,35 +104,33 @@ dimensions:
         level (skills-list mention counts) or by a clearly adjacent skill
         (transferable evidence, e.g. PostgreSQL for MySQL — adjacency caps
         that requirement's contribution at this band). Some requirements
-        lack hands-on evidence; partial coverage of bundled requirements
-        may appear here but locks out band 5.
+        lack hands-on evidence.
       "1": >
         One or more must-have skill requirements are absent — no keyword,
         no adjacent equivalent (for bundled requirements: the majority of
         components absent).
     design_notes:
-      # Owner decisions, this session — mirrored in p0 report:
-      - "Q1: 5-band requires evidence-of-use; 3-band accepts keyword-level → high band keeps verification power, low band stays objective and stable"
-      - "Q2 (stance A): preferred skills never move the band — floor-checking semantics + fewer judgment points for pass^k"
-      - "Q3: adjacent skill = transferable evidence, not direct satisfaction → supports mid-band, never top band (rationale is capability-transfer, not experimental convenience)"
+      - "5-band requires evidence-of-use; 3-band accepts keyword-level — high band keeps verification power, low band stays objective and stable"
+      - "Preferred skills never move the band (stance A): floor-checking semantics + fewer judgment points for pass^k"
+      - "Adjacent skill = transferable-capability evidence, not direct satisfaction — supports mid-band, never top band"
       - "Boundary: years → experience_level; degrees → education_domain_fit"
       - "Bundled requirements: discrete three-value determination (covered / partial / absent), not a ratio"
       - "Banding granularity: whole-dimension (Plan A); per-item aggregation (Plan B) deferred to P2 as a contrast-rubric experiment"
-      - "Soft veto lives at aggregation layer, not in this dimension"
+      - "partial locks out bands 4 AND 5; absent pins the band at 1"
+      - "Soft veto lives at the aggregation layer, not in this dimension"
     anchors:
-      - score: TODO(owner) # finalize 1 or 2 — the first real labeling call
+      - score: 1
         pair: { split: train, row: 4699 }
         evidence_spans:
-          # TODO(owner): verify exact char offsets with
-          #   view_pair --span before committing
+          # TODO(owner): verify exact char offsets with view_pair --span
           - { doc: jd, start: TODO, end: TODO }     # "Microservices, Docker, Kubernetes proficiency"
           - { doc: resume, start: TODO, end: TODO } # sole Microservices mention; Docker/K8s absent
         reasoning: >
           Bundled must-have "Microservices, Docker, Kubernetes": one
           keyword-level mention (Microservices), Docker and Kubernetes
-          entirely absent, no adjacent equivalents → majority absent →
-          determination "absent" → triggers the low band regardless of
-          other requirements (AWS keyword-level, data modeling partial —
+          entirely absent, no adjacent equivalents — majority absent —
+          determination "absent" — pins the band at 1 regardless of other
+          requirements (AWS keyword-level, data modeling partial —
           relational hands-on / NoSQL absent, Python-Git partial — GitOps
           absent). Dataset labels this pair "Good Fit"; this rubric places
           skills_coverage at the bottom band — first formal
@@ -129,36 +138,164 @@ dimensions:
 
   - id: experience_level
     name: Experience level
-    weight: TODO(owner)
-    question: TODO(owner)
-    # NOTE (from skills_coverage boundary decision): this dimension owns
-    # "stated years vs. evidenced years" comparisons, including
-    # skill-attached years requirements like "5+ years Java".
+    weight: 0.3
+    question: >
+      How close does the candidate's EVIDENCED relevant experience come to
+      what the JD asks for — in years and seniority?
+    scope_notes:
+      - >
+        Evidenced years only: dated work-experience entries count; Summary
+        self-claims do not. A skill's years count only from segments whose
+        role/duties match that skill — e.g. Java years accrue in a Java
+        Developer role, not because a QA role occasionally touched Java.
+      - >
+        The years LEDGER (met/unmet against a stated "5+ years") already
+        lives in hard_requirements. This dimension scores PROXIMITY — how
+        close, not pass/fail. A gap that fires the veto can still be a 3
+        here if the relevant experience is real.
     criteria:
-      "5": TODO(owner)
-      "3": TODO(owner)
-      "1": TODO(owner)
-    anchors: []
+      "5": >
+        Evidenced relevant years meet or exceed the JD's stated (or clearly
+        implied) requirement, in role-matching segments.
+      "3": >
+        Clear relevant experience in role-matching segments, but a real gap
+        against the requirement (years short, or seniority below the role's
+        level).
+      "1": >
+        Essentially no evidenced relevant experience — no role-matching
+        dated segments.
+    design_notes:
+      - "Dated entries only, self-claims excluded — keeps the comparison span-verifiable"
+      - "Role-matching segments only — kills the largest ambiguity source in years counting"
+      - "Proximity semantics: the pass/fail duty belongs to hard_requirements; double-mention is by design (ledger vs quality)"
+    anchors:
+      - score: 3
+        pair: { split: train, row: 4699 }
+        evidence_spans:
+          # TODO(owner): verify exact char offsets with view_pair --span
+          - { doc: jd, start: TODO, end: TODO }     # "5+ years in Java (11 or 17+) development"
+          - { doc: resume, start: TODO, end: TODO } # Caterpillar Java Developer 2016-2018
+        reasoning: >
+          JD: Senior role, 5+ years Java. Evidenced role-matching Java:
+          Caterpillar Java Developer 2016-2018, ~2.5 years (QA years
+          excluded — role not matching; Summary claims excluded). Real
+          relevant experience, real gap — 3. Interplay note:
+          hard_requirements already fired the veto on this same gap; this
+          3 records that the experience is genuine, which is exactly the
+          nuance a human reviewer sees at the gate.
 
   - id: hard_requirements
-    name: Hard requirements
-    weight: TODO(owner)
-    question: TODO(owner)
-    # NOTE: this dimension is the soft-veto trigger (see aggregation).
+    name: Hard requirements (must/required ledger)
+    weight: 0.0   # NOT part of the weighted mean — acts only through soft_veto
+    question: >
+      Are ALL items the JD explicitly marks as must/required evidenced in
+      the resume? This is a ledger over other dimensions' determinations,
+      not an independent quality score.
+    scope_notes:
+      - >
+        Stance: ledger-over-all (owner decision). This dimension re-reads
+        every must/required item — skills, years, degrees, certifications,
+        licenses, visas, location — and records met / indeterminate / unmet,
+        REUSING the coverage/evidence determinations already made under the
+        other dimensions. Double-mention is by design: those dimensions
+        score match QUALITY; this one decides whether the soft veto fires.
+        It never re-scores.
+      - >
+        "Related field"-style clauses are NOT automatically indeterminate.
+        Indeterminate (band 3) is reserved for items a reasonable annotator
+        could defensibly judge either way; a clearly-within-scope case
+        (e.g. BSc Applied Computing vs "BS/MS in SWE or related") is met.
     criteria:
-      "5": TODO(owner)
-      "3": TODO(owner)
-      "1": TODO(owner)
-    anchors: []
+      "5": >
+        Every must/required item has satisfying evidence. No item unmet,
+        none indeterminate.
+      "3": >
+        No item is clearly unmet, but at least one is indeterminate —
+        evidence ambiguous or a related-clause genuinely judgeable either
+        way. No partial credit: this band is for "cannot decide", never
+        for "met most of them".
+      "0": >
+        At least one must/required item is clearly unmet (for bundled
+        items, majority-absent per the skills_coverage determination rule).
+        Meeting 4 of 5 still scores 0 — the ledger has no ratio.
+    design_notes:
+      - "weight=0: quality lives in the other three dimensions; this dimension owns only the veto decision"
+      - "Band 3 = indeterminate, not partial — proportional credit was rejected once already (granularity-consistency episode)"
+      - "Veto wiring: 0 -> cap aggregate + force gate; 3 -> force gate only (human resolves the ambiguity); 5 -> no action"
+    anchors:
+      - score: 0
+        pair: { split: train, row: 4699 }
+        evidence_spans:
+          # TODO(owner): verify exact char offsets with view_pair --span
+          - { doc: jd, start: TODO, end: TODO }     # must items incl. Docker/K8s, 5+ years Java
+        reasoning: >
+          Ledger over the JD's must items: BS/MS-or-related = met (BSc
+          Applied Computing, clearly within "related"); Docker/Kubernetes =
+          unmet (majority-absent bundle, per skills_coverage determination);
+          5+ years Java = unmet (~2.5 evidenced). Clear unmet items — 0 —
+          soft veto fires (cap + gate). Dataset label: Good Fit.
+      - score: 0
+        pair: { split: train, row: 3143 }
+        evidence_spans:
+          # TODO(owner): verify exact char offsets with view_pair --span
+          - { doc: jd, start: TODO, end: TODO }     # "5+ certifications"
+        reasoning: >
+          "5+ certifications" explicitly required; none evidenced — clearly
+          unmet — 0 — soft veto fires.
 
   - id: education_domain_fit
     name: Education / domain fit
-    weight: TODO(owner)
-    question: TODO(owner)
-    # NOTE (from skills_coverage boundary decision): degree requirements
-    # (e.g. "BS/MS in software engineering") are scored here.
+    weight: 0.2
+    question: >
+      Does the candidate's degree-level education fit the OCCUPATION this
+      JD belongs to — in level and field?
+    scope_notes:
+      - >
+        JD-relative, not absolute: fit is judged against the JD's
+        occupation (accounting JD — accounting-adjacent fields fit;
+        software JD — computing-adjacent fields fit). The corpus is
+        cross-occupation (accounting is its largest bucket, software under
+        a quarter), so a fixed "is it a CS degree" yardstick is wrong by
+        construction.
+      - >
+        Domain = occupational/functional field. Industry verticals
+        (finance, healthcare, ...) are EXCLUDED from this rubric (owner
+        decision, option A): missing in 72/280 JDs and largely orthogonal
+        to competence. Recorded as a future experiment (industry as
+        secondary signal, P2).
+      - >
+        Degree education only: bootcamps are not degrees and do not enter
+        this dimension. Bootcamp project work remains valid hands-on
+        evidence under skills_coverage — excluded here, not erased.
+      - >
+        The degree LEDGER item (a stated "BS/MS required": met/unmet)
+        lives in hard_requirements; this dimension scores fit quality.
     criteria:
-      "5": TODO(owner)
-      "3": TODO(owner)
-      "1": TODO(owner)
-    anchors: []
+      "5": >
+        Degree level meets what the JD asks (stated or role-implied) AND
+        the field is squarely within the JD's occupation.
+      "3": >
+        One of the two fits cleanly and the other is adjacent — e.g. level
+        met but field related-rather-than-core, or field exact but level
+        one step short.
+      "1": >
+        Neither fits — field unrelated to the occupation, or no degree
+        education where one is clearly expected.
+    design_notes:
+      - "Occupation-relative fit replaces the software-centric framing; corpus scan showed accounting as the largest occupation bucket"
+      - "Industry verticals excluded (option A): 72/280 JDs carry no industry signal and industry is largely orthogonal to competence"
+      - "Bootcamps: not degrees here; their project evidence lives under skills_coverage"
+    anchors:
+      - score: 4
+        pair: { split: train, row: 4699 }
+        evidence_spans:
+          # TODO(owner): verify exact char offsets with view_pair --span
+          - { doc: jd, start: TODO, end: TODO }     # "BSMS in software engineering or related field"
+          - { doc: resume, start: TODO, end: TODO } # BSc Applied Computing, Glyndwr University
+        reasoning: >
+          Software JD, BS-or-MS asked. BSc met (level fits); Applied
+          Computing is computing-adjacent — clearly related, not core
+          SWE — field slightly off exact — interpolates to 4. Consistent
+          with the hard_requirements ledger judging the same degree "met":
+          the ledger asks or-related pass/fail; this dimension grades how
+          close.
