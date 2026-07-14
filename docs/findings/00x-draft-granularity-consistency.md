@@ -1,8 +1,8 @@
 # [DRAFT — PENDING] Proportional bundle scoring retracted as a granularity self-contradiction
 
-> **Status: pending draft — do not cite.** A number is assigned at promotion (001 is reserved
-> for owner-vs-dataset disagreement, owner note 2026-07-13). Result awaits the P2
-> Plan-A-vs-Plan-B contrast run.
+> **Status: pending draft — do not cite.** A number is assigned at promotion (001 is taken by
+> the cross-occupation corpus finding; the owner-vs-dataset disagreement finding takes the next
+> free number when it opens). Result awaits the P2 Plan-A-vs-Plan-B contrast run.
 
 ## Observation (owner, 2026-07-13)
 

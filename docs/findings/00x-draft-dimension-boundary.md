@@ -1,8 +1,9 @@
 # [DRAFT — PENDING] Unbandable case exposed a missing dimension boundary (years → experience_level)
 
-> **Status: pending draft — do not cite.** A number is assigned at promotion (001 is reserved
-> for owner-vs-dataset disagreement, owner note 2026-07-13). Verification and Result await P0
-> labeling (does cross-dimension annotation hesitation drop?) or P2 numbers.
+> **Status: pending draft — do not cite.** A number is assigned at promotion (001 is taken by
+> the cross-occupation corpus finding; the owner-vs-dataset disagreement finding takes the next
+> free number when it opens). Verification and Result await P0 labeling (does cross-dimension
+> annotation hesitation drop?) or P2 numbers.
 
 ## Observation (owner, 2026-07-13)
 
