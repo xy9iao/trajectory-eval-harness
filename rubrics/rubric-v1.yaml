@@ -9,10 +9,10 @@
 # resume/JD text (the dataset is unlicensed and must not enter the repo).
 #
 # Anchor evidence_spans offsets are filled and verified with view_pair --span
-# against the pinned CSVs (2026-07-15). Status flips to active on owner sign-off.
+# against the pinned CSVs (2026-07-15).
 
 version: "1.0"
-status: draft # span offsets verified; flips to active on owner sign-off
+status: active # owner sign-off 2026-07-15 (PR #3 closing rulings)
 
 scale:
   min: 0
@@ -79,8 +79,8 @@ dimensions:
       # whole-dimension banding decision below):
       - covered: every component of the requirement is at least keyword-level
           present (or clearly adjacent)
-      - partial: some components present, some absent — locks out bands 4
-          and 5, does not trigger the low band
+      - partial: some components present, some absent — caps the band at 2,
+          does not trigger the low band
       - absent: the requirement (or the majority of a bundled requirement,
           e.g. "Microservices, Docker, Kubernetes") has no keyword and no
           adjacent equivalent — triggers the low band
@@ -116,7 +116,7 @@ dimensions:
       - "Boundary: years → experience_level; degrees → education_domain_fit"
       - "Bundled requirements: discrete three-value determination (covered / partial / absent), not a ratio"
       - "Banding granularity: whole-dimension (Plan A); per-item aggregation (Plan B) deferred to P2 as a contrast-rubric experiment"
-      - "partial locks out bands 4 AND 5; absent pins the band at 1"
+      - "partial caps the band at 2; absent pins the band at 1"
       - "Soft veto lives at the aggregation layer, not in this dimension"
     anchors:
       - score: 1
@@ -125,11 +125,10 @@ dimensions:
           - { doc: jd, start: 498, end: 543 }     # "Microservices, Docker, Kubernetes proficiency"
           - { doc: resume, start: 4403, end: 4416 } # "MicroServices" in Caterpillar duties (a second mention sits at 933:954, Summary); Docker/K8s absent
         reasoning: >
-          Bundled must-have "Microservices, Docker, Kubernetes": one
-          keyword-level mention (Microservices), Docker and Kubernetes
-          entirely absent, no adjacent equivalents — majority absent —
-          determination "absent" — pins the band at 1 regardless of other
-          requirements (AWS keyword-level, data modeling partial —
+          Microservices hands-on-evidenced (dated work duty at Caterpillar,
+          plus Summary mention at 933:954); Docker and Kubernetes entirely
+          absent — bundle majority-absent — band pins at 1 regardless of
+          other requirements (AWS keyword-level, data modeling partial —
           relational hands-on / NoSQL absent, Python-Git partial — GitOps
           absent). Dataset labels this pair "Good Fit"; this rubric places
           skills_coverage at the bottom band — first formal
@@ -279,18 +278,20 @@ dimensions:
         education where one is clearly expected.
     design_notes:
       - "Occupation-relative fit replaces the software-centric framing; corpus scan showed accounting as the largest occupation bucket"
+      - "Related-field fit is not sub-graded (cross-disciplinary vs same-discipline non-core both band at 3) — mirrors skills_coverage's adjacency-caps-at-mid-band rule; rule isomorphism keeps the rubric memorable and defensible, and at weight 0.2 the 3-vs-4 distinction is not worth a new ambiguity source"
       - "Industry verticals excluded (option A): 72/280 JDs carry no industry signal and industry is largely orthogonal to competence"
       - "Bootcamps: not degrees here; their project evidence lives under skills_coverage"
     anchors:
-      - score: 4
+      - score: 3
         pair: { split: train, row: 4699 }
         evidence_spans:
           - { doc: jd, start: 674, end: 719 }     # "BSMS in software engineering or related field"
           - { doc: resume, start: 4919, end: 4974 } # "Bachelor of Science:Applied ComputingGlyndwr University"
         reasoning: >
           Software JD, BS-or-MS asked. BSc met (level fits); Applied
-          Computing is computing-adjacent — clearly related, not core
-          SWE — field slightly off exact — interpolates to 4. Consistent
-          with the hard_requirements ledger judging the same degree "met":
-          the ledger asks or-related pass/fail; this dimension grades how
-          close.
+          Computing is related-rather-than-core — the band-3 text matches
+          these facts literally ("level met but field
+          related-rather-than-core") — 3. Related-field fit is not
+          sub-graded. Consistent with the hard_requirements ledger judging
+          the same degree "met": the ledger asks or-related pass/fail; this
+          dimension grades how close.

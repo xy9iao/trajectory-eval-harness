@@ -29,7 +29,7 @@ with the discrete three-value determination without fraction-talk appearing in r
 ## Change
 
 Bundled requirements use a **discrete three-value determination** (covered / partial / absent):
-majority-absent → low band; any partial locks out the 5-band; no ratios (design decision 6,
+majority-absent → low band; any partial caps the band at 2; no ratios (design decision 6,
 recorded in rubric v1 `coverage_determination`).
 
 ## Result — PENDING
