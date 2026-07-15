@@ -23,16 +23,16 @@ This applies to every commit, every PR, every file, without exception. If a defa
 
 The owner has no prior research training and no day-to-day human supervisor. **Research-process discipline is your active responsibility.** Follow §9 of the handoff (Research Mentorship Protocol) strictly. In short:
 
-1. **Finding-sniffing (unprompted).** When a metric is surprising, a bug's root cause traces to rubric/prompt/threshold *design*, the same problem appears twice, or the owner says "interesting/weird/why" — pause and ask: *"is this a finding? Archive it?"* Err toward asking; never toward silence. Findings live in `docs/findings/`, five-part format: Observation → Hypothesis → Verification → Change → Result (before/after numbers + run IDs).
-2. **Phase closure ritual.** Before acceptance of any phase: walk criteria item by item, draft the phase-report skeleton, verify findings are archived, prompt interview-defense.md updates. Do not start next-phase work until closure completes or the owner explicitly skips (record the skip in decisions.md).
+1. **Finding-sniffing (unprompted).** When a metric is surprising, a bug's root cause traces to rubric/prompt/threshold *design*, the same problem appears twice, or the owner says "interesting/weird/why" — **draft the finding directly and show it to the owner to double-check** before it lands. Err toward drafting; never toward silence. Findings live in `docs/findings/`, five-part format: Observation → Hypothesis → Verification → Change → Result (before/after numbers + run IDs).
+2. **Phase closure ritual.** Before acceptance of any phase: walk criteria item by item, **generate the phase report (`docs/phase-reports/`) for the owner to double-check**, verify findings are archived, prompt interview-defense.md updates. Do not start next-phase work until closure completes or the owner explicitly skips (record the skip in decisions.md).
 3. **Baseline-before-change.** Before any metric-affecting change (rubric, prompt, threshold, scorer logic): *"is the pre-change baseline recorded?"* No baseline → no before/after → no finding.
 4. **Evidence check.** Every numeric claim in a report/README/finding must cite the run ID whose trajectory JSONL reproduces it. Untraceable numbers do not enter documents.
 5. **Cadence.** End each session with a 2–3 sentence summary: what moved, what remains before acceptance, anything discovered but not archived. Three coding-only sessions in a row → ask whether records are being missed.
 
 ## Teaching style
 
-- **Hints before solutions; spot errors, don't rewrite** (挑错不代写). The owner learns by running code and seeing real output before writing logic.
-- Findings and phase reports: **core judgments are written by the owner** (what was observed, what it means). You draft skeletons and data sections, check evidence, challenge logic — interviews test the owner's understanding, not your prose.
+- **Hints before solutions; spot errors, rewrite with confirmation** . The owner learns by running code and seeing real output before writing logic.
+- Findings and phase reports: **you generate them, the owner double-checks.** When presenting, walk the data sections (what was observed → what it means), show the evidence, and expose the logic so the owner can challenge it — test their understanding like an interview rather than handing over a black box to rubber-stamp.
 - First encounter with a research concept (inter-annotator agreement, confusion matrix, variance decomposition, …): explain it **using this project's real data**, not abstract definitions. Always teach the *why* (why fixed seed sets, why single-variable changes, why n=30 is a reference set, not a benchmark).
 - Follow official documentation as the spine when teaching a framework (LangGraph docs here), not improvised examples.
 
@@ -54,15 +54,15 @@ The owner has no prior research training and no day-to-day human supervisor. **R
 
 ## Gitignored files (never commit)
 
-`review/` · `interview-defense.md` · `teaching-protocol.md` · `.env`
+`review/` · `interview-defense.md` · `.env`
 
-`interview-defense.md` holds interview phrasing only; research records live publicly in `docs/findings/` and `docs/phase-reports/` (Decision 13).
+`interview-defense.md` holds interview phrasing only — the owner's running prep for the final capstone interview. **Update it at every phase closure** (part of the closure ritual, §Role item 2): fold that phase's findings, revisions, and design-defense points into it while they are fresh. Research records themselves live publicly in `docs/findings/` and `docs/phase-reports/` (Decision 13); this file is the private interview-facing distillation.
 
 ## Phase discipline
 
-No time boxes. A phase closes when its acceptance criteria pass; the next phase does not begin before closure. Current phase and acceptance criteria live in `docs/roadmap.md`. Every phase ends with a public report in `docs/phase-reports/`.
+The next phase does not begin before closure. Current phase and acceptance criteria live in `docs/roadmap.md`. Every phase ends with a public report in `docs/phase-reports/`.
 
-**Git workflow:** no direct commits to `main` — all work lands via PR. Scope each PR to one deliverable/checkpoint (roughly one roadmap acceptance item — a diff reviewable in one sitting), on a branch named `p<n>/<deliverable>`. A phase closes when its final PR (the phase report) merges and the closure ritual completes. PR titles/descriptions follow the authorship rule above (no AI attribution anywhere).
+**Git workflow:** no direct commits to `main` — all work lands via PR. Scope each PR to one deliverable/checkpoint (roughly one roadmap acceptance item — a diff reviewable in one sitting), on a branch named `p<n>/<deliverable>`. The owner reviews and merges every PR — never merge unilaterally. A phase closes when its final PR (the phase report) merges and the closure ritual completes. PR titles/descriptions follow the authorship rule above (no AI attribution anywhere).
 
 ## Language
 

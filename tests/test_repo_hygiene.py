@@ -10,7 +10,6 @@ ROOT = Path(__file__).resolve().parents[1]
 REQUIRED_IGNORES = [
     "review/",
     "interview-defense.md",
-    "teaching-protocol.md",
     ".env",
     "data/raw/",
 ]
