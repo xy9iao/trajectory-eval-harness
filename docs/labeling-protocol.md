@@ -121,7 +121,86 @@ scores (blind review; otherwise agreement numbers measure persuasion, not the ru
 labels go in `data/reference/labels-v1-mentor.jsonl`, same schema; the agreement analysis
 (which pairs diverged, on which dimensions, how resolved) is p0 report §5.
 
-## 7. Reproducibility statement
+## 7. Appendix — operator walkthrough (the detailed per-pair workflow)
+
+§5 is the normative sequence; this appendix is the keystroke-level version. Budget ~20 min/pair
+for the first few, ~10 once fluent. Work in `sample-v1.json` order.
+
+### One-time setup
+
+```bash
+uv run python data/download_dataset.py     # verifies the pinned CSVs + checksums
+touch data/reference/labels-v1.jsonl       # the versioned reference file
+```
+
+### Per pair — worksheet first, JSONL last
+
+Keep a scratch worksheet (not committed) per pair; the JSONL line is a transcription of a
+finished worksheet, never composed live.
+
+**Step 1 — JD pass (resume stays closed).**
+`view_pair {split} {row} --doc jd`. Write down:
+- the JD's occupation (sanity-check against the sample's `occupation` bucket);
+- every **must/required item**, one worksheet row each — tag it `skills` / `years` / `degree` /
+  `other`; a bundle ("Docker, Kubernetes, Microservices") is ONE row. Preferred/nice-to-have
+  items are noted but never move any band (stance A);
+- the JD span for each item (`--find "..."` → offsets; `--span` to verify).
+
+**Step 2 — resume pass.** Read the whole resume once (`--doc resume`), then per must item:
+locate evidence (`--find`), verify the slice (`--span`), and classify its strength —
+**hands-on** (dated work/project entry showing use) / **keyword** (skills-list mention) /
+**adjacent** (transferable, e.g. PostgreSQL for MySQL) / **none**. Search synonyms before
+concluding "none" (K8s/Kubernetes, BS/Bachelor, GCP/Google Cloud).
+
+**Step 3 — skills_coverage.** Per skills row: determination `covered` (every component ≥
+keyword or adjacent) / `partial` (some components present, some absent) / `absent` (majority of
+components missing). Then the band is mechanical: 5 all-covered-all-hands-on · 4 all-covered-
+majority-hands-on · 3 all-covered-keyword-dominant · 2 any partial · 1 any absent · 0 broadly
+absent. Adjacency caps its requirement's contribution at mid-band.
+
+**Step 4 — experience_level.** List the resume's dated, role-matching segments (Summary
+self-claims never count); sum evidenced years against the JD's ask. 5 meets/exceeds · 3 real
+experience, real gap · 1 no role-matching dated segments. Proximity, not pass/fail — a
+veto-firing gap can still be a 3.
+
+**Step 5 — education_domain_fit.** Degree level + field vs the JD's occupation. 5 both fit ·
+3 one clean + one adjacent (related-rather-than-core is always a 3 — no sub-grading) · 1
+neither. Bootcamps are not degrees here.
+
+**Step 6 — hard_requirements ledger.** Re-walk every must item reusing steps 3–5's
+determinations: all met → 5 · any that the text cannot settle → 3 (indeterminate — never
+partial credit) · any clearly unmet → 0.
+
+**Step 7 — aggregate + gate.**
+`weighted_mean = 0.5·skills + 0.3·experience + 0.2·education` (hard_requirements never enters);
+`veto` = unmet/indeterminate/met. Then `gate_expected` per §4 — reason codes in worksheet
+order: veto first (`hard_unmet`/`hard_indeterminate`), then `boundary`, `insufficient_evidence`,
+`anomaly`.
+
+**Step 8 — hesitations, same session.** Anything you re-read twice, any band you could defend
+two ways, any criteria gap — one line each. An empty `hesitations` on a hard pair is a smell.
+
+**Step 9 — transcribe to JSONL** (schema §3) and validate before moving on:
+
+```bash
+uv run python - <<'EOF'
+import json
+from pathlib import Path
+REQUIRED = {"pair", "dataset_label", "occupation", "dimensions", "aggregate",
+            "gate_expected", "gate_reasons", "hesitations", "labeled_at"}
+lines = Path("data/reference/labels-v1.jsonl").read_text(encoding="utf-8").splitlines()
+for n, line in enumerate(lines, 1):
+    rec = json.loads(line)
+    missing = REQUIRED - rec.keys()
+    assert not missing, f"line {n}: missing {missing}"
+print(f"{len(lines)} records OK")
+EOF
+```
+
+**Cadence:** commit at the end of each labeling session (message: which rows). After the first
+3 pairs, pause for a schema/rubric-application review before continuing.
+
+## 8. Reproducibility statement
 
 A second annotator with this document, the pinned CSVs, and rubric v1 must be able to (a)
 regenerate the same 30-pair sample (seeded script), (b) locate every cited span
