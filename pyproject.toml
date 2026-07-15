@@ -4,13 +4,16 @@ version = "0.0.1"
 description = "Evaluation framework for AI-agent reliability — trajectory-level scoring of intermediate agent behavior, demonstrated on a resume-JD matching agent with a human-in-the-loop gate"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "pyyaml>=6.0.3",
+]
 
 [dependency-groups]
 dev = [
     "mypy>=1.13",
     "pytest>=8.3",
     "ruff>=0.8",
+    "types-pyyaml>=6.0.12.20260518",
 ]
 
 [tool.ruff]
@@ -24,3 +27,4 @@ exclude = ["\\.venv"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]
