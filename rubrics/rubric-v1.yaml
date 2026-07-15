@@ -8,11 +8,11 @@
 # row index + character spans at pinned revision 08978e2 — never pasted
 # resume/JD text (the dataset is unlicensed and must not enter the repo).
 #
-# Owner TODOs remaining before status flips to active:
-#   - finalize anchor evidence_spans char offsets (verify with view_pair --span)
+# Anchor evidence_spans offsets are filled and verified with view_pair --span
+# against the pinned CSVs (2026-07-15). Status flips to active on owner sign-off.
 
 version: "1.0"
-status: draft # flips to active when anchors' span offsets are verified and owner signs off
+status: draft # span offsets verified; flips to active on owner sign-off
 
 scale:
   min: 0
@@ -122,9 +122,8 @@ dimensions:
       - score: 1
         pair: { split: train, row: 4699 }
         evidence_spans:
-          # TODO(owner): verify exact char offsets with view_pair --span
-          - { doc: jd, start: TODO, end: TODO }     # "Microservices, Docker, Kubernetes proficiency"
-          - { doc: resume, start: TODO, end: TODO } # sole Microservices mention; Docker/K8s absent
+          - { doc: jd, start: 498, end: 543 }     # "Microservices, Docker, Kubernetes proficiency"
+          - { doc: resume, start: 4403, end: 4416 } # "MicroServices" in Caterpillar duties (a second mention sits at 933:954, Summary); Docker/K8s absent
         reasoning: >
           Bundled must-have "Microservices, Docker, Kubernetes": one
           keyword-level mention (Microservices), Docker and Kubernetes
@@ -172,9 +171,8 @@ dimensions:
       - score: 3
         pair: { split: train, row: 4699 }
         evidence_spans:
-          # TODO(owner): verify exact char offsets with view_pair --span
-          - { doc: jd, start: TODO, end: TODO }     # "5+ years in Java (11 or 17+) development"
-          - { doc: resume, start: TODO, end: TODO } # Caterpillar Java Developer 2016-2018
+          - { doc: jd, start: 372, end: 412 }     # "5+ years in Java (11 or 17+) development"
+          - { doc: resume, start: 3402, end: 3453 } # "03/2016to10/2018Java DeveloperCaterpillar–Pomona,MO"
         reasoning: >
           JD: Senior role, 5+ years Java. Evidenced role-matching Java:
           Caterpillar Java Developer 2016-2018, ~2.5 years (QA years
@@ -226,8 +224,7 @@ dimensions:
       - score: 0
         pair: { split: train, row: 4699 }
         evidence_spans:
-          # TODO(owner): verify exact char offsets with view_pair --span
-          - { doc: jd, start: TODO, end: TODO }     # must items incl. Docker/K8s, 5+ years Java
+          - { doc: jd, start: 372, end: 544 }     # "What We're Looking For" must list, "5+ years in Java…" through "…Kubernetes proficiency."
         reasoning: >
           Ledger over the JD's must items: BS/MS-or-related = met (BSc
           Applied Computing, clearly within "related"); Docker/Kubernetes =
@@ -237,11 +234,10 @@ dimensions:
       - score: 0
         pair: { split: train, row: 3143 }
         evidence_spans:
-          # TODO(owner): verify exact char offsets with view_pair --span
-          - { doc: jd, start: TODO, end: TODO }     # "5+ certifications"
+          - { doc: jd, start: 181, end: 208 }     # "5+ Salesforce Certification" (exact raw text)
         reasoning: >
-          "5+ certifications" explicitly required; none evidenced — clearly
-          unmet — 0 — soft veto fires.
+          "5+ Salesforce Certification" explicitly required; none
+          evidenced — clearly unmet — 0 — soft veto fires.
 
   - id: education_domain_fit
     name: Education / domain fit
@@ -289,9 +285,8 @@ dimensions:
       - score: 4
         pair: { split: train, row: 4699 }
         evidence_spans:
-          # TODO(owner): verify exact char offsets with view_pair --span
-          - { doc: jd, start: TODO, end: TODO }     # "BSMS in software engineering or related field"
-          - { doc: resume, start: TODO, end: TODO } # BSc Applied Computing, Glyndwr University
+          - { doc: jd, start: 674, end: 719 }     # "BSMS in software engineering or related field"
+          - { doc: resume, start: 4919, end: 4974 } # "Bachelor of Science:Applied ComputingGlyndwr University"
         reasoning: >
           Software JD, BS-or-MS asked. BSc met (level fits); Applied
           Computing is computing-adjacent — clearly related, not core
