@@ -130,13 +130,33 @@ for the first few, ~10 once fluent. Work in `sample-v1.json` order.
 
 ```bash
 uv run python data/download_dataset.py     # verifies the pinned CSVs + checksums
-touch data/reference/labels-v1.jsonl       # the versioned reference file
 ```
 
-### Per pair — worksheet first, JSONL last
+### The cockpit (primary path)
 
-Keep a scratch worksheet (not committed) per pair; the JSONL line is a transcription of a
-finished worksheet, never composed live.
+`data/label_pairs.py` drives steps 1–9 interactively and appends the JSONL line itself:
+
+```bash
+uv run python data/label_pairs.py              # next unlabeled sample pair
+uv run python data/label_pairs.py --row 596    # a specific sampled pair
+uv run python data/label_pairs.py --mentor     # mentor subset -> labels-v1-mentor.jsonl
+```
+
+Division of labor (the tool's legitimacy boundary, stated once): the cockpit automates
+**rendering** (pair display with `<<<` candidate-requirement highlights from the recorded
+`profile_jd_requirements` patterns — candidates only, never a must-item decision),
+**span capture** (search → pick → verified offsets, the `--find`/`--span` loop inline), and
+**rubric-defined arithmetic** (band geometry, ledger → score, weighted mean, veto, and the
+`hard_unmet`/`hard_indeterminate` gate reasons — all unit-tested in
+`tests/test_label_cockpit.py`). Every judgment is typed by the annotator: must items,
+determinations, evidence strengths, manual scores, the other gate reasons, hesitations.
+Derived values require explicit confirmation; **overriding a derived value records the reason
+as a hesitation automatically** — overrides are rubric-revision material, not friction.
+Blind by construction: the cockpit reads only its own output file, so a `--mentor` session
+never sees the owner's labels.
+
+The steps below remain normative — they are what the cockpit walks you through, and the
+manual `view_pair` path (worksheet first, JSONL last) stays valid as a fallback.
 
 **Step 1 — JD pass (resume stays closed).**
 `view_pair {split} {row} --doc jd`. Write down:
