@@ -158,6 +158,35 @@ never sees the owner's labels.
 The steps below remain normative — they are what the cockpit walks you through, and the
 manual `view_pair` path (worksheet first, JSONL last) stays valid as a fallback.
 
+### Rubric map — what to have open at each step
+
+Before the **first session** (once, ~15 min): read `rubrics/rubric-v1.yaml` top to bottom —
+especially `scale.meaning` (what 0/3/5 mean generically) and the `aggregation` comment (why
+hard_requirements never enters the mean). After that, you consult sections, not the whole file:
+
+| Step | You are deciding | Open this section of rubric-v1.yaml |
+|---|---|---|
+| 1 JD pass | what is a must item; is this a bundle; which dimension owns it | `skills_coverage.scope_notes` — years→experience_level, degrees→education_domain_fit, preferred never moves the band (stance A); `coverage_determination` intro — a bundle is ONE determination |
+| 2 resume pass | evidence strength: hands-on / keyword / adjacent / none | `skills_coverage.criteria` bands "5" vs "3" — hands-on = used in a project/work entry, keyword = skills-list mention; adjacency defined in `design_notes` (transferable capability, never top band); bootcamp evidence counts here (`scope_notes`) |
+| 3 skills_coverage | determination covered/partial/absent, then the band | `coverage_determination` (three discrete values; partial caps at 2; majority-absent = absent); the band-geometry comment above `criteria` (5/4/3/2/1/0); calibrate against the score-1 anchor (train 4699) |
+| 4 experience_level | which resume segments count; how close is close | `experience_level.scope_notes` — evidenced years only, Summary self-claims never count, role-matching segments only; proximity not pass/fail (the ledger lives in hard_requirements); calibrate against the score-3 anchor (train 4699) |
+| 5 education_domain_fit | the JD's occupation; level + field fit | `education_domain_fit.scope_notes` — occupation-relative, industry verticals excluded, bootcamps are not degrees; `criteria` band 3 — related-rather-than-core is ALWAYS a 3, no sub-grading (`design_notes`, rule isomorphism); score-3 anchor (train 4699) |
+| 6 hard_requirements | met / indeterminate / unmet per must item | `hard_requirements.criteria` — 3 means "the text cannot settle it", never partial credit; 4-of-5 met still scores 0 (the ledger has no ratio); both score-0 anchors (train 4699, train 3143) |
+| 7 aggregate + gate | veto handling; gate reasons | `aggregation` + `soft_veto` wiring (0 → cap+gate, 3 → gate-only, 5 → nothing); then §4 of this protocol for the reason codes |
+| 8 hesitations | is my discomfort a rubric problem? | the dimension's `design_notes` — if your hesitation contradicts a recorded design decision, say so explicitly: that is a rubric-revision candidate, the most valuable line you can write |
+
+**When a band call is genuinely unclear, escalate in this order** (stop at the first rung that
+settles it):
+
+1. **criteria** — the band texts themselves;
+2. **scope_notes** — does the ambiguity actually belong to another dimension?
+3. **design_notes** — the recorded *why*; often resolves "spirit vs letter" calls;
+4. **anchors** — put your pair next to the anchor's facts and reasoning: is your case stronger
+   or weaker than the anchored score?
+5. still torn → score the band you could best defend out loud, write the hesitation, move on.
+   **Never redesign the rubric mid-pair** — revisions happen between sessions, versioned, with
+   already-labeled pairs re-checked (§1).
+
 **Step 1 — JD pass (resume stays closed).**
 `view_pair {split} {row} --doc jd`. Write down:
 - the JD's occupation (sanity-check against the sample's `occupation` bucket);
