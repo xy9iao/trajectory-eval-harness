@@ -1,8 +1,7 @@
-# [DRAFT — PENDING] A JD with no stated skill musts leaves skills_coverage undefined
+# 002 — A JD with no stated skill musts leaves skills_coverage undefined
 
-> **Status: Change recorded (rubric v1.1, 2026-07-16); Result pending.** A number is
-> assigned at promotion. The rule decision was made under the rubric-maintenance delegation
-> (decisions.md log 2026-07-16): option (a), derived musts.
+> **Status: closed** (promoted 2026-07-16). Rule decision made under the rubric-maintenance
+> delegation (decisions.md log 2026-07-16): option (a), derived musts.
 
 ## Observation (labeling session 1, 2026-07-16 — train 596, the first sampled pair)
 
@@ -26,13 +25,13 @@ across pairs and annotators (mentor included): the same situation could get a du
 the reference labels, and later in P2 it becomes unattributable noise: rubric-vs-agent
 disagreement on such pairs cannot be classified as agent error vs rubric gap.
 
-## Verification — PENDING
+## Verification (P0 labeling complete, 2026-07-16)
 
-- Count affected pairs as labeling proceeds: the cockpit's auto-hesitation ("no skills must
-  items; band geometry undefined") makes them enumerable from `labels-v1.jsonl`.
-- Optional corpus-level directional scan: unique JDs whose must-language sentences contain no
-  skill-like terms (taxonomy patterns give the must-language side; the skill-term side would
-  need a defined list — record the method with the count if run).
+Affected pairs over the full 30: **1/30** (train 596 only), enumerable via the cockpit's
+auto-hesitation ("band geometry undefined") — `python eval/reports/label_stats.py`. The
+hypothesis "such JDs are common" did NOT hold on this sample; the gap is real but rare here.
+Recorded honestly: the rule's value is consistency insurance (and agent-parity — the P1 agent
+reads whole JDs), not high frequency.
 
 ## Change — recorded (rubric v1.1, 2026-07-16)
 
@@ -45,13 +44,13 @@ banded exactly like stated musts, provenance noted. Preferred-only skills stay e
 (schema change; headline dimension stops being comparable across pairs), (c) codified manual
 fallback (smallest change but leaves the judgment surface unwritten).
 
-## Result — PENDING
+## Result
 
-Closes with: (1) the train 596 skills determinations re-checked under the v1.1 rule at the
-next labeling session (~2 min; the current 0 stands if all derived items are absent — the
-recorded SQL-adjacency note may move it to 1 via any-absent geometry, which is exactly the
-before/after this finding needs); (2) the affected-pair count over the 30 as labeling
-proceeds (cockpit auto-hesitations make these enumerable).
+Train 596 re-labeled under v1.1 (owner, 2026-07-16): **skills_coverage 0 → 1** via six
+derived determinations (any-absent geometry; the recorded SQL adjacency makes one derived
+item covered-adjacent, blocking the all-absent 0). Before/after: v1.0 manual fallback 0
+(un-ruled judgment) → v1.1 ruled 1 — the score moved BECAUSE the rule was written, which is
+the eval-informs-design loop in miniature. Affected-pair count: 1/30 (Verification).
 
 Cross-references: train 596 record in `data/reference/labels-v1.jsonl` (hesitations field) ·
 labeling protocol §7 rubric map, step 3 · rubric v1 `skills_coverage` design_notes (stance A).
