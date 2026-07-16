@@ -2,6 +2,27 @@
 
 Primary data source: public resume–JD matching datasets (Decision 5).
 
+## Directory layout
+
+Shared modules (imported by everything else — no CLIs of their own):
+
+- `corpus.py` — access layer for the pinned CSVs: paths, document columns, 0-based row loading, case-insensitive find + span primitives (offsets always into the raw string)
+- `taxonomy.py` — the recorded keyword buckets and requirement patterns. **These definitions are the method behind archived numbers** (finding 001, the weight rationale in the p0 report) — don't edit terms without revising what cites the counts
+
+Tools (each a thin CLI over the modules above):
+
+- `download_dataset.py` — fetch + sha256-verify the pinned CSVs into `raw/` (gitignored)
+- `view_pair.py` — render one pair; `--find`/`--span` for recording and re-verifying offsets
+- `profile_jd_domains.py` — occupation/industry scan (evidence generator for finding 001)
+- `profile_jd_requirements.py` — requirement-pattern scan (evidence for the rubric weight rationale)
+- `sample_reference_pairs.py` — seeded stratified 30-pair sample → `reference/sample-v1.json`
+- `label_pairs.py` — interactive labeling cockpit (labeling protocol §7)
+
+Data:
+
+- `raw/` — gitignored dataset text (never committed — see rules below)
+- `reference/` — committed labeling artifacts: row indices, offsets, and scores only, never raw text
+
 Rules:
 
 - A dataset is committed here **only if its license permits use and redistribution**. Where the license is unclear or restrictive, this directory carries a download script + checksum instead of the data.

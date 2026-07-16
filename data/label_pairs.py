@@ -30,8 +30,8 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from profile_jd_requirements import PATTERNS  # noqa: E402
-from view_pair import DOC_COLUMNS, load_row  # noqa: E402
+from corpus import DOC_COLUMNS, find_offsets, load_row, show  # noqa: E402
+from taxonomy import PATTERNS  # noqa: E402
 
 from eval.rubric_loader import load_rubric  # noqa: E402
 
@@ -148,24 +148,18 @@ def multiline(prompt: str) -> str:
     return "\n".join(lines)
 
 
-def find_matches(text: str, query: str, limit: int = 8) -> list[tuple[int, int]]:
-    return [(m.start(), m.end()) for m in re.finditer(re.escape(query), text, re.IGNORECASE)][
-        :limit
-    ]
-
-
 def capture_span(doc: str, text: str, what: str) -> Span | None:
-    """--find/--span loop from view_pair, inline: search, pick, verified."""
+    """The view_pair --find/--span loop, inline: search, pick, verified."""
     while True:
         query = ask(f"  {what} — search {doc} (enter = no span)> ")
         if not query:
             return None
-        matches = find_matches(text, query)
+        matches = find_offsets(text, query, limit=8)
         if not matches:
             print("    no match — try a shorter string")
             continue
         for n, (s, e) in enumerate(matches, 1):
-            ctx = text[max(0, s - 40) : e + 40].replace("\n", "⏎")
+            ctx = show(text[max(0, s - 40) : e + 40])
             print(f"    [{n}] {s}:{e}  …{ctx}…")
         pick = ask("  pick # (enter = search again)> ")
         if pick.isdigit() and 1 <= int(pick) <= len(matches):

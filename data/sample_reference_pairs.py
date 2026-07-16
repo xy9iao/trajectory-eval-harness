@@ -1,26 +1,25 @@
 """Deterministically sample the 30-pair reference set (labeling protocol §2).
 
-Stratified: 10 pairs per dataset label class, round-robin across the 001
-corpus-scan occupation buckets, no two pairs sharing a JD, rubric anchor
-pairs excluded (they defined the scale — scoring them against it is
-circular). Fixed seed; output committed as data/reference/sample-v1.json
-so the sample is regenerable and auditable: `python
-data/sample_reference_pairs.py`.
+Stratified: 10 pairs per dataset label class, round-robin across the
+data/taxonomy.py occupation buckets (the 001 corpus scan), no two pairs
+sharing a JD, rubric anchor pairs excluded (they defined the scale —
+scoring them against it is circular). Fixed seed; output committed as
+data/reference/sample-v1.json so the sample is regenerable and auditable:
+`python data/sample_reference_pairs.py`.
 
 The first MENTOR_COUNTS[label] pairs of each label's round-robin selection
 form the mentor-review subset (protocol §6) — first-k preserves the bucket
 spread the round-robin established.
 """
 
-import csv
 import json
 import random
 import sys
 from pathlib import Path
 
-from profile_jd_domains import OCCUPATION, word
+from corpus import DOC_COLUMNS, read_rows
+from taxonomy import OCCUPATION, occupation_bucket
 
-RAW = Path(__file__).resolve().parent / "raw" / "train.csv"
 OUT = Path(__file__).resolve().parent / "reference" / "sample-v1.json"
 
 SEED = 20260715
@@ -31,27 +30,20 @@ ANCHOR_ROWS = {("train", 4699), ("train", 3143)}  # rubric v1 anchors — exclud
 BUCKETS = [*OCCUPATION, "none"]
 
 
-def occupation_bucket(jd_lower: str) -> str:
-    for label, terms in OCCUPATION.items():
-        if any(word(t, jd_lower) for t in terms):
-            return label
-    return "none"
-
-
 def main() -> int:
-    if not RAW.exists():
-        print(f"{RAW} not found — run `python data/download_dataset.py` first")
-        return 1
     rng = random.Random(SEED)
     by_label_bucket: dict[str, dict[str, list[tuple[int, str]]]] = {
         lab: {b: [] for b in BUCKETS} for lab in LABELS
     }
-    with RAW.open(newline="", encoding="utf-8") as f:
-        for i, row in enumerate(csv.DictReader(f)):
+    try:
+        for i, row in read_rows("train"):
             if ("train", i) in ANCHOR_ROWS:
                 continue
-            jd = row["job_description_text"]
+            jd = row[DOC_COLUMNS["jd"]]
             by_label_bucket[row["label"]][occupation_bucket(jd.lower())].append((i, jd))
+    except FileNotFoundError as e:
+        print(e)
+        return 1
 
     used_jds: set[str] = set()
     selected: list[dict[str, object]] = []

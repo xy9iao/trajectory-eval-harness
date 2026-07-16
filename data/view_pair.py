@@ -22,34 +22,14 @@ Usage:
 """
 
 import argparse
-import csv
 import sys
-from pathlib import Path
 
-RAW_DIR = Path(__file__).resolve().parent / "raw"
-SPLITS = ("train", "test")
-DOC_COLUMNS = {"jd": "job_description_text", "resume": "resume_text"}
-FIND_CONTEXT = 40
-
-# Resume cells run to several thousand characters; the default field limit
-# raises _csv.Error on them.
-csv.field_size_limit(sys.maxsize)
-
-
-def load_row(split: str, index: int) -> dict[str, str]:
-    path = RAW_DIR / f"{split}.csv"
-    if not path.exists():
-        raise FileNotFoundError(f"{path} not found — run `python data/download_dataset.py` first")
-    with path.open(newline="", encoding="utf-8") as f:
-        for i, row in enumerate(csv.DictReader(f)):
-            if i == index:
-                return row
-    raise IndexError(f"{split}.csv has no row index {index} (0-based)")
+from corpus import DOC_COLUMNS, FIND_CONTEXT, SPLITS, find_offsets, load_row, show
 
 
 def render(split: str, index: int, row: dict[str, str]) -> str:
-    jd = row["job_description_text"]
-    resume = row["resume_text"]
+    jd = row[DOC_COLUMNS["jd"]]
+    resume = row[DOC_COLUMNS["resume"]]
     return "\n".join(
         [
             f"# {split}.csv — row index {index} (0-based)",
@@ -69,21 +49,6 @@ def render(split: str, index: int, row: dict[str, str]) -> str:
             resume,
         ]
     )
-
-
-def show(text: str) -> str:
-    # 1:1 char replacement — printed offsets stay true to the raw string
-    return text.replace("\n", "⏎")
-
-
-def find_offsets(text: str, needle: str) -> list[tuple[int, int]]:
-    lowered, target = text.lower(), needle.lower()
-    spans = []
-    start = lowered.find(target)
-    while start != -1:
-        spans.append((start, start + len(needle)))
-        start = lowered.find(target, start + 1)
-    return spans
 
 
 def run_find(row: dict[str, str], docs: list[str], needle: str) -> int:
