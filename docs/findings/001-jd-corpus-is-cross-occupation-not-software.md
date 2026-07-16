@@ -1,6 +1,6 @@
 # 001 — The JD corpus is cross-occupation, not software-centric; "domain fit" cannot mean a technical sub-field
 
-**Status:** open — Change recorded (rubric v1 `education_domain_fit`, 2026-07-14); Result pending labeling observation. Owner writes the interpretive judgment; this file records the evidence.
+**Status:** closed (2026-07-16) — Change recorded (rubric v1 `education_domain_fit`, 2026-07-14); Result recorded from the completed 30-pair labeling.
 
 **Date:** 2026-07-14 · **Phase:** P0 (rubric v1)
 
@@ -36,6 +36,13 @@ Ran `data/profile_jd_domains.py` over the 280 unique JDs (6,241 train rows colla
 - **(b)** Treat **industry/sector** as a secondary signal or a separate dimension — present in 208/280 but absent in 72, and frequently orthogonal to competence. → **Excluded from rubric v1 (option A)**; recorded as a P2 future experiment (industry as secondary signal).
 - **(c)** Defining `domain` as a software sub-field (backend/frontend/data) — applies to <1/4 of the corpus. → **Rejected by the evidence.**
 
-## Result
+## Result (P0 labeling complete, 2026-07-16)
 
-*Pending.* This was a pre-rubric baseline observation; the `education_domain_fit` dimension is now defined per the Change. The Result closes during P0 labeling: how many of the ~30 labeled pairs turn on occupational vs industry mismatch, and whether the occupation-relative definition survives labeling or needs a v1→v1.x revision.
+The occupation-relative definition survived all 30 pairs without a v1.x revision.
+`education_domain_fit` band 1 (cross-occupation mismatch — "neither level nor field fits the
+JD's occupation") fired on **7/30** pairs, spread across accounting/fin, data/ML,
+devops/infra, business/PM, and unbucketed JDs — i.e. the mismatch signal the occupation-
+relative framing was built to catch is real and cross-occupation, exactly as the corpus scan
+predicted. Zero industry-related hesitations were recorded, supporting option A (industry
+excluded); industry-as-secondary-signal stays on the P2 deferred-experiments list.
+Reproduction: `python eval/reports/label_stats.py` + hesitation scan over `labels-v1.jsonl`.

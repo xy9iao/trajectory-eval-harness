@@ -1,7 +1,7 @@
-# [DRAFT — PENDING] Gate ground truth is 29/30 positive — the P2 confusion matrix starts degenerate
+# 004 — Gate ground truth is 29/30 positive — the P2 confusion matrix starts degenerate
 
-> **Status: pending draft.** Observation and numbers are final (P0 labeling complete);
-> Change lands in P1 gate design; Result closes in P2. A number is assigned at promotion.
+**Status:** open — Observation final (P0 labeling complete, 2026-07-16); Change lands in P1
+gate design; Result closes in P2. **Date:** 2026-07-16 · **Phase:** P0 → P1/P2
 
 ## Observation (P0 labeling complete, 2026-07-16)
 

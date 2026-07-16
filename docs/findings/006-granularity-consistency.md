@@ -1,8 +1,7 @@
-# [DRAFT — PENDING] Proportional bundle scoring retracted as a granularity self-contradiction
+# 006 — Proportional bundle scoring retracted as a granularity self-contradiction
 
-> **Status: pending draft — do not cite.** A number is assigned at promotion (001 is taken by
-> the cross-occupation corpus finding; the owner-vs-dataset disagreement finding takes the next
-> free number when it opens). Result awaits the P2 Plan-A-vs-Plan-B contrast run.
+**Status:** open — P0 interim check passed (2026-07-16); Result awaits the P2
+Plan-A-vs-Plan-B contrast run. **Date:** 2026-07-13 → 2026-07-16 · **Phase:** P0 → P2
 
 ## Observation (owner, 2026-07-13)
 
@@ -20,11 +19,14 @@ design review — before any labeling — is the cheapest possible catch point; 
 would have contaminated the P2 Plan-A-vs-Plan-B comparison (Plan A would secretly contain
 Plan B).
 
-## Verification — PENDING
+## Verification — P0 interim check passed (2026-07-16)
 
-The P2 contrast run requires the two plans to be cleanly separated; the retraction is what
-makes that experiment valid. Interim check at P0 labeling: bundled requirements are labeled
-with the discrete three-value determination without fraction-talk appearing in reasoning notes.
+Scan over the completed 30-record reference set: every recorded determination uses strictly
+{covered, partial, absent} (no other values appear), and no fraction-based scoring language
+occurs in any notes field (regex scan for ratio/percentage phrasing; all numeric-ratio matches
+were dates, GPAs, and decimal year figures). Plan A stayed pure through labeling. The P2
+contrast run remains the full verification: it requires the two plans cleanly separated, and
+the retraction is what makes that experiment valid.
 
 ## Change
 
