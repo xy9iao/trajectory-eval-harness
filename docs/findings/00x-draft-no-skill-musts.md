@@ -1,8 +1,8 @@
 # [DRAFT — PENDING] A JD with no stated skill musts leaves skills_coverage undefined
 
-> **Status: pending draft — do not cite.** CC-drafted from labeling session 1; owner to
-> double-check the characterization. A number is assigned at promotion. The Change is an
-> owner rubric decision (v1 → v1.1), to be made **between labeling sessions**, never mid-pair.
+> **Status: Change recorded (rubric v1.1, 2026-07-16); Result pending.** A number is
+> assigned at promotion. The rule decision was made under the rubric-maintenance delegation
+> (decisions.md log 2026-07-16): option (a), derived musts.
 
 ## Observation (labeling session 1, 2026-07-16 — train 596, the first sampled pair)
 
@@ -34,28 +34,24 @@ disagreement on such pairs cannot be classified as agent error vs rubric gap.
   skill-like terms (taxonomy patterns give the must-language side; the skill-term side would
   need a defined list — record the method with the count if run).
 
-## Change — PENDING (owner decision, rubric v1 → v1.1, between sessions)
+## Change — recorded (rubric v1.1, 2026-07-16)
 
-Candidate rules, each with a cost:
-
-- **(a) Duties-derived musts:** when a JD states no skill musts, derive skill requirements
-  from the duties section by a defined procedure. Cost: a new judgment surface (which duties
-  count?) — the ambiguity stance A existed to avoid.
-- **(b) NA + renormalize:** `skills_coverage` is not-applicable for such pairs; weights
-  renormalize over the remaining scoring dimensions. Cost: schema change (`score: null`),
-  and pairs stop being comparable on the headline dimension.
-- **(c) Codified fallback:** keep the manual score but write down what it may consider
-  (e.g. duties yes, preferred no) and what the default band is. Cost: smallest change, but
-  partially contradicts stance A and must say so explicitly.
-
-Whichever rule lands: already-labeled pairs get re-checked under it (protocol §1), and the
-decision is logged as a rubric revision (p0 report §2.2).
+**Option (a) adopted — derived musts** (CC decision under the rubric-maintenance delegation,
+decisions.md log 2026-07-16): when a JD states no must-have skill requirements, skill
+requirements are derived from the duties/responsibilities section (one requirement per duties
+sentence naming concrete tools/technologies/skills, bundled per sentence), determined and
+banded exactly like stated musts, provenance noted. Preferred-only skills stay excluded
+(stance A unchanged). Options considered and set aside: (b) NA + weight renormalization
+(schema change; headline dimension stops being comparable across pairs), (c) codified manual
+fallback (smallest change but leaves the judgment surface unwritten).
 
 ## Result — PENDING
 
-Closes when the v1.1 rule is ratified and affected pairs are re-checked; before/after =
-labels under fallback vs under the written rule, plus the affected-pair count from
-Verification.
+Closes with: (1) the train 596 skills determinations re-checked under the v1.1 rule at the
+next labeling session (~2 min; the current 0 stands if all derived items are absent — the
+recorded SQL-adjacency note may move it to 1 via any-absent geometry, which is exactly the
+before/after this finding needs); (2) the affected-pair count over the 30 as labeling
+proceeds (cockpit auto-hesitations make these enumerable).
 
 Cross-references: train 596 record in `data/reference/labels-v1.jsonl` (hesitations field) ·
 labeling protocol §7 rubric map, step 3 · rubric v1 `skills_coverage` design_notes (stance A).
