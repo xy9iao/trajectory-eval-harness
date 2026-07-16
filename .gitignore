@@ -19,3 +19,6 @@ build/
 
 # OS
 .DS_Store
+
+# P1 trajectory runs — raw dataset text in prompts/payloads (Decision 5)
+runs/
