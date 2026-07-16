@@ -6,20 +6,19 @@ skips where the data is absent (CI) and runs on any machine that has run
 data/download_dataset.py.
 """
 
-import csv
 import sys
 from pathlib import Path
 
 import pytest
 
-from eval.rubric_loader import Rubric, load_rubric
-
 ROOT = Path(__file__).resolve().parents[1]
-RUBRIC_PATH = ROOT / "rubrics" / "rubric-v1.yaml"
-RAW_DIR = ROOT / "data" / "raw"
-DOC_COLUMNS = {"jd": "job_description_text", "resume": "resume_text"}
+sys.path.insert(0, str(ROOT / "data"))
 
-csv.field_size_limit(sys.maxsize)
+from corpus import DOC_COLUMNS, RAW_DIR, load_row  # noqa: E402
+
+from eval.rubric_loader import Rubric, load_rubric  # noqa: E402
+
+RUBRIC_PATH = ROOT / "rubrics" / "rubric-v1.yaml"
 
 
 @pytest.fixture(scope="module")
@@ -63,23 +62,16 @@ def test_anchor_spans_well_formed(rubric: Rubric) -> None:
 )
 def test_anchor_spans_in_bounds(rubric: Rubric) -> None:
     """Every anchor span must slice real text in the pinned CSVs (0-based iloc rows,
-    char offsets into the raw string — same convention as data/view_pair.py)."""
+    char offsets into the raw string — same convention as data/corpus.py)."""
     rows: dict[tuple[str, int], dict[str, str]] = {}
     for dim in rubric.dimensions:
         for anchor in dim.get("anchors", []):
-            split, idx = anchor["pair"]["split"], anchor["pair"]["row"]
-            if (split, idx) not in rows:
-                with (RAW_DIR / f"{split}.csv").open(newline="", encoding="utf-8") as f:
-                    for i, row in enumerate(csv.DictReader(f)):
-                        if i == idx:
-                            rows[(split, idx)] = row
-                            break
-                    else:
-                        pytest.fail(f"{dim['id']}: row {idx} not in {split}.csv")
-            doc_texts = rows[(split, idx)]
+            key = (anchor["pair"]["split"], anchor["pair"]["row"])
+            if key not in rows:
+                rows[key] = load_row(*key)
             for span in anchor["evidence_spans"]:
-                text = doc_texts[DOC_COLUMNS[span["doc"]]]
+                text = rows[key][DOC_COLUMNS[span["doc"]]]
                 assert span["end"] <= len(text), (
-                    f"{dim['id']}: span {span} out of bounds for {split} {idx} "
+                    f"{dim['id']}: span {span} out of bounds for {key} "
                     f"({span['doc']} has {len(text)} chars)"
                 )

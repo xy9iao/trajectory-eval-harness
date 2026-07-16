@@ -1,0 +1,225 @@
+{
+  "seed": 20260715,
+  "anchor_rows_excluded": [
+    [
+      "train",
+      3143
+    ],
+    [
+      "train",
+      4699
+    ]
+  ],
+  "pairs": [
+    {
+      "split": "train",
+      "row": 596,
+      "dataset_label": "No Fit",
+      "occupation": "software eng",
+      "mentor": true
+    },
+    {
+      "split": "train",
+      "row": 901,
+      "dataset_label": "No Fit",
+      "occupation": "data/ML",
+      "mentor": true
+    },
+    {
+      "split": "train",
+      "row": 400,
+      "dataset_label": "No Fit",
+      "occupation": "devops/infra",
+      "mentor": true
+    },
+    {
+      "split": "train",
+      "row": 2189,
+      "dataset_label": "No Fit",
+      "occupation": "hardware eng",
+      "mentor": false
+    },
+    {
+      "split": "train",
+      "row": 175,
+      "dataset_label": "No Fit",
+      "occupation": "accounting/fin",
+      "mentor": false
+    },
+    {
+      "split": "train",
+      "row": 935,
+      "dataset_label": "No Fit",
+      "occupation": "business/PM",
+      "mentor": false
+    },
+    {
+      "split": "train",
+      "row": 2980,
+      "dataset_label": "No Fit",
+      "occupation": "sales/mktg",
+      "mentor": false
+    },
+    {
+      "split": "train",
+      "row": 970,
+      "dataset_label": "No Fit",
+      "occupation": "hr/admin",
+      "mentor": false
+    },
+    {
+      "split": "train",
+      "row": 1089,
+      "dataset_label": "No Fit",
+      "occupation": "none",
+      "mentor": false
+    },
+    {
+      "split": "train",
+      "row": 1050,
+      "dataset_label": "No Fit",
+      "occupation": "software eng",
+      "mentor": false
+    },
+    {
+      "split": "train",
+      "row": 3229,
+      "dataset_label": "Potential Fit",
+      "occupation": "software eng",
+      "mentor": true
+    },
+    {
+      "split": "train",
+      "row": 3590,
+      "dataset_label": "Potential Fit",
+      "occupation": "data/ML",
+      "mentor": true
+    },
+    {
+      "split": "train",
+      "row": 3861,
+      "dataset_label": "Potential Fit",
+      "occupation": "devops/infra",
+      "mentor": true
+    },
+    {
+      "split": "train",
+      "row": 3978,
+      "dataset_label": "Potential Fit",
+      "occupation": "hardware eng",
+      "mentor": false
+    },
+    {
+      "split": "train",
+      "row": 3559,
+      "dataset_label": "Potential Fit",
+      "occupation": "accounting/fin",
+      "mentor": false
+    },
+    {
+      "split": "train",
+      "row": 3773,
+      "dataset_label": "Potential Fit",
+      "occupation": "business/PM",
+      "mentor": false
+    },
+    {
+      "split": "train",
+      "row": 3769,
+      "dataset_label": "Potential Fit",
+      "occupation": "sales/mktg",
+      "mentor": false
+    },
+    {
+      "split": "train",
+      "row": 4160,
+      "dataset_label": "Potential Fit",
+      "occupation": "hr/admin",
+      "mentor": false
+    },
+    {
+      "split": "train",
+      "row": 3800,
+      "dataset_label": "Potential Fit",
+      "occupation": "none",
+      "mentor": false
+    },
+    {
+      "split": "train",
+      "row": 3148,
+      "dataset_label": "Potential Fit",
+      "occupation": "software eng",
+      "mentor": false
+    },
+    {
+      "split": "train",
+      "row": 5063,
+      "dataset_label": "Good Fit",
+      "occupation": "software eng",
+      "mentor": true
+    },
+    {
+      "split": "train",
+      "row": 6220,
+      "dataset_label": "Good Fit",
+      "occupation": "data/ML",
+      "mentor": true
+    },
+    {
+      "split": "train",
+      "row": 4890,
+      "dataset_label": "Good Fit",
+      "occupation": "devops/infra",
+      "mentor": true
+    },
+    {
+      "split": "train",
+      "row": 5798,
+      "dataset_label": "Good Fit",
+      "occupation": "hardware eng",
+      "mentor": true
+    },
+    {
+      "split": "train",
+      "row": 5699,
+      "dataset_label": "Good Fit",
+      "occupation": "accounting/fin",
+      "mentor": false
+    },
+    {
+      "split": "train",
+      "row": 4928,
+      "dataset_label": "Good Fit",
+      "occupation": "business/PM",
+      "mentor": false
+    },
+    {
+      "split": "train",
+      "row": 5084,
+      "dataset_label": "Good Fit",
+      "occupation": "sales/mktg",
+      "mentor": false
+    },
+    {
+      "split": "train",
+      "row": 5707,
+      "dataset_label": "Good Fit",
+      "occupation": "none",
+      "mentor": false
+    },
+    {
+      "split": "train",
+      "row": 4715,
+      "dataset_label": "Good Fit",
+      "occupation": "software eng",
+      "mentor": false
+    },
+    {
+      "split": "train",
+      "row": 6236,
+      "dataset_label": "Good Fit",
+      "occupation": "data/ML",
+      "mentor": false
+    }
+  ]
+}

@@ -11,7 +11,9 @@
 # Anchor evidence_spans offsets are filled and verified with view_pair --span
 # against the pinned CSVs (2026-07-15).
 
-version: "1.0"
+version: "1.1" # v1.1 (2026-07-16): derived-musts rule closes the no-skill-musts gap
+               # (labeling session 1, train 596); rubric maintenance delegated to CC,
+               # owner ratifies via PR merge — see decisions.md log 2026-07-16.
 status: active # owner sign-off 2026-07-15 (PR #3 closing rulings)
 
 scale:
@@ -72,6 +74,18 @@ dimensions:
         Bootcamp project work is valid hands-on evidence for this dimension
         (bootcamps are excluded from education_domain_fit as non-degrees,
         but their evidence of actual skill use counts here).
+      - >
+        DERIVED MUSTS (v1.1): when a JD states no must-have skill
+        requirements, skill requirements are derived from its duties/
+        responsibilities section — each duties sentence naming concrete
+        tools, technologies, or named skills yields one requirement
+        (bundled per sentence), determined and banded exactly like stated
+        musts, with provenance noted ("derived"). A skill appearing in
+        duties counts via the duties mention even if also listed as
+        preferred; skills appearing ONLY in a preferred/nice-to-have list
+        remain excluded (stance A unchanged). Rationale: keeps the
+        0.5-weight dimension defined on every JD instead of falling back
+        to un-ruled judgment.
     coverage_determination:
       # Per-requirement coverage is a DISCRETE three-value judgment, not a
       # ratio (a proportional scheme was proposed and retracted — it
@@ -118,6 +132,7 @@ dimensions:
       - "Banding granularity: whole-dimension (Plan A); per-item aggregation (Plan B) deferred to P2 as a contrast-rubric experiment"
       - "partial caps the band at 2; absent pins the band at 1"
       - "Soft veto lives at the aggregation layer, not in this dimension"
+      - "v1.1 derived-musts: no-skill-musts JDs derive requirements from duties (session-1 gap, train 596); imperfect-rubric stance accepted — the reference standard must be consistent, not perfect (between-rater variance is a measured quantity, not a defect)"
     anchors:
       - score: 1
         pair: { split: train, row: 4699 }
