@@ -85,6 +85,46 @@ Pinned rationale:
   it. If the task later grows a real branch (e.g. autonomous evidence supplementation), a
   model-routed conditional edge is added — the architecture does not change.
 
+**Signatures (ratified 2026-07-17):**
+
+| tool | caller | signature | trajectory args_summary (dataset-text-free) |
+|---|---|---|---|
+| `parse_resume` | parse node | `(pair: PairRef) -> str` | `{split, row}` |
+| `parse_jd` | parse node | `(pair: PairRef) -> str` | `{split, row}` |
+| `get_rubric` | assess node, once per dimension | `(dimension: str) -> RubricSlice` | `{dimension}` |
+| `assess_dimension` | assess node (issues the llm_call) | `(dimension, extraction, rubric_slice, resume_text, jd_text) -> Assessment` | `{dimension, attempt}` |
+| `submit_assessment` | the MODEL (forced function call) | schema: `{dimension, score 0-5, evidence_quotes: required ≥1 verbatim, determinations (skills only), notes}` | validation ok/malformed → llm_call.status |
+| `flag_for_review` | gate node | `(triggers, assessments, aggregate) -> GateOutcome` | `{triggers, mode, action}` |
+
+Sub-decisions, ratified:
+
+- **3-i — what counts as a "tool" (criterion on record):** the tool list is the GRAPH'S
+  orchestration contract (what P2's tool-call correctness scorer asserts against), not a
+  registry of every function-calling use. Extraction's schema rides the same
+  function-calling mechanism but is the extract node's internal output contract — same
+  mechanism, different contract tier. `parse_resume`/`parse_jd` stay separate: P2's error
+  recovery scorer needs single-sided-failure granularity (garbled resume + intact JD must be
+  two distinguishable parse events) — the fourth instance of eval needs determining
+  interface design (after: no parallel fan-out, no free scheduling, by-value state).
+- **3-ii — malformed output escalates, never drowns:** `assess_dimension` retries once
+  (D3's one-retry-visible-degradation lands here); second failure → Assessment marked
+  degraded with `score: null` → `insufficient_evidence` auto-triggers the gate (D15).
+  Degraded dimensions contribute NO score; `aggregate.weighted_mean` is **null** when any
+  scoring dimension is degraded (a partially-computed mean looks complete downstream; null
+  forces consumers to check the `partial` flag) with missing dimensions listed. The gate
+  thus guards three classes: boundary scores, evidence divergence, and degradation of the
+  assessment process itself (the system's meta-state is a gating condition).
+- **Evidence as verbatim quotes, offsets resolved tool-side:** models are unreliable at
+  character-offset arithmetic, so `submit_assessment` takes verbatim quotes;
+  `assess_dimension` resolves each quote to raw offsets via deterministic search
+  (`corpus.find_offsets`); an unresolvable quote = the quote does not exist in the document
+  = validation failure → malformed path. Side effect: fabricated evidence is structurally
+  unable to pass (a hallucinated quote fails resolution) — D7 upgraded from spot-check to
+  mechanism. Raw `resume_text`/`jd_text` are in the signature BECAUSE quote resolution
+  requires them (docstring must say so — do not "optimize" them away); prompt layout puts
+  invariant content (docs + extraction) in a shared prefix and per-dimension content in the
+  suffix, so provider prefix caching amortizes the raw-doc cost across the four assess calls.
+
 ### 4. Trajectory event types + invariants — PENDING
 
 ### 5. Gate triggers + initial thresholds — PENDING
