@@ -19,3 +19,6 @@ build/
 
 # OS
 .DS_Store
+
+# P1 trajectory runs — state, checkpoints, and raw dumps carry dataset text (Decision 5)
+runs/
