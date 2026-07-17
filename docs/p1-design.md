@@ -198,6 +198,45 @@ Design input: finding 004 (gate ground truth 29/30 positive; veto 24/30).
   is a true property of this corpus; the negative class comes from P2's controlled variants,
   never from loosening thresholds to make the rate look nice.
 
-### 6. Checkpointer + two-mode wiring (D15) — PENDING
+### 6. Checkpointer + two-mode wiring (D15) — DECIDED (owner, 2026-07-17)
 
-### 7. Provider compatibility + degradation policy (D3) — PENDING
+- **6a — `SqliteSaver`** (framework checkpointer) over hand-rolled JSON: resume semantics
+  ride the framework's battle-tested path (decision 2c's principle, reapplied); D1 permits
+  explicitly. Lives at `runs/checkpoints.db` — gitignored because by-value state (2a)
+  carries raw document text: the data discipline closes its loop.
+- **6b — dynamic `interrupt()` inside the gate node**, called only when
+  `mode=interactive AND triggers nonempty` — not static `interrupt_before` (which stops
+  every run regardless). "Stop only when there is something to review" IS the gate's
+  semantics: mechanism and meaning isomorphic.
+- **6c — review artifact:** on interrupt, write `review/<run_id>.md` — triggers,
+  per-dimension scores WITH evidence text (review/ is gitignored; raw text legal there),
+  raw + capped aggregates side by side (5c's information-preservation landing), machine
+  conclusion draft. Human edits one decision field (approve / edit / reject);
+  `resume <run_id>` CLI validates and resumes the thread; `gate_event.resolution` records
+  approved/edited/rejected — **human adjudication becomes evaluable data** (post-P2 the
+  system can answer "how often and in what pattern do humans overturn the machine").
+- **6d — eval mode:** never interrupts; `gate_event{action: auto_resume, resolution: auto}`;
+  batch runs proceed with the machine conclusion (flagged) and full trajectories.
+
+### 7. Provider compatibility + degradation policy (D3) — DECIDED (owner, 2026-07-17)
+
+- **7a — single module `agent/client.py`** on the openai SDK; base_url/key/model entirely
+  env-driven (`LLM_PROVIDER=deepseek|openai`; `.env.example` updated). **Enforced by
+  hygiene test:** grep-style CI test fails on any provider string in `agent/` or `eval/`
+  outside the client module — D3-① upgraded from convention to assertion.
+- **7b — pydantic single-source types** (`agent/types.py`: Assessment, EvidenceSpan,
+  Determination, GateOutcome, Aggregate, PairRef; `extra="forbid"`, score `int|None` with
+  0–5 bounds). One definition, three imports: client validation
+  (`Assessment.model_validate`), state annotation, scorer assertion. **The provider-facing
+  `submit_assessment` function schema is generated from the same models
+  (`model_json_schema()`)** — the contract the model is forced to obey and the validator
+  that checks it are one object; prompt-side/validation-side schema drift is structurally
+  impossible. (First proposal — hand-written validation "to keep deps light" — was blocked
+  by owner: pydantic is already in the tree via langgraph, the saving was zero, and
+  hand-rolled validators are exactly where holes pollute degraded-determination accuracy;
+  same principle as 6a, initially misapplied. Recorded as a Problems & Fixes episode.)
+- **7c — malformed-output tests:** mocked transport, zero live calls/keys in CI; one test
+  per provider config asserting the full chain retry → degraded → insufficient_evidence →
+  gate, with correct trajectory events — the executable contract of decision 3-ii.
+- Dependencies land at Stages D/E via uv: `langgraph`, `langgraph-checkpoint-sqlite`,
+  `openai`, `pydantic` (explicit, though already transitive).
