@@ -63,7 +63,27 @@ assessments dict under a merge reducer) · downstream (aggregate, gate, recommen
   observed party surviving — a crashed run keeps its trajectory up to the crash, which is
   exactly what the P2 error-recovery scorer needs.
 
-### 3. Tool surface (6 locked names: parse_resume, parse_jd, get_rubric, assess_dimension, submit_assessment, flag_for_review) — signatures PENDING
+### 3. Tool surface — architecture DECIDED (owner, 2026-07-17: option C); signatures pending below
+
+**Graph-orchestrated scheduling + LLM structured output through function calling.** The graph
+(decision 1's topology) decides when tools run; `assess_dimension`/`submit_assessment` are
+exposed to the model as schema-enforced function calls — the model must return each
+assessment AS a `submit_assessment(...)` call with `evidence_spans` required.
+
+Pinned rationale:
+- **Rejecting model-driven scheduling (option A) reapplies decision 1's principle** — eval
+  measurability constrains agent freedom: monotonic-seq schema rejected parallel fan-out;
+  contract-execution scorers reject free scheduling. Giving the model "control" over a flow
+  with no branch points is **fake agency** — freedom the task cannot use, returned as noise.
+- **Over plain orchestration (option B): tool calling is redefined as the output contract's
+  enforcement mechanism.** Provider function-calling makes the schema structural:
+  `evidence_spans: required` upgrades D7 (mandatory evidence citation) from a prompt-level
+  request the model can ignore to an API-level guarantee it cannot — mechanism over
+  instruction.
+- **Agency allocation rule (owner):** where the flow has no choice, the graph owns it; where
+  the output is non-enumerable judgment (per-dimension evidence assessment), the model owns
+  it. If the task later grows a real branch (e.g. autonomous evidence supplementation), a
+  model-routed conditional edge is added — the architecture does not change.
 
 ### 4. Trajectory event types + invariants — PENDING
 
