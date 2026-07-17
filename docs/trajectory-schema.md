@@ -93,9 +93,11 @@ dimension degraded), `missing`: [dim]} ·
 5. **Totals reconcile:** `run_end.totals.llm_calls` = count of `llm_call` events;
    token totals = their sums.
 6. **Retry visibility:** `llm_call` with `attempt > 1` requires a prior same-node event
-   with `status ≠ ok`. This is the SAME definition as the strict state reducer's
-   legitimate-rewrite carve-out (design decision 2b/4-6): legal rewrite ⇔ same dimension
-   has a prior non-ok `llm_call`. One definition, two enforcement points.
+   with `status ≠ ok`. This is the trajectory layer's own contract, independent of the
+   state layer's (which is stricter: exactly one assessment write per dimension, no
+   exceptions — retries never surface as state writes because they live inside
+   `assess_dimension`). Superseded the earlier "one shared definition" framing at Stage E
+   (p1-design.md decision 2b supersede).
 7. **Data hygiene:** no event field, on any status branch, contains dataset text — pinned
    by test: no string value anywhere in any event contains a ≥20-character verbatim
    substring of either raw document. Runs where the raw data exists (CI-skipped, same rule

@@ -55,7 +55,19 @@ assessments dict under a merge reducer) · downstream (aggregate, gate, recommen
   exactly-once-per-dimension invariant. Owner leaning, to be finalized when the reducer is
   written in Stage E: **raise on existing key** ("blow up in development rather than pollute
   a trajectory"), with a defined carve-out for legitimate rewrites (retry after
-  malformed output). Decision + rationale to be logged when implemented.
+  malformed output).
+  **SUPERSEDED at Stage E (owner ruling, 2026-07-17): strict raise, NO carve-out.**
+  Implementation exposed the structural fact: retries live inside `assess_dimension`
+  (client layer, decision 7), so one dimension pass produces exactly one state write —
+  "legitimate duplicate write" is a category with no members at the state layer; any
+  duplicate reaching the reducer is a bug (cursor stalled, loop misrouted). The
+  legitimate-rewrite concept sinks to the layer it belongs to: trajectory invariant 6.
+  The two layers' contracts are now independent and each stronger — no cross-layer
+  reference. Direction matters: design→implementation TIGHTENED the contract
+  (loosening would be decay; tightening is health). Reserving today's hole for a
+  hypothetical future architecture change is exactly the error being deleted — if retry
+  logic ever leaves the client layer, that is an architecture change and the reducer's
+  contract gets renegotiated then, not pre-weakened now.
 - **2c — TypedDict over dataclasses.** Framework idiom beats object aesthetics; principle on
   record: a "better design" that fights the framework's data model is not a better design.
 - **Trajectory events stay OUT of state** (logger-side, append-only, written as events
@@ -152,10 +164,12 @@ starts here: pass^k joins on (pair, provider, model, config_digest); agreement j
    carry 0 (failed resolution is why it degraded).
 5. Invariant 4 (gate consistency) extended: any degraded dimension ⇒ a `gate_event` with
    trigger `insufficient_evidence` (decision 3-ii, now an assertable contract).
-6. Invariant 6 (retry visibility) shares ONE definition with the strict state reducer's
-   legitimate-rewrite carve-out: legal rewrite ⇔ same dimension has a prior
-   `llm_call.status != ok`. Single definition, two enforcement points (state layer admits,
-   trajectory layer asserts); Stage E implements by reference to the schema text.
+6. Invariant 6 (retry visibility): `llm_call.attempt > 1` requires a prior same-node
+   non-ok attempt. **Superseded framing (Stage E, owner ruling):** originally specified as
+   "one definition shared with the state reducer's rewrite carve-out"; the carve-out was
+   deleted (see decision 2b supersede) — the two layers now carry independent contracts:
+   state = exactly one write per dimension, no exceptions; trajectory = retries visible
+   with failure precedent. Not shared: separate and each stronger.
 7. **NEW invariant 7 — data hygiene:** no event field, on any status branch, carries dataset
    text; `error.detail` explicitly named as the high-risk path (failed quotes must not be
    logged "for debugging" — counts yes, text no). Pinned by test: no event string value

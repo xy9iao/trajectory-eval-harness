@@ -23,14 +23,12 @@ def merge_assessments(
       (the default dict-union semantics silently overwrite — which would mask
       assess-loop cursor bugs and disarm schema invariant 2's alarm).
 
-    Carve-out analysis (CC, for owner ruling): the design-doc carve-out for
-    "legitimate rewrites (retry after malformed output)" may be UNNECESSARY at
-    the state layer — retries happen INSIDE assess_dimension (client layer,
-    decision 7), so one dimension pass produces exactly one state write no
-    matter how many llm_call attempts it took. If that holds, this reducer can
-    be strictly raise-on-duplicate with no exception, and the legal-rewrite
-    definition lives only at the trajectory layer (invariant 6, llm_call
-    attempts). Owner confirms or refutes; rationale goes to Problems & Fixes.
+    RULED (owner, 2026-07-17): strict raise, NO carve-out. Retries live inside
+    assess_dimension (client layer), so one dimension pass produces exactly one
+    state write — "legitimate duplicate" has no members at this layer; any
+    duplicate reaching this reducer is a bug. The legitimate-rewrite concept
+    lives only at the trajectory layer (invariant 6). See p1-design.md
+    decision 2b supersede.
     """
     raise NotImplementedError("owner writes this — decision 2b (Stage E)")
 
