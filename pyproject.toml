@@ -5,6 +5,8 @@ description = "Evaluation framework for AI-agent reliability — trajectory-leve
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "openai>=2.46.0",
+    "pydantic>=2.13.4",
     "pyyaml>=6.0.3",
 ]
 
