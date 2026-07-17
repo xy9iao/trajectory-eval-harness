@@ -21,7 +21,20 @@ preference — learning folds into the implementation stages, taught at point of
 
 ## Decisions
 
-### 1. Graph shape (nodes and edges) — PENDING
+### 1. Graph shape (nodes and edges) — DECIDED (owner, 2026-07-17: option A)
+
+```
+parse → extract → assess ⟲ (conditional edge, once per dimension) → aggregate → gate → recommend
+```
+
+One `assess` node executed sequentially per dimension via a conditional edge over a
+dimensions-remaining cursor; **fixed order with hard_requirements last** (it re-reads the
+other dimensions' determinations — the rubric itself forces sequential). Alternatives
+recorded: parallel fan-out (Send API) rejected — nondeterministic event ordering pollutes
+trajectory replay and pass^k comparison, and the hard_requirements dependency forces a hybrid
+anyway; single mega-call rejected — destroys per-dimension trajectory granularity, which is
+the eval's protagonist. Rationale: trajectory legibility and deterministic replay outrank
+wall-clock at n=30.
 
 ### 2. State schema — PENDING
 
