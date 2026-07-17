@@ -36,7 +36,32 @@ anyway; single mega-call rejected — destroys per-dimension trajectory granular
 the eval's protagonist. Rationale: trajectory legibility and deterministic replay outrank
 wall-clock at n=30.
 
-### 2. State schema — PENDING
+### 2. State schema — DECIDED (owner, 2026-07-17)
+
+`TypedDict` state: identity/config (pair ref, mode, rubric_version) · documents by value
+(resume_text, jd_text) · working products (extraction, dimensions_remaining cursor,
+assessments dict under a merge reducer) · downstream (aggregate, gate, recommendation).
+
+- **2a — documents by value.** An interrupted run is hermetic, and the deeper purchase is
+  **pass^k internal validity**: with by-reference inputs, k runs could straddle a re-download/
+  re-normalization of the raw files, making score drift unattributable (model instability vs
+  input change). By-value freezes the input in state so pass^k variance attributes to model
+  behavior only. Recorded boundary (owner L3): if inputs outgrow a few KB (e.g. PDFs),
+  switch to content-hash-in-state + content-addressed storage — hash preserves hermeticity,
+  storage handles size. Not needed at current scale.
+- **2b — assessments under a merge reducer**, each assess pass returning only its own
+  `{dimension: result}`. Key-conflict semantics: the default (dict-union, right wins) is a
+  **silent overwrite** — it would mask assess-loop cursor bugs and disarm the
+  exactly-once-per-dimension invariant. Owner leaning, to be finalized when the reducer is
+  written in Stage E: **raise on existing key** ("blow up in development rather than pollute
+  a trajectory"), with a defined carve-out for legitimate rewrites (retry after
+  malformed output). Decision + rationale to be logged when implemented.
+- **2c — TypedDict over dataclasses.** Framework idiom beats object aesthetics; principle on
+  record: a "better design" that fights the framework's data model is not a better design.
+- **Trajectory events stay OUT of state** (logger-side, append-only, written as events
+  happen): the trajectory is observational evidence and evidence must not depend on the
+  observed party surviving — a crashed run keeps its trajectory up to the crash, which is
+  exactly what the P2 error-recovery scorer needs.
 
 ### 3. Tool surface (6 locked names: parse_resume, parse_jd, get_rubric, assess_dimension, submit_assessment, flag_for_review) — signatures PENDING
 
