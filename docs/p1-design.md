@@ -125,7 +125,45 @@ Sub-decisions, ratified:
   invariant content (docs + extraction) in a shared prefix and per-dimension content in the
   suffix, so provider prefix caching amortizes the raw-doc cost across the four assess calls.
 
-### 4. Trajectory event types + invariants — PENDING
+### 4. Trajectory event types + invariants — DECIDED (owner, 2026-07-17: schema v0.2)
+
+Base: the v0.1 draft (closed PR #6), revised under decisions 1–3 and owner review. Full spec
+lands in `docs/trajectory-schema.md` (Stage C / PR-2); binding deltas and additions:
+
+**Seven event types** (unchanged): `run_start / llm_call / tool_call / dimension_assessed /
+gate_event / error / run_end`.
+
+**Join keys explicit in `run_start`** (owner check): `pair{split,row} · provider · model ·
+rubric_version · config_digest · agent_mode · schema_version` — the scorer consumption map
+starts here: pass^k joins on (pair, provider, model, config_digest); agreement joins pair →
+`labels-v1.jsonl`; the cross-model table groups by (provider, model).
+
+**Revisions vs v0.1:**
+1. `dimension_assessed.evidence_spans` = tool-side-resolved raw offsets (same convention as
+   reference labels); adds `degraded: bool`, nullable `score` (degraded only), and
+   `resolution_failures: int` (per-dimension citation-quality signal; P2 faithfulness
+   precursor).
+2. `run_end.aggregate` = `{weighted_mean: number|null, veto, partial: bool, missing: [dim]}`;
+   `veto` documented as the hard_requirements soft-veto state (unmet/indeterminate/met — the
+   rubric's cap+gate wiring, not a fifth score).
+3. Invariant 2 (dimension completeness) clarified: degraded COUNTS as assessed (event
+   present, score null) — completeness scoring must not misreport degradation as absence.
+4. Invariant 3 (evidence) forks: non-degraded requires ≥1 well-formed span; degraded may
+   carry 0 (failed resolution is why it degraded).
+5. Invariant 4 (gate consistency) extended: any degraded dimension ⇒ a `gate_event` with
+   trigger `insufficient_evidence` (decision 3-ii, now an assertable contract).
+6. Invariant 6 (retry visibility) shares ONE definition with the strict state reducer's
+   legitimate-rewrite carve-out: legal rewrite ⇔ same dimension has a prior
+   `llm_call.status != ok`. Single definition, two enforcement points (state layer admits,
+   trajectory layer asserts); Stage E implements by reference to the schema text.
+7. **NEW invariant 7 — data hygiene:** no event field, on any status branch, carries dataset
+   text; `error.detail` explicitly named as the high-risk path (failed quotes must not be
+   logged "for debugging" — counts yes, text no). Pinned by test: no event string value
+   contains a ≥20-char verbatim substring of either document (runs where raw data exists;
+   CI-skipped like the anchor in-bounds test).
+
+Invariants 1 (envelope monotonic) and 5 (totals reconcile) unchanged; `args_summary`
+conventions are those of the decision-3 signature table.
 
 ### 5. Gate triggers + initial thresholds — PENDING
 Design input on record: finding 004 — gate ground truth is 29/30 positive on the reference
