@@ -165,9 +165,38 @@ starts here: pass^k joins on (pair, provider, model, config_digest); agreement j
 Invariants 1 (envelope monotonic) and 5 (totals reconcile) unchanged; `args_summary`
 conventions are those of the decision-3 signature table.
 
-### 5. Gate triggers + initial thresholds — PENDING
-Design input on record: finding 004 — gate ground truth is 29/30 positive on the reference
-set (veto fires 24/30); thresholds must be chosen knowing this base rate.
+### 5. Gate triggers + initial thresholds — DECIDED (owner, 2026-07-17)
+
+Design input: finding 004 (gate ground truth 29/30 positive; veto 24/30).
+
+- **5a — boundary band [2.5, 3.5)**: `advance ≥ 3.5` (veto met, not partial) ·
+  `do_not_advance < 2.5` · in-band → `boundary` trigger. **One ruler, three places:** the
+  same operationalization defines the gate's boundary trigger, label_stats' divergence, and
+  P2 gate-integrity's revision starting point — when P2 revises, ONE definition moves and
+  all three stay aligned (no eval-says-good/gate-says-bad drift). Empirical calibration: 8
+  of the 30 reference pairs fall in-band; the owner hand-flagged 7 as boundary — the ruler
+  already tracks human judgment. Defense chain (Q7): rubric passing floor → half-band
+  tolerance → alignment check against 30 labels → P2 numeric revision loop.
+- **5b — anomaly is a CLOSED deterministic list (exactly three, exhaustive):**
+  A1 document empty · A2 document < 200 chars (post whitespace-strip, per document) ·
+  A3 document load/decode failure (encoding errors are A3 — a deterministic exception, not
+  a judgment). **Nothing else triggers anomaly in P1** — garble heuristics, all-caps,
+  repetition, injection markers are explicitly out (P3's threat model; adding them here
+  as "obviously deterministic" is how the layering leaks). The agent's anomaly triggers are
+  by construction more conservative than the owner's 10/30 hand labels; the gap is P2
+  stratified-analysis material, not a defect to erase.
+- **5c — veto cap_value = 2.4** (one tick below the boundary floor: a veto-unmet pair can
+  never present as boundary-or-better). Trajectory records BOTH `aggregate.weighted_mean`
+  (raw) and `aggregate.capped` (equal when no cap): the machine's recommendation reads
+  capped; the human at the gate sees the uncapped score — "the cap constrains the machine's
+  conclusion, not the human's information" (a vetoed pair showing raw 4.1 is key input for
+  judging whether the veto itself misfired). Schema addition rides PR-2. Consumption-map
+  note (owner leaning, to be confirmed in the P2 scorer design doc, not defaulted):
+  gate-integrity asserts on **capped**; agreement-vs-labels compares on **raw** (the
+  owner/mentor labels had no cap mechanism — like with like).
+- **No threshold gymnastics for negatives (finding 004 discipline):** the high trigger rate
+  is a true property of this corpus; the negative class comes from P2's controlled variants,
+  never from loosening thresholds to make the rate look nice.
 
 ### 6. Checkpointer + two-mode wiring (D15) — PENDING
 
