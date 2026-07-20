@@ -110,6 +110,7 @@ def assess_dimension_stub(
     rubric_slice: dict[str, Any],
     resume_text: str,
     jd_text: str,
+    prior: dict[str, Assessment] | None = None,
 ) -> tuple[Assessment, list[CallMeta]]:
     """Stage-E stand-in for the LLM-backed assess_dimension. Deterministic:
     fixed score per dimension, evidence span = the first 30 chars of the

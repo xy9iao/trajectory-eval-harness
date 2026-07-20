@@ -143,11 +143,18 @@ def call_with_validation(
     completer: Completer,
     cfg: ProviderConfig,
     max_attempts: int = 2,
+    post_validate: Callable[[M], str | None] | None = None,
 ) -> ValidatedCall[M]:
     """Forced function call -> validate -> one corrective retry -> degrade.
 
     Mutates `messages` by appending corrective turns so the retry (and any
     later node) sees the failure history — degradation stays visible (D3-②).
+
+    `post_validate` extends schema validation with semantic checks that need
+    context the schema can't carry (quote resolution, dimension-specific
+    score constraints); a non-None reason counts as malformed_output and
+    joins the same retry/degrade chain (decision 3: an unresolvable quote IS
+    a validation failure). The reason must be dataset-text-free.
     """
     attempts: list[CallMeta] = []
     for attempt in range(1, max_attempts + 1):
@@ -170,6 +177,13 @@ def call_with_validation(
                 except ValidationError as ve:
                     status = "malformed_output"
                     reason = f"invalid fields: {_invalid_fields(ve)}"
+                else:
+                    if post_validate is not None:
+                        post_reason = post_validate(parsed)
+                        if post_reason is not None:
+                            status = "malformed_output"
+                            reason = post_reason
+                            parsed = None
         except Exception:
             status = "error"
             reason = "provider call failed"

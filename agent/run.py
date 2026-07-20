@@ -10,14 +10,39 @@ Usage:
 """
 
 import argparse
+import functools
+import os
 import sys
 from pathlib import Path
 
-from agent.graph import ADVANCE_THRESHOLD, BOUNDARY_FLOOR, VETO_CAP, build_graph, config_digest
+from agent.client import make_completer, provider_config
+from agent.graph import (
+    ADVANCE_THRESHOLD,
+    BOUNDARY_FLOOR,
+    VETO_CAP,
+    Assessor,
+    Extractor,
+    build_graph,
+    config_digest,
+)
+from agent.llm_tools import assess_dimension_llm, extract_requirements
 from agent.state import AgentState
 from agent.tools import CorpusSource, DocumentSource, SyntheticSource
 from agent.trajectory_writer import TrajectoryWriter
 from agent.types import PairRef
+
+
+def load_dotenv(path: Path) -> None:
+    """Minimal .env loader (stdlib-only; values never logged — D14)."""
+    if not path.exists():
+        return
+    for line in path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        os.environ.setdefault(key.strip(), value.strip())
+
 
 RUNS_DIR = Path(__file__).resolve().parents[1] / "runs"
 RUBRIC_VERSION = "1.1"
@@ -58,6 +83,8 @@ def run_pair(
     runs_dir: Path,
     provider: str = "stub",
     model: str = "stub",
+    extractor: Extractor | None = None,
+    assessor: Assessor | None = None,
 ) -> tuple[AgentState, TrajectoryWriter]:
     writer = TrajectoryWriter(runs_dir)
     writer.emit(
@@ -78,7 +105,7 @@ def run_pair(
             }
         ),
     )
-    app = build_graph(source, writer)
+    app = build_graph(source, writer, extractor=extractor, assessor=assessor)
     final = app.invoke(initial_state(pair, mode))
     return final, writer  # type: ignore[return-value]
 
@@ -89,6 +116,11 @@ def main() -> int:
     group.add_argument("--pair", metavar="SPLIT:ROW", help="e.g. train:596 (needs local data)")
     group.add_argument("--synthetic", action="store_true")
     ap.add_argument("--mode", choices=["eval"], default="eval")  # interactive lands Stage G
+    ap.add_argument(
+        "--live",
+        action="store_true",
+        help="use the real LLM via .env provider config (Stage F); default is the stub",
+    )
     args = ap.parse_args()
 
     source: DocumentSource
@@ -102,7 +134,20 @@ def main() -> int:
         source = CorpusSource()
         pair = PairRef.model_validate({"split": split, "row": int(row)})
 
-    final, writer = run_pair(source, pair, args.mode, RUNS_DIR)
+    provider = model = "stub"
+    extractor: Extractor | None = None
+    assessor: Assessor | None = None
+    if args.live:
+        load_dotenv(Path(__file__).resolve().parents[1] / ".env")
+        cfg = provider_config()
+        completer = make_completer(cfg)
+        provider, model = cfg.provider, cfg.model
+        extractor = functools.partial(extract_requirements, cfg, completer)
+        assessor = functools.partial(assess_dimension_llm, cfg, completer)
+
+    final, writer = run_pair(
+        source, pair, args.mode, RUNS_DIR, provider, model, extractor, assessor
+    )
     aggregate = final["aggregate"]
     print(f"run_id: {writer.run_id}")
     print(f"trajectory: {writer.path.relative_to(Path.cwd())}")
