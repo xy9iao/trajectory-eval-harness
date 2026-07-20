@@ -232,6 +232,13 @@ Design input: finding 004 (gate ground truth 29/30 positive; veto 24/30).
 - **6d — eval mode:** never interrupts; `gate_event{action: auto_resume, resolution: auto}`;
   batch runs proceed with the machine conclusion (flagged) and full trajectories.
 
+### P2 scorer candidates discovered during P1 (running list)
+
+- **Ledger consistency (internal-coherence class — finding 008):** hard_requirements
+  determinations must agree with the prior dimensions' determinations they claim to reuse;
+  intra-run contradiction is detectable with zero annotation. Donated by the first live
+  run's gate miss (r20260720T094231-3ae875), not designed a priori.
+
 ### 7. Provider compatibility + degradation policy (D3) — DECIDED (owner, 2026-07-17)
 
 - **7a — single module `agent/client.py`** on the openai SDK; base_url/key/model entirely

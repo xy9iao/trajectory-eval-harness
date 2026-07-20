@@ -179,6 +179,21 @@ def _strings_in(value: Any) -> list[str]:
     return []
 
 
+def shares_doc_substring(
+    value: str, documents: dict[str, str], min_len: int = HYGIENE_MIN_SUBSTRING
+) -> str | None:
+    """Name of the first document sharing a >= min_len verbatim substring with
+    value, else None. Single source for the invariant-7 check — used by the
+    validator below AND by the agent's post_validate (finding 007: model-
+    authored labels must be paraphrases, never document text)."""
+    if len(value) >= min_len:
+        for doc_name, doc in documents.items():
+            for i in range(len(value) - min_len + 1):
+                if value[i : i + min_len] in doc:
+                    return doc_name
+    return None
+
+
 def validate_data_hygiene(
     events: list[Event],
     documents: dict[str, str],
@@ -190,17 +205,10 @@ def validate_data_hygiene(
     problems: list[str] = []
     for e in events:
         for s in _strings_in(e):
-            if len(s) < min_len:
-                continue
-            for doc_name, doc in documents.items():
-                for i in range(len(s) - min_len + 1):
-                    if s[i : i + min_len] in doc:
-                        problems.append(
-                            f"seq {e.get('seq')} ({e.get('type')}): event text shares a"
-                            f" {min_len}-char substring with {doc_name}"
-                        )
-                        break
-                else:
-                    continue
-                break
+            doc_name = shares_doc_substring(s, documents, min_len)
+            if doc_name is not None:
+                problems.append(
+                    f"seq {e.get('seq')} ({e.get('type')}): event text shares a"
+                    f" {min_len}-char substring with {doc_name}"
+                )
     return problems
