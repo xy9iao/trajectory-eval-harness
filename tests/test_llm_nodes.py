@@ -231,3 +231,45 @@ def test_e2e_degraded_dimension_full_3ii_chain(tmp_path: Any) -> None:
     gate = final["gate"]
     assert gate is not None and "insufficient_evidence" in gate.triggers
     assert final["recommendation"] == "flagged"
+
+
+# --- the symmetric carrier contract (finding 007) ---
+
+
+def test_verbatim_requirement_label_rejected_then_ok() -> None:
+    verbatim = json.dumps(
+        {
+            "dimension": "skills_coverage",
+            "score": 4,
+            "evidence_quotes": [{"doc": "resume", "quote": "Spark and Kafka pipelines"}],
+            "determinations": [
+                # copies >=20 chars of the JD verbatim -> must be rejected
+                {"requirement": "four or more years of relevant experience", "value": "covered"}
+            ],
+            "notes": "",
+        }
+    )
+    responses: list[str | None] = [
+        verbatim,
+        _submit("skills_coverage", 4, "Spark and Kafka pipelines"),
+    ]
+    assessment, metas = assess_dimension_llm(
+        CFG,
+        _completer(responses),
+        "skills_coverage",
+        {},
+        get_rubric("skills_coverage"),
+        RESUME_DOC,
+        JD_DOC,
+        {},
+    )
+    assert [m.status for m in metas] == ["malformed_output", "ok"]
+    assert not assessment.degraded and assessment.score == 4
+
+
+def test_wire_schema_caps_requirement_length() -> None:
+    from agent.types import submit_assessment_tool
+
+    schema = submit_assessment_tool()["function"]["parameters"]
+    requirement = schema["$defs"]["Determination"]["properties"]["requirement"]
+    assert requirement["maxLength"] == 80

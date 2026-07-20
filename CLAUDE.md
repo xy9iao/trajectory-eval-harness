@@ -50,6 +50,7 @@ The owner has no prior research training and no day-to-day human supervisor. **R
 - Public resume–JD datasets: committable **only if the license permits use and redistribution**; otherwise commit a download script + checksum, never the data.
 - **Resumes of real NUS-ISS students/applicants or anyone personally known to the owner: never committed, never sent to an API without explicit consent.**
 - API keys live in `.env` (gitignored); `.env.example` is committed; keys never in code or logs. CI runs a secrets scan. The owner has personally experienced the key-leak failure mode — treat this as non-negotiable.
+- **Data-boundary holes are fixed the moment they are found — never queued.** A leak path (dataset text escaping into logs, trajectories, or commits) outranks whatever is in progress: patching the source now is 10× cheaper than laundering history later. (Owner rule, 2026-07-20, from finding 007.)
 - Evidence citation is mandatory in agent output: every dimension score cites the resume/JD span it rests on; uncited claims are flagged.
 
 ## Gitignored files (never commit)

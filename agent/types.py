@@ -37,7 +37,10 @@ class PairRef(StrictModel):
 
 
 class Determination(StrictModel):
-    requirement: str = Field(min_length=1)
+    # requirement is a short PARAPHRASE label, never document text (finding
+    # 007): max_length rides the wire schema, and the agent's post_validate
+    # rejects labels sharing a >=20-char substring with either document.
+    requirement: str = Field(min_length=1, max_length=80)
     value: Literal["covered", "partial", "absent"]
 
 

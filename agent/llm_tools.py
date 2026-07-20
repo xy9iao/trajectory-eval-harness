@@ -26,6 +26,7 @@ from typing import Any
 import yaml
 
 from agent.client import CallMeta, Completer, ProviderConfig, call_with_validation
+from eval.trajectory import shares_doc_substring
 from agent.types import (
     Assessment,
     EvidenceQuote,
@@ -132,7 +133,9 @@ def assess_dimension_llm(
     if dimension == "skills_coverage":
         suffix.append(
             "Include determinations: one covered/partial/absent judgment per"
-            " must-have skill requirement."
+            " must-have skill requirement. Requirement labels must be brief"
+            " paraphrases (max 80 chars) — never copy document sentences"
+            " verbatim; only evidence_quotes may carry document text."
         )
     if dimension == "hard_requirements":
         prior_summary = {
@@ -148,7 +151,11 @@ def assess_dimension_llm(
             "PRIOR DIMENSION RESULTS (reuse these determinations for the ledger):\n"
             + json.dumps(prior_summary, ensure_ascii=False)
         )
-        suffix.append("The hard_requirements score MUST be exactly 0, 3, or 5.")
+        suffix.append(
+            "The hard_requirements score MUST be exactly 0, 3, or 5."
+            " Requirement labels must be brief paraphrases (max 80 chars) —"
+            " never copy document sentences verbatim."
+        )
     messages = shared_prefix(resume_text, jd_text, extraction) + [
         {"role": "user", "content": "\n\n".join(suffix)}
     ]
@@ -160,6 +167,15 @@ def assess_dimension_llm(
             return f"dimension must be {dimension!r}"
         if dimension == "hard_requirements" and parsed.score not in HARD_SCORES:
             return "hard_requirements score must be exactly 0, 3, or 5"
+        # The symmetric carrier contract (finding 007): evidence_quotes MUST be
+        # document substrings; every other model-authored string must NOT be.
+        docs = {"resume": resume_text, "jd": jd_text}
+        for det in parsed.determinations or []:
+            if shares_doc_substring(det.requirement, docs) is not None:
+                return (
+                    "determination requirement labels must be short paraphrases"
+                    " — do not copy document text verbatim"
+                )
         spans, failures = resolve_quotes(parsed.evidence_quotes, resume_text, jd_text)
         resolution["spans"] = spans
         resolution["total_failures"] += failures
