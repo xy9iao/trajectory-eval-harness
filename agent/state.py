@@ -30,7 +30,13 @@ def merge_assessments(
     lives only at the trajectory layer (invariant 6). See p1-design.md
     decision 2b supersede.
     """
-    raise NotImplementedError("owner writes this — decision 2b (Stage E)")
+    merged = dict(left)
+
+    for key, value in right.items():
+        if key in merged:
+            raise ValueError(f"duplicate assessment write for {key}")
+        merged[key] = value
+    return merged
 
 
 class AgentState(TypedDict):
