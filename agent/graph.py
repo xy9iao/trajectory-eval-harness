@@ -12,12 +12,15 @@ trajectory events are emitted as side effects through the writer
 import hashlib
 import json
 import time
+from collections.abc import Callable
 from typing import Any
 
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 
+from agent.client import CallMeta
 from agent.state import AgentState
+from agent.types import Assessment
 from agent.tools import (
     DocumentSource,
     assess_dimension_stub,
@@ -51,8 +54,19 @@ def scoring_weights() -> dict[str, float]:
     return {d["id"]: float(d["weight"]) for d in rubric.scoring_dimensions}
 
 
+# Stage F injection seams: extract/assess implementations (stub or client-backed).
+Extractor = Callable[[str, str], tuple[dict[str, Any], list[CallMeta]]]
+Assessor = Callable[
+    [str, dict[str, Any], dict[str, Any], str, str, dict[str, Assessment]],
+    tuple[Assessment, list[CallMeta]],
+]
+
+
 def build_graph(
-    source: DocumentSource, writer: TrajectoryWriter
+    source: DocumentSource,
+    writer: TrajectoryWriter,
+    extractor: Extractor | None = None,
+    assessor: Assessor | None = None,
 ) -> CompiledStateGraph[AgentState, Any, AgentState, AgentState]:
     def _timed_tool(tool: str, args_summary: dict[str, Any], fn: Any) -> Any:
         started = time.perf_counter()
@@ -83,6 +97,22 @@ def build_graph(
         }
 
     def extract(state: AgentState) -> dict[str, Any]:
+        if extractor is not None:
+            extraction, metas = extractor(state["resume_text"], state["jd_text"])
+            for meta in metas:
+                writer.emit(
+                    "llm_call",
+                    node="extract",
+                    purpose="extraction",
+                    provider=meta.provider,
+                    model=meta.model,
+                    tokens_in=meta.tokens_in,
+                    tokens_out=meta.tokens_out,
+                    latency_ms=meta.latency_ms,
+                    attempt=meta.attempt,
+                    status=meta.status,
+                )
+            return {"extraction": extraction, "dimensions_remaining": list(ASSESS_ORDER)}
         # Stage-E stub: no LLM; a fake ok llm_call keeps totals meaningful.
         writer.emit(
             "llm_call",
@@ -104,15 +134,17 @@ def build_graph(
         rubric_slice = _timed_tool(
             "get_rubric", {"dimension": dimension}, lambda: get_rubric(dimension)
         )
+        assess_fn: Assessor = assessor if assessor is not None else assess_dimension_stub
         assessment, metas = _timed_tool(
             "assess_dimension",
-            {"dimension": dimension, "attempt": 1},
-            lambda: assess_dimension_stub(
+            {"dimension": dimension},
+            lambda: assess_fn(
                 dimension,
                 state["extraction"] or {},
                 rubric_slice,
                 state["resume_text"],
                 state["jd_text"],
+                state["assessments"],
             ),
         )
         for meta in metas:
@@ -185,7 +217,9 @@ def build_graph(
             and BOUNDARY_FLOOR <= aggregate_.capped < ADVANCE_THRESHOLD
         ):
             triggers.append("boundary")
-        if aggregate_.partial:
+        if aggregate_.partial or any(a.degraded for a in state["assessments"].values()):
+            # partial covers degraded scoring dims; the any() covers a degraded
+            # hard_requirements (weight 0 — never in `missing`, still 3-ii)
             triggers.append("insufficient_evidence")
         if state["anomalies"]:
             triggers.append("anomaly")

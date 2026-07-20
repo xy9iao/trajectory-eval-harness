@@ -122,6 +122,35 @@ def veto_from_score(score: int) -> VetoState:
     return {0: "unmet", 3: "indeterminate", 5: "met"}[score]  # type: ignore[return-value]
 
 
+class RequirementItem(StrictModel):
+    tag: Literal["skills", "years", "degree", "other"]
+    text: str = Field(min_length=1)
+
+
+class ExtractRequirements(StrictModel):
+    """Extraction wire contract — the extract node's internal output format
+    (same function-calling mechanism as submit_assessment, but NOT one of the
+    six orchestration tools: decision 3-i, different contract tier)."""
+
+    must_items: list[RequirementItem]
+    derived: bool = False  # true when the v1.1 derived-musts rule was applied
+
+
+def extract_requirements_tool() -> dict[str, Any]:
+    return {
+        "type": "function",
+        "function": {
+            "name": "extract_requirements",
+            "description": (
+                "Extract the JD's must/required items. If the JD states no"
+                " must-have skills, derive skill requirements from the duties"
+                " section and set derived=true (rubric v1.1)."
+            ),
+            "parameters": ExtractRequirements.model_json_schema(),
+        },
+    }
+
+
 def submit_assessment_tool() -> dict[str, Any]:
     """The function-calling tool definition, generated from SubmitAssessment —
     single source for wire contract and validator."""
