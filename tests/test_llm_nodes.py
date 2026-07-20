@@ -45,9 +45,18 @@ def _submit(dimension: str, score: int, quote: str, doc: str = "resume") -> str:
         "notes": "",
     }
     if dimension == "skills_coverage":
-        payload["determinations"] = [{"requirement": "Spark and Kafka", "value": "covered"}]
+        payload["determinations"] = [{"requirement": "R1", "value": "covered"}]
     return json.dumps(payload)
 
+
+EXTRACTION_STATE: dict[str, Any] = {
+    "must_items": [
+        {"id": "R1", "tag": "skills", "text": "Spark and Kafka in production"},
+        {"id": "R2", "tag": "years", "text": "four or more years relevant"},
+    ],
+    "derived": False,
+    "extraction_degraded": False,
+}
 
 EXTRACTION_OK = json.dumps(
     {
@@ -86,6 +95,7 @@ def test_extract_requirements_ok() -> None:
     extraction, metas = extract_requirements(CFG, _completer([EXTRACTION_OK]), RESUME_DOC, JD_DOC)
     assert extraction["extraction_degraded"] is False
     assert [i["tag"] for i in extraction["must_items"]] == ["skills", "years"]
+    assert [i["id"] for i in extraction["must_items"]] == ["R1", "R2"]  # tool-side ids (v2)
     assert [m.status for m in metas] == ["ok"]
 
 
@@ -101,7 +111,7 @@ def test_unresolvable_quote_retries_then_ok() -> None:
         CFG,
         _completer(responses),
         "skills_coverage",
-        {},
+        EXTRACTION_STATE,
         get_rubric("skills_coverage"),
         RESUME_DOC,
         JD_DOC,
@@ -121,7 +131,7 @@ def test_hard_requirements_rejects_non_ledger_score() -> None:
         CFG,
         _completer(responses),
         "hard_requirements",
-        {},
+        EXTRACTION_STATE,
         get_rubric("hard_requirements"),
         RESUME_DOC,
         JD_DOC,
@@ -137,7 +147,7 @@ def test_double_failure_degrades_with_indeterminate_veto_for_hard() -> None:
         CFG,
         _completer([bad, bad]),
         "hard_requirements",
-        {},
+        EXTRACTION_STATE,
         get_rubric("hard_requirements"),
         RESUME_DOC,
         JD_DOC,
@@ -257,7 +267,7 @@ def test_verbatim_requirement_label_rejected_then_ok() -> None:
         CFG,
         _completer(responses),
         "skills_coverage",
-        {},
+        EXTRACTION_STATE,
         get_rubric("skills_coverage"),
         RESUME_DOC,
         JD_DOC,
