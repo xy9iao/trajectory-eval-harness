@@ -43,7 +43,9 @@ SYSTEM = (
     "You are a resume-screening assessor. Judge ONLY from the resume and job"
     " description provided. Every claim must be supported by verbatim quotes"
     " from the documents — quotes are checked mechanically against the raw"
-    " text, and unverifiable quotes invalidate your response."
+    " text, and unverifiable quotes invalidate your response. Copy quotes as"
+    " CONTIGUOUS text exactly as written (same casing, punctuation, spacing,"
+    " no ellipses); prefer short quotes of 5-15 words."
 )
 
 HARD_SCORES = (0, 3, 5)
@@ -143,6 +145,8 @@ def assess_dimension_llm(
             ' that item\'s id (e.g. "R1") — ids ONLY, never requirement text.'
             " If there are no extracted requirements, omit determinations."
         )
+    if dimension not in ("skills_coverage", "hard_requirements"):
+        suffix.append("Do not include determinations for this dimension.")
     if dimension == "hard_requirements":
         prior_summary = {
             d: {
@@ -161,6 +165,9 @@ def assess_dimension_llm(
             "The hard_requirements score MUST be exactly 0, 3, or 5. For"
             ' determinations, "requirement" must be an item id from EXTRACTED'
             ' REQUIREMENTS (e.g. "R2") — ids ONLY, never requirement text.'
+            " Your ledger determinations MUST be consistent with PRIOR"
+            " DIMENSION RESULTS for the same item ids; if you depart from a"
+            " prior determination, state why in notes."
         )
     messages = shared_prefix(resume_text, jd_text, extraction) + [
         {"role": "user", "content": "\n\n".join(suffix)}
@@ -176,18 +183,23 @@ def assess_dimension_llm(
         # Carrier contract v2 (finding 007): determinations reference extracted
         # item ids — zero free text. The substring rule stays as a backstop
         # (evidence_quotes MUST be document substrings; nothing else may be).
-        allowed_ids = {
-            item.get("id") for item in extraction.get("must_items", []) if item.get("id")
-        }
-        docs = {"resume": resume_text, "jd": jd_text}
-        for det in parsed.determinations or []:
-            if det.requirement not in allowed_ids:
-                return (
-                    'determination "requirement" must be an item id from'
-                    ' EXTRACTED REQUIREMENTS (e.g. "R1") — ids only'
-                )
-            if shares_doc_substring(det.requirement, docs) is not None:
-                return "determination labels must not contain document text"
+        # Only skills/hard carry determinations contractually; extraneous ones
+        # on other dimensions are dropped tool-side (calibration r1, #2 —
+        # they degraded education runs for a field that isn't part of that
+        # dimension's contract).
+        if dimension in ("skills_coverage", "hard_requirements"):
+            allowed_ids = {
+                item.get("id") for item in extraction.get("must_items", []) if item.get("id")
+            }
+            docs = {"resume": resume_text, "jd": jd_text}
+            for det in parsed.determinations or []:
+                if det.requirement not in allowed_ids:
+                    return (
+                        'determination "requirement" must be an item id from'
+                        ' EXTRACTED REQUIREMENTS (e.g. "R1") — ids only'
+                    )
+                if shares_doc_substring(det.requirement, docs) is not None:
+                    return "determination labels must not contain document text"
         spans, failures = resolve_quotes(parsed.evidence_quotes, resume_text, jd_text)
         resolution["spans"] = spans
         resolution["total_failures"] += failures
@@ -221,6 +233,11 @@ def assess_dimension_llm(
             call.attempts,
         )
     parsed = call.result
+    determinations = (
+        parsed.determinations
+        if dimension in ("skills_coverage", "hard_requirements")
+        else None  # extraneous determinations dropped tool-side (calibration r1, #2)
+    )
     return (
         Assessment(
             dimension=parsed.dimension,
@@ -228,7 +245,7 @@ def assess_dimension_llm(
             degraded=False,
             evidence_spans=resolution["spans"],
             resolution_failures=resolution["total_failures"],
-            determinations=parsed.determinations,
+            determinations=determinations,
             veto_state=(
                 veto_from_score(parsed.score) if dimension == "hard_requirements" else None
             ),

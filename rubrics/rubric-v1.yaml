@@ -11,7 +11,10 @@
 # Anchor evidence_spans offsets are filled and verified with view_pair --span
 # against the pinned CSVs (2026-07-15).
 
-version: "1.1" # v1.1 (2026-07-16): derived-musts rule closes the no-skill-musts gap
+version: "1.2" # v1.2 (2026-07-21): hard_requirements "relevant experience" defined as
+               # role-matching (calibration round 1, #3 — codifies the reading the
+               # reference labels already used; no relabel needed).
+               # v1.1 (2026-07-16): derived-musts rule closes the no-skill-musts gap
                # (labeling session 1, train 596); rubric maintenance delegated to CC,
                # owner ratifies via PR merge — see decisions.md log 2026-07-16.
 status: active # owner sign-off 2026-07-15 (PR #3 closing rulings)
@@ -212,6 +215,15 @@ dimensions:
         other dimensions. Double-mention is by design: those dimensions
         score match QUALITY; this one decides whether the soft veto fires.
         It never re-scores.
+      - >
+        RELEVANT EXPERIENCE (v1.2): when a must item asks for "relevant"
+        experience, "relevant" means ROLE-MATCHING under experience_level's
+        rule — years accrue only in segments whose role/duties match the
+        JD's occupation. Generic tenure ("14 years of IT") does NOT satisfy
+        a relevant-years must for a different occupation. This codifies the
+        reading the reference labels already used (calibration round 1: the
+        596 gate miss traced to this definition living in labeling notes
+        instead of rubric text).
       - >
         "Related field"-style clauses are NOT automatically indeterminate.
         Indeterminate (band 3) is reserved for items a reasonable annotator

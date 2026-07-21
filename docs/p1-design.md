@@ -232,6 +232,33 @@ Design input: finding 004 (gate ground truth 29/30 positive; veto 24/30).
 - **6d — eval mode:** never interrupts; `gate_event{action: auto_resume, resolution: auto}`;
   batch runs proceed with the machine conclusion (flagged) and full trajectories.
 
+### Calibration round 1 (owner-ratified, 2026-07-21)
+
+Evidence base: the 30-pair dev batch (`eval/reports/batch_vs_reference.py`; before-numbers:
+ledger contradictions 8/7 pairs · education degradations 4 (3 quote-resolution, 2 extraneous
+determinations incl. one experience) · gate confusion TP27/FN2/FP1/TN0 · exact agreement
+skills 13/30 · exp 19/29 · edu 15/26 · hard 23/30 · cost 742k in / 96k out).
+
+**Ruled classification:** #1 ledger contradictions → prompt debt (consistency instruction;
+scorer shifts from bug-catcher to regression guard) · #2 education degradations → prompt debt
+(quote-precision guidance + non-skills/hard dimensions carry no determinations, prompt +
+tool-side drop) · #3 "relevant experience" → rubric debt (v1.2 scope_note: relevant =
+role-matching; codifies the reading the reference labels already used — no relabel) ·
+#4 band-0/1 boundary → **deferred entirely** (see discipline below) · #5 central tendency +
+per-dimension agreement spread → honest P2 numbers, untouched · #6 TN=0 → finding 004's
+variant plan, thresholds untouched.
+
+**Attribution discipline (owner rule): one calibration round, one attributable change per
+mechanism.** #1/#2/#3 may share a round because their metrics are independent (contradiction
+count · resolution_failures/degradations · hard-dimension divergence pattern). #4 would stack
+a second rubric change on the same dimension family as #3, making the before/after
+unattributable — it waits for the post-v1.2 rerun; if 0/1 divergence persists, v1.3 opens
+separately. The credibility of every before/after table rests on this rule.
+
+**Cost ledger (running):** dev full-batch round 1 (2026-07-20/21, deepseek-chat): 742,420 in
+/ 95,970 out. Calibration rerun and delivery-model final run append here — "what does one
+full eval round cost" gets a measured answer.
+
 ### P2 scorer candidates discovered during P1 (running list)
 
 - **Ledger consistency (internal-coherence class — finding 008):** hard_requirements
