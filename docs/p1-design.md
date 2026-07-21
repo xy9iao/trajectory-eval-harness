@@ -284,7 +284,46 @@ Two honest observations recorded for the p1 report and P2:
 #4 input for the v1.3 decision: the band-0/1 divergence cluster persists post-v1.2
 (agent-1-vs-ref-0 on ~7 pairs) — v1.3 may open as its own single-change round.
 
+**Round-2 表二 (v1.2 batch → v1.3 batch, runs 2026-07-21; both rubric-only changes):**
+
+| metric | before (v1.2) | after (v1.3) | verdict |
+|---|---|---|---|
+| 596-class hard reading | 596 hard 5vs0 | **596 hard 5vs0 persists** (survived definition AND worked negative example) | target unmoved |
+| skills 0/1 cluster (agent-1-vs-ref-0) | ~7-8 pairs | 7 pairs (+2980 worsened to 3vs0) | target unmoved |
+| gate FN | 2 | 1 (composition churned: 3590/5084 out, 970 in) | within single-run noise, not attributable |
+| ledger contradictions | 2/1 pair (4715) | 2/1 pair (3773 — churned) | round-1 gain stable at ~2 (baseline 8) |
+| hygiene / structural | 30/30 · 30/30 | 30/30 · 30/30 | third consecutive clean batch |
+
+**Round-2 verdict, recorded honestly: both v1.3 changes failed to move their targets.**
+Meta-observation across the week's five interventions: the fixes that held are MECHANISMS
+(id carrier contract, wire-schema constraints, and the process-level consistency
+instruction); the fixes that failed are PROSE REDEFINITIONS OF JUDGMENT SEMANTICS (v1.2
+"relevant" definition, v1.3 worked negative example, band-0 discriminant). Working
+hypothesis: instruction can bind FORM and PROCESS; it does not reliably re-bind SEMANTIC
+JUDGMENT on this model — drafted as finding 009. Escalation options for the owner: (a)
+round 3 as mechanism class (e.g. cross-dimension structural rule: a years-tagged item
+cannot be `covered` when experience_level found no role-matching segments — turns finding
+008's scorer logic from measurement into enforcement, with the measurement-object tension
+that implies); or (b) stop calibrating, reclassify #3/#4 as honest P2 numbers
+(model-limitation class), proceed to Stage G. CC recommendation: (b).
+**RULED (owner, 2026-07-21): (b).** Full rationale and the P2 stratified-agreement
+pre-commitment recorded in finding 009 (closed at P1 scope).
+
+**Cost ledger row 3:** v1.3 batch 560,684 in / 71,327 out. (Row-2 note: the −26% vs row 1
+is attributable to fewer retries after the #2 fixes — recorded so future-you doesn't guess.)
+
 ### P2 scorer candidates discovered during P1 (running list)
+
+- **Agreement stratified by divergence root cause (owner pre-commitment, finding 009):**
+  per-dimension agreement reported in strata — semantic-prior class (596-class relevant
+  reading; skills 0/1 cluster) separated from other divergence. Low headline numbers carry
+  their explanation; nothing gets averaged into an unexplained figure.
+- **Gate trigger-attribution correctness (596 'fired right for the wrong reason'):** beyond
+  the binary confusion matrix, check WHETHER the firing trigger matches the reference
+  reason — gate integrity one level deeper, time-box decides in P2.
+- **pass^k回头账:** skills agreement moved 13→7→9 across three single-run batches with no
+  skills-directed change — once pass^k runs, check skills' run-to-run variance; if it is
+  natively high, the movement was noise. (Flagged 2026-07-21.)
 
 - **Ledger consistency (internal-coherence class — finding 008):** hard_requirements
   determinations must agree with the prior dimensions' determinations they claim to reuse;
