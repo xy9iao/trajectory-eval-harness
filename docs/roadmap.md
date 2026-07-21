@@ -4,7 +4,7 @@ Derived from the project handoff ([handoff-trajectory-eval-harness.md](handoff-t
 
 **Phase discipline:** phases are ordered by dependency, not calendar — **no time boxes**. A phase closes when its acceptance criteria pass and its public report lands in `docs/phase-reports/`; the next phase does not begin before closure (or an explicit skip recorded in `decisions.md`). Closure follows the ritual in CLAUDE.md / handoff §9.
 
-**Current phase: P0 (open — closure gated on the mentor touchpoint) · P1 (closing via the p1 report PR).** P2 does not begin before both closures complete (overlap recorded in decisions.md, 2026-07-17).
+**P0 and P1 both closed (2026-07-21).** Current phase: **P2 (the research core) — not yet started.** Phase order was P0→P1 overlapped (decisions.md 2026-07-17); both closures now complete.
 
 ---
 
@@ -23,10 +23,10 @@ Derived from the project handoff ([handoff-trajectory-eval-harness.md](handoff-t
 **Acceptance:**
 
 - [x] Chosen dataset documented with license status (`data/README.md` — survey 2026-07-13, Route A selection recorded in decisions.md log)
-- [ ] Rubric v1 committed
-- [ ] 30 labeled pairs (including `gate_expected`) in a versioned reference file
-- [ ] Labeling protocol reproducible
-- [ ] p0 report complete with label-distribution figures and ≥1 recorded rubric revision
+- [x] Rubric v1 committed (v1.3 — authored v1.0, active v1.1, calibrated v1.2/v1.3 during P1)
+- [x] 30 labeled pairs (including `gate_expected`) in a versioned reference file (`data/reference/labels-v1.jsonl`)
+- [x] Labeling protocol reproducible (`docs/labeling-protocol.md` + seeded sampler + cockpit)
+- [x] p0 report complete — label distributions (§3), disagreement 6/30 (§4), mentor agreement 90%/gate 10/10 (§5), three rubric revisions
 
 ## P1 — Agent + HITL gate
 
