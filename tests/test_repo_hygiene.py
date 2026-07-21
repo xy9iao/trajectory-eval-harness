@@ -74,3 +74,49 @@ def test_repo_content_is_english() -> None:
             if cjk.search(line):
                 offenders.append(f"{name}:{lineno}")
     assert not offenders, "non-English content in tracked files:\n" + "\n".join(offenders)
+
+
+def test_no_ai_authorship_attribution() -> None:
+    """Sole-author project (CLAUDE.md): no AI-attribution in tracked files —
+    no co-author trailers, no 'Generated with <AI>' lines, no robot badges.
+    Commit-message trailers are not in files and stay instruction-level;
+    this guards the file-committed forms for ANY agent. The governance files
+    that QUOTE the rule are excluded so the rule text isn't self-flagged."""
+    import subprocess
+
+    governance = {
+        "CLAUDE.md",
+        "AGENTS.md",
+        "docs/collaboration-protocol.md",
+        "docs/handoff-trajectory-eval-harness.md",
+        "tests/test_repo_hygiene.py",
+    }
+    ai = r"(?:claude|codex|copilot|chatgpt|gpt-[0-9]|anthropic|openai)"
+    patterns = [
+        re.compile(r"co-authored-by:\s*.+<[^>]+@", re.IGNORECASE),  # an actual trailer
+        re.compile(rf"generated with .*{ai}", re.IGNORECASE),
+        re.compile(rf"co-?authored .*{ai}", re.IGNORECASE),
+        re.compile(r"🤖"),
+    ]
+    tracked = subprocess.run(
+        ["git", "ls-files"], capture_output=True, text=True, cwd=ROOT, check=True
+    ).stdout.split()
+    offenders = []
+    for name in tracked:
+        if name in governance or (ROOT / name).suffix not in {
+            ".py",
+            ".md",
+            ".yaml",
+            ".yml",
+            ".toml",
+            ".json",
+            ".jsonl",
+            ".txt",
+            ".cfg",
+            ".ini",
+        }:
+            continue
+        for lineno, line in enumerate((ROOT / name).read_text(encoding="utf-8").splitlines(), 1):
+            if any(p.search(line) for p in patterns):
+                offenders.append(f"{name}:{lineno}: {line.strip()[:80]}")
+    assert not offenders, "AI-authorship attribution in tracked files:\n" + "\n".join(offenders)
