@@ -112,7 +112,13 @@ def extract_requirements(
     )
     if call.result is None:
         return {"must_items": [], "derived": False, "extraction_degraded": True}, call.attempts
-    return call.result.model_dump() | {"extraction_degraded": False}, call.attempts
+    extraction = call.result.model_dump() | {"extraction_degraded": False}
+    # Tool-side ids (carrier contract v2): determinations reference these ids
+    # instead of writing requirement text — zero text in trajectory labels,
+    # and the ledger-consistency scorer gets exact identity matching for free.
+    for n, item in enumerate(extraction["must_items"], 1):
+        item["id"] = f"R{n}"
+    return extraction, call.attempts
 
 
 def assess_dimension_llm(
@@ -133,9 +139,9 @@ def assess_dimension_llm(
     if dimension == "skills_coverage":
         suffix.append(
             "Include determinations: one covered/partial/absent judgment per"
-            " must-have skill requirement. Requirement labels must be brief"
-            " paraphrases (max 80 chars) — never copy document sentences"
-            " verbatim; only evidence_quotes may carry document text."
+            ' skill item in EXTRACTED REQUIREMENTS, with "requirement" set to'
+            ' that item\'s id (e.g. "R1") — ids ONLY, never requirement text.'
+            " If there are no extracted requirements, omit determinations."
         )
     if dimension == "hard_requirements":
         prior_summary = {
@@ -152,9 +158,9 @@ def assess_dimension_llm(
             + json.dumps(prior_summary, ensure_ascii=False)
         )
         suffix.append(
-            "The hard_requirements score MUST be exactly 0, 3, or 5."
-            " Requirement labels must be brief paraphrases (max 80 chars) —"
-            " never copy document sentences verbatim."
+            "The hard_requirements score MUST be exactly 0, 3, or 5. For"
+            ' determinations, "requirement" must be an item id from EXTRACTED'
+            ' REQUIREMENTS (e.g. "R2") — ids ONLY, never requirement text.'
         )
     messages = shared_prefix(resume_text, jd_text, extraction) + [
         {"role": "user", "content": "\n\n".join(suffix)}
@@ -167,15 +173,21 @@ def assess_dimension_llm(
             return f"dimension must be {dimension!r}"
         if dimension == "hard_requirements" and parsed.score not in HARD_SCORES:
             return "hard_requirements score must be exactly 0, 3, or 5"
-        # The symmetric carrier contract (finding 007): evidence_quotes MUST be
-        # document substrings; every other model-authored string must NOT be.
+        # Carrier contract v2 (finding 007): determinations reference extracted
+        # item ids — zero free text. The substring rule stays as a backstop
+        # (evidence_quotes MUST be document substrings; nothing else may be).
+        allowed_ids = {
+            item.get("id") for item in extraction.get("must_items", []) if item.get("id")
+        }
         docs = {"resume": resume_text, "jd": jd_text}
         for det in parsed.determinations or []:
-            if shares_doc_substring(det.requirement, docs) is not None:
+            if det.requirement not in allowed_ids:
                 return (
-                    "determination requirement labels must be short paraphrases"
-                    " — do not copy document text verbatim"
+                    'determination "requirement" must be an item id from'
+                    ' EXTRACTED REQUIREMENTS (e.g. "R1") — ids only'
                 )
+            if shares_doc_substring(det.requirement, docs) is not None:
+                return "determination labels must not contain document text"
         spans, failures = resolve_quotes(parsed.evidence_quotes, resume_text, jd_text)
         resolution["spans"] = spans
         resolution["total_failures"] += failures

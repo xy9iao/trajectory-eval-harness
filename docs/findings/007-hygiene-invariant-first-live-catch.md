@@ -1,7 +1,6 @@
 # 007 — First live run tripped the data-hygiene invariant: model-authored labels quoted the JD
 
-**Status:** open — Change landed (symmetric carrier contract); Result closes with the
-post-fix rerun + clean 30-pair batch. **Date:** 2026-07-20 · **Phase:** P1 (Stage F live)
+**Status:** closed (2026-07-21). **Date:** 2026-07-20/21 · **Phase:** P1 (Stage F live)
 
 **Reproduction:** run `r20260720T094231-3ae875` (train 596, DeepSeek dev, first live run) —
 `validate_data_hygiene` reports 10 violations; structural validation (invariants 1–6) CLEAN.
@@ -34,7 +33,14 @@ schema (cap). Single-source check: `eval.trajectory.shares_doc_substring` serves
 validator and the agent. Also recorded as a standing CLAUDE.md rule: data-boundary holes are
 fixed on discovery, never queued.
 
-## Result — PENDING
+## Result
 
-Closes with: post-fix rerun of train 596 hygiene-clean, and the 30-pair batch reporting zero
-invariant-7 violations.
+Two-step change, both forced by live evidence. v1 (substring rejection) was itself falsified
+by the batch stop-loss within 3 runs: rejection without a compliant vocabulary degraded every
+determination-bearing dimension twice per run (mechanism without affordance is just
+punishment). v2 gives the affordance: extraction items carry tool-side ids (R1..Rn) and
+determination labels must BE those ids — the leak surface is deleted, not guarded, and
+finding 008's scorer upgrades to exact id matching. Before/after: v1 batch 3/3 runs degraded
+(all determination dims) → v2 full 30-pair batch **30/30 structural clean, 30/30 hygiene
+clean, zero determination-label degradations** (`eval/reports/batch_vs_reference.py`,
+runs of 2026-07-20/21). Closed.

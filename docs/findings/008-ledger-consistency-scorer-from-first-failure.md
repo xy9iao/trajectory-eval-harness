@@ -1,7 +1,8 @@
 # 008 — The first live gate miss donated a new scorer class: internal ledger consistency
 
-**Status:** open — Observation final; Verification pending the 30-pair dev batch; Change
-(scorer implementation) and Result land in P2. **Date:** 2026-07-20 · **Phase:** P1 → P2
+**Status:** open — Observation final; **Verification complete (30-pair dev batch,
+2026-07-21)**; Change (scorer implementation) and Result land in P2. **Date:** 2026-07-20/21
+· **Phase:** P1 → P2
 
 **Reproduction:** run `r20260720T094231-3ae875` (train 596, DeepSeek dev, first live run).
 
@@ -34,9 +35,17 @@ hard_requirements ledger determination that references a requirement judged by a
 dimension must agree with that dimension's determination; disagreement = flag. Implemented
 in P2 with the planted-defect discipline; this run is the first known-positive test case.
 
-## Verification / Result — PENDING
+## Verification (30-pair dev batch, 2026-07-21 — `eval/reports/batch_vs_reference.py`)
 
-Verification: the 30-pair dev batch counts ledger contradictions (plus gate misses and
-semantic divergences) for the single calibration pass (stop-loss discipline: classify →
-one decision round — prompt debt vs rubric debt vs honest P2 numbers → dev-model rerun
-before/after). Result: P2 scorer implementation + its numbers.
+The contradiction class is real and frequent: **8 contradictions across 7/30 pairs (23%)**,
+dominant pattern `skills=absent` vs `hard=covered` on the same item id — the train-596
+pathology recurring at scale (pairs 935, 3148, 3773, 4715, 5063, 5707, 5798). Carrier
+contract v2's id labels made detection exact (no fuzzy text matching). Same batch, adjacent
+evidence: gate confusion vs reference = TP 27 · FN 2 (596, 5084) · FP 1 (4715) · **TN 0** —
+the reference set's single negative pair drew a false alarm, finding 004's degeneracy
+prediction observed in vivo.
+
+## Result — PENDING
+
+P2 scorer implementation (this batch is its known-positive test set) + the post-calibration
+delta.
