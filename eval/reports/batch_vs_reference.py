@@ -49,9 +49,7 @@ def main() -> int:
 
     refs = {
         (r["pair"]["split"], r["pair"]["row"]): r
-        for r in (
-            json.loads(x) for x in LABELS.read_text(encoding="utf-8").splitlines()
-        )
+        for r in (json.loads(x) for x in LABELS.read_text(encoding="utf-8").splitlines())
     }
     runs = latest_runs_per_pair()
     print(f"# Batch vs reference — {len(runs)} runs joined to {len(refs)} labels\n")
@@ -77,9 +75,7 @@ def main() -> int:
         if validate_data_hygiene(events, docs):
             hygiene_bad += 1
 
-        assessed = {
-            e["dimension"]: e for e in events if e["type"] == "dimension_assessed"
-        }
+        assessed = {e["dimension"]: e for e in events if e["type"] == "dimension_assessed"}
         end = events[-1]
         calls = [e for e in events if e["type"] == "llm_call"]
         tokens_in += sum(c["tokens_in"] for c in calls)
@@ -118,8 +114,10 @@ def main() -> int:
                     (key[1], rid, f"skills={skills_dets[rid]} hard={det['value']}")
                 )
 
-    print(f"validation: structural clean {len(runs) - struct_bad}/{len(runs)}"
-          f" · hygiene clean {len(runs) - hygiene_bad}/{len(runs)}")
+    print(
+        f"validation: structural clean {len(runs) - struct_bad}/{len(runs)}"
+        f" · hygiene clean {len(runs) - hygiene_bad}/{len(runs)}"
+    )
     print(f"cost: {tokens_in} in / {tokens_out} out tokens\n")
     print("## Per-dimension exact agreement (non-degraded)\n")
     for dim in DIMENSIONS:
