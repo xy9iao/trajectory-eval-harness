@@ -28,7 +28,24 @@ paying it now buys the error bars for every subsequent figure.
 
 ## Decisions
 
-### 1. pass^k — k value + output structure — PENDING (cost table in the workshop; owner picks)
+### 1. pass^k — k value + output structure — DECIDED (owner, 2026-07-22: k=5)
+
+**k = 5.** Cost on the dev model is a rounding error at any k (30 pairs × k × ~560k in ≈
+$0.6/$1.0/$2.0 for k=3/5/10); the real tradeoff is statistical df vs the delivery-model token
+budget. k=3 gives df=2 (a too-crude variance estimate); k=5 gives df=4 (the credible-stability
+floor); k=10's marginal precision isn't worth the tokens, which are better kept for the
+required cross-model run. k=5 is the sweet spot.
+
+**Output structure:** a **per-dimension run-to-run variance table** — this is the settlement
+site for the "skills 13→7→9: drift or variance?" account (findings 009/010). Consumption
+rule, written into the design now: if a dimension's run-to-run variance is natively wide, its
+cross-batch score movements fall inside the noise band and the calibration-round "misses" are
+re-read as noise; if narrow, the movement is real drift. The variance table is what every other
+single-run metric's error bar is read from.
+
+**Model split:** the primary pass^k runs on **dev (DeepSeek)** to build the variance floor
+cheaply; the cross-model stage runs a **lighter pass^k on delivery (OpenAI)** only to check
+whether stability transfers across providers — not a full repeat.
 
 ### 2. Scorer architecture — PENDING
 
