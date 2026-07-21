@@ -23,7 +23,9 @@ side effects, they go after the interrupt or they must be idempotent.
 """
 
 from typing import Any
+from langgraph.types import interrupt
 
 
 def request_human_decision(payload: dict[str, Any]) -> str:
-    raise NotImplementedError("owner writes this — Stage G slot #1 (see module docstring)")
+    decision = interrupt(payload)
+    return str(decision)

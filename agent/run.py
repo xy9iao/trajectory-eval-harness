@@ -13,9 +13,15 @@ import argparse
 import functools
 import json
 import os
+import sqlite3
 import sys
+from collections.abc import Iterator
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
+
+from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
+from langgraph.checkpoint.sqlite import SqliteSaver
 
 from eval.trajectory import load_trajectory, validate_data_hygiene, validate_trajectory
 
@@ -35,6 +41,9 @@ from agent.state import AgentState
 from agent.tools import CorpusSource, DocumentSource, SyntheticSource
 from agent.trajectory_writer import TrajectoryWriter
 from agent.types import PairRef
+
+from langgraph.types import Command
+from agent.review import read_decision
 
 
 def load_dotenv(path: Path) -> None:
@@ -134,6 +143,32 @@ def run_pair(
     return final, writer  # type: ignore[return-value]
 
 
+# Checkpoint serde (Stage G): state stores pydantic models (decision 2), and
+# langgraph requires explicit allow-listing of custom types for checkpoint
+# round-trips — unregistered types will be BLOCKED in a future version, so
+# the allow-list is forward-compat, not cosmetics.
+_ALLOWED_CHECKPOINT_TYPES = [
+    ("agent.types", "PairRef"),
+    ("agent.types", "Assessment"),
+    ("agent.types", "Aggregate"),
+    ("agent.types", "GateOutcome"),
+    ("agent.types", "EvidenceSpan"),
+    ("agent.types", "Determination"),
+]
+
+
+@contextmanager
+def open_checkpointer() -> Iterator[SqliteSaver]:
+    RUNS_DIR.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(str(RUNS_DIR / "checkpoints.db"), check_same_thread=False)
+    try:
+        yield SqliteSaver(
+            conn, serde=JsonPlusSerializer(allowed_msgpack_modules=_ALLOWED_CHECKPOINT_TYPES)
+        )
+    finally:
+        conn.close()
+
+
 def _resume_run(run_id: str, live: bool) -> int:
     """OWNER-IMPLEMENTED — Stage G slot #2 (the resume path).
 
@@ -158,7 +193,41 @@ def _resume_run(run_id: str, live: bool) -> int:
     Import hint: `from langgraph.types import Command` and
     `from langgraph.checkpoint.sqlite import SqliteSaver`.
     """
-    raise NotImplementedError("owner writes this — Stage G slot #2 (see docstring)")
+    decision = read_decision(DEFAULT_REVIEW_DIR, run_id)
+    if decision is None or decision == "pending":
+        print(f"no decision yet for {run_id}: edit review/{run_id}.md ('decision:' line) first")
+        return 1
+
+    writer = TrajectoryWriter(RUNS_DIR, run_id)
+
+    extractor: Extractor | None = None
+    assessor: Assessor | None = None
+    if live:
+        load_dotenv(Path(__file__).resolve().parents[1] / ".env")
+        cfg = provider_config()
+        completer = make_completer(cfg)
+        extractor = functools.partial(extract_requirements, cfg, completer)
+        assessor = functools.partial(assess_dimension_llm, cfg, completer)
+
+    RUNS_DIR.mkdir(parents=True, exist_ok=True)
+    with open_checkpointer() as saver:
+        app = build_graph(
+            CorpusSource(),
+            writer,
+            extractor=extractor,
+            assessor=assessor,
+            checkpointer=saver,
+            review_dir=DEFAULT_REVIEW_DIR,
+        )
+        config: Any = {"configurable": {"thread_id": run_id}}
+        final = app.invoke(Command(resume=decision), config=config)
+
+    aggregate = final["aggregate"]
+    print(f"run_id: {run_id}")
+    print(f"aggregate: {aggregate.model_dump() if aggregate else None}")
+    print(f"gate: {final['gate'].triggers if final['gate'] else 'not fired'}")
+    print(f"recommendation: {final['recommendation']}")
+    return 0
 
 
 def run_batch(
@@ -258,10 +327,7 @@ def main() -> int:
 
     checkpointer_cm = None
     if args.mode == "interactive":
-        from langgraph.checkpoint.sqlite import SqliteSaver
-
-        RUNS_DIR.mkdir(parents=True, exist_ok=True)
-        checkpointer_cm = SqliteSaver.from_conn_string(str(RUNS_DIR / "checkpoints.db"))
+        checkpointer_cm = open_checkpointer()
 
     if checkpointer_cm is not None:
         with checkpointer_cm as saver:
