@@ -24,7 +24,9 @@ class TrajectoryWriter:
         self.run_id = run_id or new_run_id()
         self.path = runs_dir / self.run_id / "trajectory.jsonl"
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        self._seq = 0
+        # Resume support (Stage G): reopening an existing run continues its
+        # seq — one run, one file, monotonic across interrupt/resume.
+        self._seq = sum(1 for _ in self.path.open(encoding="utf-8")) if self.path.exists() else 0
 
     def emit(self, type_: str, **fields: Any) -> None:
         event = {

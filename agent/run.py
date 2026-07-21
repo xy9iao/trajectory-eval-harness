@@ -15,12 +15,14 @@ import json
 import os
 import sys
 from pathlib import Path
+from typing import Any
 
 from eval.trajectory import load_trajectory, validate_data_hygiene, validate_trajectory
 
 from agent.client import make_completer, provider_config
 from agent.graph import (
     ADVANCE_THRESHOLD,
+    DEFAULT_REVIEW_DIR,
     BOUNDARY_FLOOR,
     VETO_CAP,
     Assessor,
@@ -97,6 +99,8 @@ def run_pair(
     model: str = "stub",
     extractor: Extractor | None = None,
     assessor: Assessor | None = None,
+    checkpointer: Any = None,
+    review_dir: Path | None = None,
 ) -> tuple[AgentState, TrajectoryWriter]:
     writer = TrajectoryWriter(runs_dir)
     writer.emit(
@@ -117,9 +121,44 @@ def run_pair(
             }
         ),
     )
-    app = build_graph(source, writer, extractor=extractor, assessor=assessor)
-    final = app.invoke(initial_state(pair, mode))
+    app = build_graph(
+        source,
+        writer,
+        extractor=extractor,
+        assessor=assessor,
+        checkpointer=checkpointer,
+        review_dir=review_dir if review_dir is not None else DEFAULT_REVIEW_DIR,
+    )
+    config: Any = {"configurable": {"thread_id": writer.run_id}}
+    final = app.invoke(initial_state(pair, mode), config=config)
     return final, writer  # type: ignore[return-value]
+
+
+def _resume_run(run_id: str, live: bool) -> int:
+    """OWNER-IMPLEMENTED — Stage G slot #2 (the resume path).
+
+    Contract (tests exercise the library-level chain; this CLI slot is
+    verified by your own hands-on run):
+
+    1. Read the human decision: `read_decision(DEFAULT_REVIEW_DIR, run_id)`
+       — None or "pending" means the reviewer has not decided: print that
+       and return 1 without touching the graph.
+    2. Reopen the SAME run: `TrajectoryWriter(RUNS_DIR, run_id)` continues
+       the seq (one run, one file, monotonic across the interrupt).
+    3. Rebuild the graph with the SAME wiring the original run used
+       (--live flag must match; source can be CorpusSource() — parse will
+       NOT re-run, only the interrupted gate node does) and the SAME
+       checkpointer file (runs/checkpoints.db) + thread_id=run_id.
+    4. Resume: `app.invoke(Command(resume=decision), config)` — inside the
+       gate node, the interrupt() call RETURNS your decision, the
+       gate_event is emitted with the mapped resolution, and the graph
+       runs to run_end.
+    5. Print the outcome (aggregate, gate resolution, recommendation).
+
+    Import hint: `from langgraph.types import Command` and
+    `from langgraph.checkpoint.sqlite import SqliteSaver`.
+    """
+    raise NotImplementedError("owner writes this — Stage G slot #2 (see docstring)")
 
 
 def run_batch(
@@ -177,7 +216,12 @@ def main() -> int:
         action="store_true",
         help="run all pairs in data/reference/sample-v1.json (eval mode)",
     )
-    ap.add_argument("--mode", choices=["eval"], default="eval")  # interactive lands Stage G
+    group.add_argument(
+        "--resume",
+        metavar="RUN_ID",
+        help="resume an interrupted interactive run after editing its review file",
+    )
+    ap.add_argument("--mode", choices=["eval", "interactive"], default="eval")
     ap.add_argument(
         "--live",
         action="store_true",
@@ -196,8 +240,10 @@ def main() -> int:
         extractor = functools.partial(extract_requirements, cfg, completer)
         assessor = functools.partial(assess_dimension_llm, cfg, completer)
 
+    if args.resume:
+        return _resume_run(args.resume, args.live)
     if args.batch:
-        return run_batch(RUNS_DIR, provider, model, extractor, assessor)
+        return run_batch(RUNS_DIR, provider, model, extractor, assessor)  # always eval mode
 
     source: DocumentSource
     if args.synthetic:
@@ -210,9 +256,38 @@ def main() -> int:
         source = CorpusSource()
         pair = PairRef.model_validate({"split": split, "row": int(row)})
 
-    final, writer = run_pair(
-        source, pair, args.mode, RUNS_DIR, provider, model, extractor, assessor
-    )
+    checkpointer_cm = None
+    if args.mode == "interactive":
+        from langgraph.checkpoint.sqlite import SqliteSaver
+
+        RUNS_DIR.mkdir(parents=True, exist_ok=True)
+        checkpointer_cm = SqliteSaver.from_conn_string(str(RUNS_DIR / "checkpoints.db"))
+
+    if checkpointer_cm is not None:
+        with checkpointer_cm as saver:
+            final, writer = run_pair(
+                source,
+                pair,
+                args.mode,
+                RUNS_DIR,
+                provider,
+                model,
+                extractor,
+                assessor,
+                checkpointer=saver,
+            )
+    else:
+        final, writer = run_pair(
+            source, pair, args.mode, RUNS_DIR, provider, model, extractor, assessor
+        )
+    if "__interrupt__" in final:
+        print(f"run_id: {writer.run_id}")
+        print(f"INTERRUPTED — gate is waiting for you: review/{writer.run_id}.md")
+        print(
+            f"edit its 'decision:' line, then: python -m agent.run --resume {writer.run_id}"
+            + (" --live" if args.live else "")
+        )
+        return 0
     aggregate = final["aggregate"]
     print(f"run_id: {writer.run_id}")
     print(f"trajectory: {writer.path.relative_to(Path.cwd())}")
