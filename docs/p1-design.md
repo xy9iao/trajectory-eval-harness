@@ -232,6 +232,58 @@ Design input: finding 004 (gate ground truth 29/30 positive; veto 24/30).
 - **6d — eval mode:** never interrupts; `gate_event{action: auto_resume, resolution: auto}`;
   batch runs proceed with the machine conclusion (flagged) and full trajectories.
 
+### Calibration round 1 (owner-ratified, 2026-07-21)
+
+Evidence base: the 30-pair dev batch (`eval/reports/batch_vs_reference.py`; before-numbers:
+ledger contradictions 8/7 pairs · education degradations 4 (3 quote-resolution, 2 extraneous
+determinations incl. one experience) · gate confusion TP27/FN2/FP1/TN0 · exact agreement
+skills 13/30 · exp 19/29 · edu 15/26 · hard 23/30 · cost 742k in / 96k out).
+
+**Ruled classification:** #1 ledger contradictions → prompt debt (consistency instruction;
+scorer shifts from bug-catcher to regression guard) · #2 education degradations → prompt debt
+(quote-precision guidance + non-skills/hard dimensions carry no determinations, prompt +
+tool-side drop) · #3 "relevant experience" → rubric debt (v1.2 scope_note: relevant =
+role-matching; codifies the reading the reference labels already used — no relabel) ·
+#4 band-0/1 boundary → **deferred entirely** (see discipline below) · #5 central tendency +
+per-dimension agreement spread → honest P2 numbers, untouched · #6 TN=0 → finding 004's
+variant plan, thresholds untouched.
+
+**Attribution discipline (owner rule): one calibration round, one attributable change per
+mechanism.** #1/#2/#3 may share a round because their metrics are independent (contradiction
+count · resolution_failures/degradations · hard-dimension divergence pattern). #4 would stack
+a second rubric change on the same dimension family as #3, making the before/after
+unattributable — it waits for the post-v1.2 rerun; if 0/1 divergence persists, v1.3 opens
+separately. The credibility of every before/after table rests on this rule.
+
+**Cost ledger (running):** dev full-batch round 1 (2026-07-20/21, deepseek-chat): 742,420 in
+/ 95,970 out · calibration rerun round 2 (2026-07-21): 549,120 in / 67,989 out (cheaper —
+fewer retries). Delivery-model final run appends here — "what does one full eval round cost"
+gets a measured answer.
+
+**Round-2 before/after (per-metric attribution; `batch_vs_reference.py`, runs 2026-07-21):**
+
+| metric (owner #) | before | after | verdict |
+|---|---|---|---|
+| #1 ledger contradictions | 8 across 7 pairs | **2 across 1 pair** (4715) | prompt fix held (−75%) |
+| #2 degradations | 5 (edu 4, exp 1) | **1** (hard, 1089) | held; education 4 → 0 |
+| #2 resolution_failures | edu 22 · global 178 | edu 12 · global 107 | held |
+| #3 hard divergence (596-class) | 596 hard 5vs0 etc. | **596 hard 5vs0 persists**; agreement 23/30 → 23/29 | **v1.2 text did NOT move the target — recorded honestly** |
+| gate confusion | TP27 FN2 FP1 TN0 | TP27 FN2 FP1 TN0 (miss composition changed: 596→3590) | unchanged |
+
+Two honest observations recorded for the p1 report and P2:
+1. **Consistency ≠ correctness.** The #1 fix made hard agree with skills — including agreeing
+   on the WRONG answer: 596 is no longer a ledger contradiction because both dimensions now
+   read the years item as covered, against the reference. Internal-coherence scoring
+   (finding 008) measures coherence only; correctness stays with the agreement scorers —
+   the two must never be conflated.
+2. **Untargeted movement:** skills agreement 13/30 → 7/30 with no skills-directed change in
+   the round — single-run rounds cannot distinguish drift from variance; this is the
+   standing argument for P2's pass^k repetition. Education agreement 15/26 → 22/30 (partly
+   the un-degrading effect of #2).
+
+#4 input for the v1.3 decision: the band-0/1 divergence cluster persists post-v1.2
+(agent-1-vs-ref-0 on ~7 pairs) — v1.3 may open as its own single-change round.
+
 ### P2 scorer candidates discovered during P1 (running list)
 
 - **Ledger consistency (internal-coherence class — finding 008):** hard_requirements

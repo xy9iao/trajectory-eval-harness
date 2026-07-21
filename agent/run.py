@@ -48,7 +48,16 @@ def load_dotenv(path: Path) -> None:
 
 
 RUNS_DIR = Path(__file__).resolve().parents[1] / "runs"
-RUBRIC_VERSION = "1.1"
+
+
+def _rubric_version() -> str:
+    from agent.tools import RUBRIC_PATH
+    from eval.rubric_loader import load_rubric
+
+    return load_rubric(RUBRIC_PATH).version
+
+
+RUBRIC_VERSION = _rubric_version()  # single source: the rubric file itself
 
 SYNTHETIC_RESUME = (
     "Synthetic resume for the skeleton runner. Seven years of data platform work: "

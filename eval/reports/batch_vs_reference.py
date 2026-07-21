@@ -59,6 +59,7 @@ def main() -> int:
     dim_total: Counter[str] = Counter()
     confusion: Counter[tuple[bool, bool]] = Counter()  # (expected, fired)
     degraded_pairs: list[Any] = []
+    res_failures: Counter[str] = Counter()
     ledger_contradictions: list[Any] = []
     gate_misses: list[Any] = []
     semantic_divergent: list[Any] = []
@@ -84,6 +85,7 @@ def main() -> int:
         mismatched_dims = []
         for dim in DIMENSIONS:
             agent = assessed.get(dim, {})
+            res_failures[dim] += agent.get("resolution_failures", 0)
             if agent.get("degraded"):
                 degraded_pairs.append((key[1], dim))
                 continue
@@ -122,7 +124,8 @@ def main() -> int:
     print("## Per-dimension exact agreement (non-degraded)\n")
     for dim in DIMENSIONS:
         print(f"- {dim}: {dim_match[dim]}/{dim_total[dim]}")
-    print(f"- degraded (excluded): {degraded_pairs or 'none'}\n")
+    print(f"- degraded (excluded): {degraded_pairs or 'none'}")
+    print(f"- resolution_failures by dimension: {dict(res_failures) or 'none'}\n")
     print("## Gate confusion (reference gate_expected vs agent gate_fired)\n")
     print(f"- expected+fired (TP): {confusion[(True, True)]}")
     print(f"- expected+silent (FN — miss): {confusion[(True, False)]}")
