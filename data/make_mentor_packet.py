@@ -21,7 +21,7 @@ OUT_DIR = ROOT / "review" / "mentor-packet"
 SAMPLE = ROOT / "data" / "reference" / "sample-v1.json"
 
 FORM = """
-## Scoring form (fill per rubric v1.1 — rubrics/rubric-v1.yaml)
+## Scoring form (fill per rubric v{rubric_version} — rubrics/rubric-v1.yaml)
 
 | dimension | score (0-5) | evidence (quote the phrase) | notes |
 |---|---|---|---|
@@ -53,6 +53,12 @@ Files: one markdown file per pair, each ending with a scoring form.
 
 
 def main() -> int:
+    import sys as _sys
+
+    _sys.path.insert(0, str(ROOT))
+    from eval.rubric_loader import load_rubric
+
+    rubric_version = load_rubric(ROOT / "rubrics" / "rubric-v1.yaml").version
     sample = json.loads(SAMPLE.read_text(encoding="utf-8"))
     mentor_pairs = [p for p in sample["pairs"] if p["mentor"]]
     OUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -60,6 +66,7 @@ def main() -> int:
     for n, p in enumerate(mentor_pairs, 1):
         row = load_row(p["split"], p["row"])
         jd, resume = row[DOC_COLUMNS["jd"]], row[DOC_COLUMNS["resume"]]
+        form = FORM.format(rubric_version=rubric_version)
         body = "\n".join(
             [
                 f"# Pair {n} of {len(mentor_pairs)} — {p['split']} row {p['row']}",
@@ -75,7 +82,7 @@ def main() -> int:
                 resume,
                 "",
                 "---",
-                FORM,
+                form,
             ]
         )
         (OUT_DIR / f"pair-{n:02d}-{p['split']}-{p['row']}.md").write_text(body, encoding="utf-8")

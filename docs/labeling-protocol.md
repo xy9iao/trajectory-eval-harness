@@ -194,7 +194,7 @@ settles it):
   `other`; a bundle ("Docker, Kubernetes, Microservices") is ONE row. Preferred/nice-to-have
   items are noted but never move any band (stance A);
 - **if the JD states no must-have skills**: derive skill requirements from the duties section
-  (rubric v1.1 derived-musts rule, `skills_coverage.scope_notes`) — one `skills` row per
+  (the derived-musts rule, introduced in rubric v1.1 — `skills_coverage.scope_notes`) — one `skills` row per
   duties sentence naming concrete tools/technologies, note "derived" in the paraphrase;
 - the JD span for each item (`--find "..."` → offsets; `--span` to verify).
 

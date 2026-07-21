@@ -96,7 +96,7 @@ def hesitation_table(recs: list[dict[str, Any]]) -> None:
     geo = sum(1 for r in recs if "geometry undefined" in r["hesitations"])
     print("\n## Hesitations\n")
     print(f"- pairs with hesitation notes: {n}/{len(recs)}")
-    print(f"- no-skill-musts (geometry undefined, v1.1 derived-musts rule): {geo}/{len(recs)}")
+    print(f"- no-skill-musts (geometry undefined; derived-musts rule): {geo}/{len(recs)}")
 
 
 def mentor_agreement(recs: list[dict[str, Any]], mentor: list[dict[str, Any]]) -> None:
