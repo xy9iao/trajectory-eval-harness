@@ -45,7 +45,12 @@ evidence: gate confusion vs reference = TP 27 · FN 2 (596, 5084) · FP 1 (4715)
 the reference set's single negative pair drew a false alarm, finding 004's degeneracy
 prediction observed in vivo.
 
-## Result — PENDING
+## Result — partial (calibration round 1 delta, 2026-07-21); scorer implementation P2
 
-P2 scorer implementation (this batch is its known-positive test set) + the post-calibration
-delta.
+Post-calibration rerun: contradictions **8/7 pairs → 2/1 pair** (consistency instruction
+held; 4715 remains the stubborn case). Attendant honest observation: consistency is not
+correctness — 596 left the contradiction list by becoming consistently WRONG (both skills
+and hard now read the years item as covered, against the reference). The internal-coherence
+scorer measures coherence only; correctness belongs to the agreement scorers. Final Result
+lands with the P2 scorer implementation (planted-defect tests; this batch pair is the
+known-positive).
