@@ -43,7 +43,7 @@ def latest_runs_per_pair() -> dict[tuple[str, int], list[dict[str, Any]]]:
 
 
 def main() -> int:
-    from corpus import DOC_COLUMNS, load_row  # type: ignore[import-not-found]
+    from corpus import DOC_COLUMNS, load_row
 
     from eval.trajectory import validate_data_hygiene, validate_trajectory
 
