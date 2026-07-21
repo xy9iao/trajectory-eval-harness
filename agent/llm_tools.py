@@ -105,7 +105,7 @@ def extract_requirements(
                 f"JOB DESCRIPTION:\n{jd_text}\n\nRESUME:\n{resume_text}\n\n"
                 "Extract the JD's must/required items (bundle = one item). If the"
                 " JD states no must-have skills, derive skill requirements from"
-                " its duties section and set derived=true (rubric v1.1)."
+                " its duties section and set derived=true (the rubric's derived-musts rule)."
             ),
         },
     ]

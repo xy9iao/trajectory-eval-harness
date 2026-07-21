@@ -6,7 +6,9 @@ The eval framework is the protagonist; the resume–JD matching agent is its hos
 
 ## Status
 
-**P0 — data + rubric foundation (open).** Phases and acceptance criteria: [docs/roadmap.md](docs/roadmap.md). Locked design decisions and their rationale: [docs/decisions.md](docs/decisions.md).
+**P1 — agent + HITL gate: closed** ([report](docs/phase-reports/p1.md), 2026-07-21). **P0 — data + rubric foundation: open**, gated only on the mentor review touchpoint ([report draft](docs/phase-reports/p0.md)). P2 (the research core) begins after both closures. Phases and acceptance criteria: [docs/roadmap.md](docs/roadmap.md); locked decisions: [docs/decisions.md](docs/decisions.md).
+
+Version conventions: the rubric's version lives ONLY in `rubrics/rubric-v1.yaml`'s `version` field (currently maintained there; consumers read it, never copy it). The trajectory schema version lives in [docs/trajectory-schema.md](docs/trajectory-schema.md) and its validator. The labeling protocol and reference files carry their own `v1` line (`labels-v1.jsonl`, `sample-v1.json`) — a separate axis from the rubric version by design: relabeling, not rewording, bumps it.
 
 ## Layout
 

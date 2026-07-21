@@ -136,7 +136,7 @@ class ExtractRequirements(StrictModel):
     six orchestration tools: decision 3-i, different contract tier)."""
 
     must_items: list[RequirementItem]
-    derived: bool = False  # true when the v1.1 derived-musts rule was applied
+    derived: bool = False  # true when the derived-musts rule (introduced in rubric v1.1) applied
 
 
 def extract_requirements_tool() -> dict[str, Any]:
@@ -147,7 +147,7 @@ def extract_requirements_tool() -> dict[str, Any]:
             "description": (
                 "Extract the JD's must/required items. If the JD states no"
                 " must-have skills, derive skill requirements from the duties"
-                " section and set derived=true (rubric v1.1)."
+                " section and set derived=true (the rubric's derived-musts rule)."
             ),
             "parameters": ExtractRequirements.model_json_schema(),
         },
