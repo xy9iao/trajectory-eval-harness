@@ -32,10 +32,13 @@ and still gated it.
 
 ## Change
 
-No adjudication to a single score; no rubric revision (imperfect-rubric stance, D4 —
-between-rater variance on the adjacency axis is a measured quantity). Recorded instead: (1)
-the adjacency axis as the rubric's localized soft spot and P2's weak-agreement prediction; (2)
-P2 reports per-dimension agreement stratified so this axis stays visible (aligns with 009).
+The disagreements are **classified, not resolved** (a disagreement is a signal to route, not
+an error to eliminate — D4). Three-class discriminant + first-pass tables in p0 report §5b:
+the 4 inter-annotator rows are rubric-gap (596, 4890) / ambiguous-label (5798); the broader
+agent-vs-reference set is pattern-classified so P2 inherits a populated ledger. Disposition
+per class: rubric-gap → changelog candidate; ambiguous-label → protocol limitation + second-
+annotator signal; agent-error/model-limitation → counts against the agent in P2. No score
+adjudicated, no rubric revised now.
 
 ## Result
 
