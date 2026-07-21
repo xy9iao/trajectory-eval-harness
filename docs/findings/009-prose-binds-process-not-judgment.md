@@ -4,7 +4,7 @@
 is a pre-committed P2 item. **Date:** 2026-07-21 · **Phase:** P1 (calibration rounds 1–2)
 
 **Reproduction:** batches of 2026-07-20/21 (`eval/reports/batch_vs_reference.py`); rounds
-recorded in p1-design.md (calibration section, 表一/表二).
+recorded in p1-design.md (calibration section, round-1 and round-2 tables).
 
 ## Observation
 
@@ -34,7 +34,7 @@ mechanism (structural cross-checks) or model change — more prose is spend with
 
 ## Verification
 
-表一/表二 in p1-design.md; runs 2026-07-20/21. Two consecutive rubric-prose rounds on the
+The round-1 and round-2 tables in p1-design.md; runs 2026-07-20/21. Two consecutive rubric-prose rounds on the
 same target with clean attribution (rubric-only round) and zero movement; three mechanism
 interventions stable across all batches.
 
