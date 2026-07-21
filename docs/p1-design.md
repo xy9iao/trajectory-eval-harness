@@ -306,11 +306,24 @@ cannot be `covered` when experience_level found no role-matching segments — tu
 008's scorer logic from measurement into enforcement, with the measurement-object tension
 that implies); or (b) stop calibrating, reclassify #3/#4 as honest P2 numbers
 (model-limitation class), proceed to Stage G. CC recommendation: (b).
+**RULED (owner, 2026-07-21): (b).** Full rationale and the P2 stratified-agreement
+pre-commitment recorded in finding 009 (closed at P1 scope).
 
 **Cost ledger row 3:** v1.3 batch 560,684 in / 71,327 out. (Row-2 note: the −26% vs row 1
 is attributable to fewer retries after the #2 fixes — recorded so future-you doesn't guess.)
 
 ### P2 scorer candidates discovered during P1 (running list)
+
+- **Agreement stratified by divergence root cause (owner pre-commitment, finding 009):**
+  per-dimension agreement reported in strata — semantic-prior class (596-class relevant
+  reading; skills 0/1 cluster) separated from other divergence. Low headline numbers carry
+  their explanation; nothing gets averaged into an unexplained figure.
+- **Gate trigger-attribution correctness (596 'fired right for the wrong reason'):** beyond
+  the binary confusion matrix, check WHETHER the firing trigger matches the reference
+  reason — gate integrity one level deeper, time-box decides in P2.
+- **pass^k回头账:** skills agreement moved 13→7→9 across three single-run batches with no
+  skills-directed change — once pass^k runs, check skills' run-to-run variance; if it is
+  natively high, the movement was noise. (Flagged 2026-07-21.)
 
 - **Ledger consistency (internal-coherence class — finding 008):** hard_requirements
   determinations must agree with the prior dimensions' determinations they claim to reuse;
