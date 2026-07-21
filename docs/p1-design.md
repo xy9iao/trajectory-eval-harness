@@ -284,7 +284,7 @@ Two honest observations recorded for the p1 report and P2:
 #4 input for the v1.3 decision: the band-0/1 divergence cluster persists post-v1.2
 (agent-1-vs-ref-0 on ~7 pairs) — v1.3 may open as its own single-change round.
 
-**Round-2 表二 (v1.2 batch → v1.3 batch, runs 2026-07-21; both rubric-only changes):**
+**Round-2 before/after table (v1.2 batch → v1.3 batch, runs 2026-07-21; both rubric-only changes):**
 
 | metric | before (v1.2) | after (v1.3) | verdict |
 |---|---|---|---|
@@ -321,7 +321,7 @@ is attributable to fewer retries after the #2 fixes — recorded so future-you d
 - **Gate trigger-attribution correctness (596 'fired right for the wrong reason'):** beyond
   the binary confusion matrix, check WHETHER the firing trigger matches the reference
   reason — gate integrity one level deeper, time-box decides in P2.
-- **pass^k回头账:** skills agreement moved 13→7→9 across three single-run batches with no
+- **pass^k follow-up check:** skills agreement moved 13→7→9 across three single-run batches with no
   skills-directed change — once pass^k runs, check skills' run-to-run variance; if it is
   natively high, the movement was noise. (Flagged 2026-07-21.)
 

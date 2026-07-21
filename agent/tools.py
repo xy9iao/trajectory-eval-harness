@@ -144,12 +144,13 @@ def assess_dimension_stub(
 def flag_for_review(
     triggers: list[GateReason],
     mode: str,
+    resolution: str = "auto",
 ) -> GateOutcome:
-    """Stage E: eval-mode wiring only (auto_resume/auto). Interactive
-    interrupt lands in Stage G behind the same signature."""
+    """Gate outcome constructor (both D15 modes). Interactive callers pass
+    the post-interrupt resolution; eval mode is always auto_resume/auto."""
     return GateOutcome(
         triggers=triggers,
         mode=mode,  # type: ignore[arg-type]
-        action="auto_resume",
-        resolution="auto",
+        action="interrupt" if mode == "interactive" else "auto_resume",
+        resolution=resolution,  # type: ignore[arg-type]
     )

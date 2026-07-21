@@ -13,12 +13,15 @@ import hashlib
 import json
 import time
 from collections.abc import Callable
+from pathlib import Path
 from typing import Any
 
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 
 from agent.client import CallMeta
+from agent.hitl import request_human_decision
+from agent.review import build_payload, write_review_file
 from agent.state import AgentState
 from agent.types import Assessment
 from agent.tools import (
@@ -62,11 +65,18 @@ Assessor = Callable[
 ]
 
 
+DEFAULT_REVIEW_DIR = Path(__file__).resolve().parents[1] / "review"
+
+RESOLUTION_BY_DECISION = {"approve": "approved", "edit": "edited", "reject": "rejected"}
+
+
 def build_graph(
     source: DocumentSource,
     writer: TrajectoryWriter,
     extractor: Extractor | None = None,
     assessor: Assessor | None = None,
+    checkpointer: Any = None,
+    review_dir: Path = DEFAULT_REVIEW_DIR,
 ) -> CompiledStateGraph[AgentState, Any, AgentState, AgentState]:
     def _timed_tool(tool: str, args_summary: dict[str, Any], fn: Any) -> Any:
         started = time.perf_counter()
@@ -225,7 +235,19 @@ def build_graph(
             triggers.append("anomaly")
         if not triggers:
             return {"gate": None}
-        outcome = flag_for_review(triggers, state["mode"])
+        if state["mode"] == "interactive":
+            # Re-execution contract: this node re-runs from the top on resume.
+            # Everything BEFORE the interrupt must be idempotent (the review
+            # file is idempotent-by-existence); the gate_event is emitted only
+            # AFTER the interrupt returns — no resolution exists until then.
+            write_review_file(review_dir, writer.run_id, build_payload(state, triggers))
+            decision = request_human_decision({"run_id": writer.run_id, "triggers": list(triggers)})
+            resolution = RESOLUTION_BY_DECISION.get(decision)
+            if resolution is None:
+                raise ValueError(f"invalid review decision {decision!r}")
+            outcome = flag_for_review(triggers, state["mode"], resolution=resolution)
+        else:
+            outcome = flag_for_review(triggers, state["mode"])
         writer.emit(
             "gate_event",
             triggers=list(outcome.triggers),
@@ -267,7 +289,7 @@ def build_graph(
     graph.add_edge("aggregate", "gate")
     graph.add_edge("gate", "recommend")
     graph.add_edge("recommend", END)
-    return graph.compile()
+    return graph.compile(checkpointer=checkpointer)
 
 
 def writer_totals(writer: TrajectoryWriter) -> dict[str, int]:

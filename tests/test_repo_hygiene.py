@@ -53,3 +53,24 @@ def test_text_io_declares_encoding() -> None:
                     continue
                 offenders.append(f"{path.relative_to(ROOT)}:{lineno}: {line.strip()}")
     assert not offenders, "text-mode I/O without encoding=:\n" + "\n".join(offenders)
+
+
+def test_repo_content_is_english() -> None:
+    """All repo content is English (CLAUDE.md language rule) — mechanized
+    after CJK slipped into two committed docs (2026-07-21). Conversation
+    may be bilingual; tracked files may not."""
+    import subprocess
+
+    cjk = re.compile("[\\u4e00-\\u9fff\\u3040-\\u30ff]")
+    tracked = subprocess.run(
+        ["git", "ls-files"], capture_output=True, text=True, cwd=ROOT, check=True
+    ).stdout.split()
+    offenders = []
+    for name in tracked:
+        path = ROOT / name
+        if path.suffix not in {".py", ".md", ".yaml", ".yml", ".toml", ".json", ".jsonl"}:
+            continue
+        for lineno, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+            if cjk.search(line):
+                offenders.append(f"{name}:{lineno}")
+    assert not offenders, "non-English content in tracked files:\n" + "\n".join(offenders)
