@@ -4,7 +4,7 @@ Derived from the project handoff ([handoff-trajectory-eval-harness.md](handoff-t
 
 **Phase discipline:** phases are ordered by dependency, not calendar — **no time boxes**. A phase closes when its acceptance criteria pass and its public report lands in `docs/phase-reports/`; the next phase does not begin before closure (or an explicit skip recorded in `decisions.md`). Closure follows the ritual in CLAUDE.md / handoff §9.
 
-**Current phase: P0 (open).**
+**Current phase: P0 (open — closure gated on the mentor touchpoint) · P1 (closing via the p1 report PR).** P2 does not begin before both closures complete (overlap recorded in decisions.md, 2026-07-17).
 
 ---
 
@@ -43,10 +43,10 @@ Derived from the project handoff ([handoff-trajectory-eval-harness.md](handoff-t
 
 **Acceptance:**
 
-- [ ] Schema frozen-candidate committed
-- [ ] Graph runs end-to-end in both modes on the example pairs
-- [ ] Compatibility layer passes its three requirements
-- [ ] p1 report complete with graph diagram and annotated trajectory samples
+- [x] Schema frozen-candidate committed (v0.2 — `docs/trajectory-schema.md`, validator + planted-defect tests; freezes at P2's first scorer commit)
+- [x] Graph runs end-to-end in both modes on the example pairs (eval: three 30-pair batches, 30/30 valid; interactive: owner-driven live run `r20260721T031458-26e0fd`)
+- [x] Compatibility layer passes its three requirements (CI-enforced — provider isolation test, malformed matrix, per-call metadata)
+- [x] p1 report complete with graph diagram and annotated trajectory samples (`docs/phase-reports/p1.md`)
 
 ## P2 — Trajectory eval harness (the research core)
 
