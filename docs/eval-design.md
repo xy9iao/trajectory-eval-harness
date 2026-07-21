@@ -47,7 +47,48 @@ single-run metric's error bar is read from.
 cheaply; the cross-model stage runs a **lighter pass^k on delivery (OpenAI)** only to check
 whether stability transfers across providers — not a full repeat.
 
-### 2. Scorer architecture — PENDING
+### 2. Scorer architecture — DECIDED (owner, 2026-07-22: option A + three sub-decisions)
+
+**Uniform signature `(corpus, reference) -> ScorerResult`.** Every scorer receives all runs
+(grouped by pair) + the reference and slices what it needs (per-run / per-pair-group /
+per-corpus arity lives INSIDE the scorer). The runner is a dumb pipe —
+`for scorer in REGISTRY: scorer(corpus, ref)` — and all intelligence lives in single-testable,
+planted-defect-verifiable pure functions. This is the mirror of P1 decision 3 (graph owns
+flow, model owns judgment): here the runner owns iteration, the scorer owns slicing. B/C
+(arity-typed interfaces / OO classes) rejected — three dispatch paths buy a "precision" that 6
+scorers don't need; **framework thickness scales with managed diversity, not below it** (the
+architectural form of YAGNI), and OO fights `eval/trajectory.py`'s pure-function idiom (2c).
+
+**2a — relation to `eval/trajectory.py` + the exclusion contract:** structural scorers REUSE
+the validator's invariant functions (e.g. tool-call correctness calls the same
+"each dimension assessed once" check), never re-implement. Scorers assume a validated
+trajectory — and that assumption is backed by an assertion, not left to trust: **the runner
+validates every case first (`validate_trajectory`); any case that fails is excluded from ALL
+scorers' inputs and listed prominently in the report header ("N cases excluded: validation
+failures").** A scorer silently computing statistics over an illegal trajectory is the worst
+outcome (contaminated report, discovered late); exclusion makes the guarantee real and the
+problem visible — the hygiene-discipline posture (surface, don't drown).
+
+**2b — self-verification, incl. a semantic-boundary defect per scorer:** each scorer ships
+planted-defect synthetic trajectories under `tests/scorers/` + a test asserting it catches
+them. The defect set is **a declaration of each scorer's capability boundary**, so it must
+include at least one *semantic-boundary* defect, not only structural ones (missing event,
+wrong dimension): e.g. gate-integrity gets a "gate fired but the trigger reason is wrong"
+case (the synthetic form of P1's 596 fired-right-for-wrong-reason). If a scorer can't catch
+it, it IS the binary-matrix version that masks wrong-reason firing — the P1 blind spot must
+not reappear in P2's self-verification. A scorer that can't catch its planted defect is not
+done.
+
+**2c — report + figures:** `eval/reports/p2_report.py` is the single reproducible command —
+runs the whole REGISTRY, emits markdown with ≥1 figure/table per metric. **Figures use
+matplotlib** (chosen: text tables can't carry the two imminent consumption scenarios —
+pass^k's per-dimension variance wants error bars, cross-model wants grouped bars; the report's
+end consumers are interviewers and README readers, for whom figure information-density IS the
+project's information-density). Two constraints: **matplotlib default styles only** (no color
+work — styling is this project's purest gilding; the value is the data) and PNGs land in
+`docs/phase-reports/figures/` as **re-runnable output of p2_report.py** (figures are generated,
+never hand-made — the "one command" acceptance covers them). Dependency (`matplotlib`) is added
+with the first stage that generates a figure (pass^k), not in this docs-only PR.
 
 ### 3. Negative-class variants — DECIDED (owner, 2026-07-22)
 
