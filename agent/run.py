@@ -326,11 +326,10 @@ def run_passk(
     # historical runs sharing the same pair (eval-design decision 2 / pass^k).
     manifest_name = f"passk{'-smoke' if smoke else ''}-{run_ids[-1]}.json"
     manifest = runs_dir / manifest_name
-    manifest.write_text(
-        json.dumps({"k": k, "provider": provider, "model": model, "run_ids": run_ids}, indent=2)
-        + "\n",
-        encoding="utf-8",
+    manifest_json = json.dumps(
+        {"k": k, "provider": provider, "model": model, "run_ids": run_ids}, indent=2
     )
+    manifest.write_text(manifest_json + "\n", encoding="utf-8")
     print(f"pass^k done: {total - failures}/{total} clean runs")
     print(f"manifest: {manifest.relative_to(Path.cwd())}")
     return 0 if failures == 0 else 1
