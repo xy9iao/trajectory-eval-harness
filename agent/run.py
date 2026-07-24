@@ -275,6 +275,67 @@ def run_batch(
     return 0 if failures == 0 else 1
 
 
+def run_passk(
+    runs_dir: Path,
+    provider: str,
+    model: str,
+    extractor: Extractor | None,
+    assessor: Assessor | None,
+    k: int,
+    smoke: bool,
+) -> int:
+    """Run each sampled pair k times (eval mode) for pass^k stability.
+    Every run is an independent trajectory sharing (pair, provider, model,
+    config_digest) — the schema's pass^k join key — so the scorer groups
+    them without extra bookkeeping. --smoke limits to 2 pairs to prove the
+    pipeline + cost before the full k×30 spend."""
+    sample_path = Path(__file__).resolve().parents[1] / "data" / "reference" / "sample-v1.json"
+    pairs = json.loads(sample_path.read_text(encoding="utf-8"))["pairs"]
+    if smoke:
+        pairs = pairs[:2]
+    source = CorpusSource()
+    total = len(pairs) * k
+    print(f"pass^k: {len(pairs)} pairs × k={k} = {total} runs | provider={provider} model={model}")
+    failures = 0
+    done = 0
+    run_ids: list[str] = []
+    for entry in pairs:
+        pair = PairRef.model_validate({"split": entry["split"], "row": entry["row"]})
+        resume_text, jd_text = source.load(pair)
+        scores_across_k = []
+        for _ in range(k):
+            final, writer = run_pair(
+                source, pair, "eval", runs_dir, provider, model, extractor, assessor
+            )
+            run_ids.append(writer.run_id)
+            events = load_trajectory(writer.path)
+            bad = validate_trajectory(events) or validate_data_hygiene(
+                events, {"resume": resume_text, "jd": jd_text}
+            )
+            if bad:
+                failures += 1
+            agg = final["aggregate"]
+            scores_across_k.append(agg.weighted_mean if agg else None)
+            done += 1
+        print(
+            f"[{pair.split}:{pair.row:<5}] means across k: {scores_across_k}"
+            f"  ({done}/{total} runs, {failures} invalid)",
+            flush=True,
+        )
+    # Manifest: the scorer scores THIS batch's run_ids, never mixing with the
+    # historical runs sharing the same pair (eval-design decision 2 / pass^k).
+    manifest_name = f"passk{'-smoke' if smoke else ''}-{run_ids[-1]}.json"
+    manifest = runs_dir / manifest_name
+    manifest.write_text(
+        json.dumps({"k": k, "provider": provider, "model": model, "run_ids": run_ids}, indent=2)
+        + "\n",
+        encoding="utf-8",
+    )
+    print(f"pass^k done: {total - failures}/{total} clean runs")
+    print(f"manifest: {manifest.relative_to(Path.cwd())}")
+    return 0 if failures == 0 else 1
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     group = ap.add_mutually_exclusive_group(required=True)
@@ -289,6 +350,15 @@ def main() -> int:
         "--resume",
         metavar="RUN_ID",
         help="resume an interrupted interactive run after editing its review file",
+    )
+    group.add_argument(
+        "--passk",
+        type=int,
+        metavar="K",
+        help="run each sampled pair K times for pass^k stability (eval mode)",
+    )
+    ap.add_argument(
+        "--smoke", action="store_true", help="pass^k on 2 pairs only (pipeline + cost check)"
     )
     ap.add_argument("--mode", choices=["eval", "interactive"], default="eval")
     ap.add_argument(
@@ -313,6 +383,8 @@ def main() -> int:
         return _resume_run(args.resume, args.live)
     if args.batch:
         return run_batch(RUNS_DIR, provider, model, extractor, assessor)  # always eval mode
+    if args.passk:
+        return run_passk(RUNS_DIR, provider, model, extractor, assessor, args.passk, args.smoke)
 
     source: DocumentSource
     if args.synthetic:
