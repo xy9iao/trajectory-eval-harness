@@ -60,6 +60,12 @@ structure instead of being averaged into one unexplained figure.
 
 ## Result
 
+**Update (2026-07-28, finding 011):** the skills-agreement movement across the
+calibration batches (13→7→9) has been quantified as model variance — pass^k k=5 puts
+skills self-consistency at 0.400 (mean within-pair stdev 0.445), so the cross-batch moves
+sit inside the noise band. Single-round agreement fluctuation cannot be attributed to
+calibration; that account is settled.
+
 At P1 scope the reclassification IS the result: targets left unmoved by design, evidence
 chain preserved intact for P2. Scientific-status annotation (owner, recorded): **n is small
 — five interventions, one model. This is a working hypothesis, not a law**, until the

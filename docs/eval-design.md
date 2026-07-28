@@ -84,8 +84,9 @@ runs the whole REGISTRY, emits markdown with ≥1 figure/table per metric. **Fig
 matplotlib** (chosen: text tables can't carry the two imminent consumption scenarios —
 pass^k's per-dimension variance wants error bars, cross-model wants grouped bars; the report's
 end consumers are interviewers and README readers, for whom figure information-density IS the
-project's information-density). Two constraints: **matplotlib default styles only** (no color
-work — styling is this project's purest gilding; the value is the data) and PNGs land in
+project's information-density). Two constraints: **matplotlib defaults unless a default causes information loss** (see
+Figure conventions below for the admission test — preference is gilding, visibility is
+function) and PNGs land in
 `docs/phase-reports/figures/` as **re-runnable output of p2_report.py** (figures are generated,
 never hand-made — the "one command" acceptance covers them). Dependency (`matplotlib`) is added
 with the first stage that generates a figure (pass^k), not in this docs-only PR.
@@ -110,5 +111,20 @@ uncontaminated second data point: whether the 596-class semantic-prior divergenc
 OpenAI MUST be a raw observation, so no semantic calibration may precede the delivery run. This
 constraint sits at the same level as the config-digest reproducibility rule in the cross-model
 protocol.
+
+### Figure conventions (general rules for every P2 chart script)
+
+- **Regenerable exactly:** any randomness in a figure (jitter, sampling) uses a fixed seed —
+  a chart that renders differently on re-run breaks the "figures are generated output, never
+  hand-made" contract.
+- **Styling admission test:** matplotlib defaults, EXCEPT where the default causes information
+  loss. The bar is "without this change, a real feature of the data becomes invisible" (e.g.
+  same-color bars swallow an overlaid strip and hide a bimodal shape) — never "this looks
+  nicer". Preference is gilding; visibility is function.
+- **Parameterize model + output path** so the cross-model counterpart renders from the same
+  script and the two figures sit side by side without hand-editing.
+- **Vocabulary discipline:** *agreement* is reserved for scores vs the human reference;
+  model-vs-itself is *self-consistency*. The two are distinct measurements and the P2
+  cross-validation argument depends on not conflating them.
 
 ### 5. Two-tier split formalization — this document (§ "Two tiers")

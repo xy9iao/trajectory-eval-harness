@@ -42,6 +42,11 @@ adjudicated, no rubric revised now.
 
 ## Result
 
+**Update (2026-07-28, finding 011):** the prediction that the adjacency axis is where
+agreement is weakest got its first independent test. pass^k (zero-reference, model vs
+itself) also ranks education_domain_fit last — 0.233 self-consistency vs its 8/10 human
+agreement here. Two instruments with no shared machinery, same bottom-ranked dimension.
+
 **The phase's sharpest result: dimension-score disagreement (4/40) produced zero gate
 disagreement (0/10).** The veto + boundary structure absorbed sub-dimension noise — including
 on 5798, the pair the mentor herself judged closest to "advance without review." The gate
