@@ -119,7 +119,7 @@ def test_clean_gate_matrix() -> None:
         _run(f"s{i}", 2, gate_fired=False) for i in range(3)
     ]
     result = gate_integrity_scorer(_corpus(cases), REF_GATED)
-    assert result.metrics["confusion_by_pair_majority"] == {"TP": 1, "TN": 1}
+    assert result.metrics["confusion_by_pair_majority_SECONDARY"] == {"TP": 1, "TN": 1}
     assert result.metrics["fired_for_wrong_reason"] == 0
     assert result.stability is not None and result.stability.unstable_pairs == []
 
@@ -130,7 +130,8 @@ def test_catches_wrong_reason_firing() -> None:
     # exactly P1's train 596. A scorer without attribution calls this perfect.
     cases = [_run(f"r{i}", 1, triggers=["boundary"]) for i in range(3)]
     result = gate_integrity_scorer(_corpus(cases), REF_GATED)
-    assert result.metrics["confusion_by_pair_majority"] == {"TP": 1}  # binary view: clean
+    # the SECONDARY (majority-vote) view calls this a clean TP...
+    assert result.metrics["confusion_by_pair_majority_SECONDARY"] == {"TP": 1}
     assert result.metrics["fired_for_wrong_reason"] == 1  # attribution view: caught
     assert result.metrics["trigger_attribution_ok"] == "0/1"
 
@@ -141,7 +142,7 @@ def test_reports_gate_instability_across_k() -> None:
     assert result.stability is not None
     assert result.stability.unstable_pairs == ["train:1"]
     # the across-runs matrix carries the spread the by-pair majority hides
-    assert result.metrics["confusion_across_all_runs"] == {"TP": 2, "FN": 1}
+    assert result.metrics["confusion_across_all_runs_PRIMARY"] == {"TP": 2, "FN": 1}
 
 
 # --- ledger consistency ---

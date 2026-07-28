@@ -14,6 +14,15 @@ that are not constant across k are reported as `unstable` — a matrix built
 from one run per pair is a snapshot whose TP/FN membership churns (P1: the
 FN count stayed 2 while its members changed), so this scorer refuses to
 present a single-run matrix without saying which pairs move.
+
+PRIMARY vs SECONDARY (owner ruling 2026-07-28, fixed here rather than at
+report time so the prettier number can never be picked ad hoc):
+`confusion_across_all_runs` is the PRIMARY figure — it is what the deployed
+system does, one run per decision. `confusion_by_pair_majority` is
+SECONDARY and means "the ceiling reachable IF k=5 majority voting were
+adopted"; majority voting is an operation this system does not perform, so
+reporting it as the headline would describe a fictional configuration. Both
+are emitted with those roles named in `metrics`.
 """
 
 from collections import Counter
@@ -104,8 +113,11 @@ def gate_integrity_scorer(corpus: Corpus, reference: Reference) -> ScorerResult:
         name="gate integrity",
         metrics={
             "pairs_scored": n,
-            "confusion_by_pair_majority": dict(cells),
-            "confusion_across_all_runs": dict(per_run_cells),
+            "runs_scored": sum(per_run_cells.values()),
+            # PRIMARY: one run per decision — what the deployed system does.
+            "confusion_across_all_runs_PRIMARY": dict(per_run_cells),
+            # SECONDARY: ceiling under a k=5 majority vote the system never runs.
+            "confusion_by_pair_majority_SECONDARY": dict(cells),
             "trigger_attribution_ok": (
                 f"{attribution_ok}/{attribution_checked}" if attribution_checked else "0/0"
             ),
@@ -125,10 +137,11 @@ def gate_integrity_scorer(corpus: Corpus, reference: Reference) -> ScorerResult:
         stability=StabilityNote(
             basis="across-k",
             detail=(
-                f"{len(unstable)}/{n} pairs flip their gate decision across the k repeats; "
-                "the by-pair matrix uses the majority decision, and the across-all-runs matrix "
-                "carries the full spread. A single-run matrix would hide this churn "
-                "(finding 011)."
+                f"{len(unstable)}/{n} pairs flip their gate decision across the k repeats. "
+                "PRIMARY = across-all-runs (one run per decision, what the system does); "
+                "SECONDARY = by-pair majority (the ceiling under a k=5 vote this system never "
+                "performs). Reporting the majority figure alone would describe a fictional "
+                "configuration (finding 011)."
             ),
             unstable_pairs=unstable,
         ),

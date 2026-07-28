@@ -102,6 +102,18 @@ after the change.** The variant set is therefore a suite of unit tests with expe
 not another batch of data — it populates the negative class (finding 004's TN=0) with cases
 whose correct gate outcome is known by construction.
 
+### 3b. Variant-stage acceptance (added 2026-07-28, structural-scorer stage)
+
+The variant set must carry **two separate batches**, because the gate's negative class and the
+error-recovery failure path are different failure routes and one does not cover the other:
+
+1. **Gate negatives** (finding 004's TN=0): perturbations that flip a pair to a legitimate
+   no-gate outcome, with the expected gate behavior recorded per variant.
+2. **Fault/recovery samples** (this stage's coverage caveat): malformed model output,
+   truncated documents, encoding damage — inputs that exercise the retry → degrade →
+   escalate chain. The live corpus exercised it on only 20/150 runs, so error recovery's
+   real coverage depends entirely on this batch existing.
+
 ### 4. Cross-model protocol — DECIDED (owner, 2026-07-22)
 
 D12 permits one calibration round on the delivery model. **That round is spent on

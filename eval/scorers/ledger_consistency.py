@@ -70,7 +70,11 @@ def ledger_consistency_scorer(corpus: Corpus, reference: Reference) -> ScorerRes
         notes=(
             "Consistency is not correctness: a run can be clean here by being consistently "
             "wrong (finding 008, train 596 after the consistency prompt). Pair with the "
-            "agreement scorers; never merge them."
+            "agreement scorers; never merge them. "
+            "COMPARABILITY: totals here are over ALL runs in the corpus, while finding 008's "
+            "figures (8 contradictions / 7 pairs pre-calibration, 2 / 1 pair post) came from "
+            "single 30-run batches — the two are only comparable as per-run rates "
+            "(008 post-calibration: 2/30 = 0.067 per run), never as raw counts."
         ),
         stability=StabilityNote(
             basis="across-k",
