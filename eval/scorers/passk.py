@@ -59,6 +59,10 @@ def passk_scorer(corpus: Corpus, reference: Reference) -> ScorerResult:
                 "mean_within_pair_stdev": round(statistics.mean(stdevs), 3) if stdevs else None,
                 "max_within_pair_stdev": round(max(stdevs), 3) if stdevs else None,
                 "pairs_with_a_degraded_run": degraded_pairs,
+                # every pair's own stdev — the report plots these as a strip so
+                # bimodal shapes (a few pairs swinging hard, most flat) stay
+                # visible instead of collapsing into the mean.
+                "per_pair_stdevs": [round(s, 3) for s in stdevs],
             }
         )
 
