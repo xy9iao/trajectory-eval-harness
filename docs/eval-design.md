@@ -114,6 +114,41 @@ error-recovery failure path are different failure routes and one does not cover 
    escalate chain. The live corpus exercised it on only 20/150 runs, so error recovery's
    real coverage depends entirely on this batch existing.
 
+### 3c. Variant-stage scope gates (owner, 2026-07-28) — four, all binding
+
+1. **Counts, deliberately small:** gate negatives **6–8**, fault samples **5–6**. The goal is
+   to un-degenerate the confusion matrix (finding 004's TN=0) and to give each failure route
+   1–2 exemplars — NOT to build a balanced dataset. Beyond that the return on hand-built
+   distribution collapses.
+2. **Closed perturbation types:** only those listed in 3b. A new type needs a new ruling —
+   this is what stops the set from growing a third and fourth category mid-build.
+3. **One-sentence expectation or it isn't built:** every variant states *what changed* and
+   *what gate behavior is expected after the change*. If that sentence can't be written, the
+   variant isn't a test with an answer and doesn't belong.
+4. **Variant numbers NEVER merge with live-corpus numbers in the report.** TNs are
+   constructed; TP/FP/FN come from the real 30 pairs. A single combined confusion matrix
+   would let hand-built samples contaminate the credibility of the whole table. Two tables,
+   or one table with a source column — decided now, not at report time.
+
+### 3d. Faithfulness sampling — STRATIFIED, not random (owner, 2026-07-28)
+
+10 samples, drawn to interrogate known weak spots rather than to estimate a population rate:
+
+| stratum | n | why |
+|---|---|---|
+| education_domain_fit | 3 | lowest self-consistency (finding 011 §2) — if faithfulness also degrades here, §2's hypothesis gains a third independent evidence path |
+| hard_requirements veto-swing pairs (596/970/5084/6220) | 3 | scores jump between poles; do the citations jump too? tests whether the stated reason is post-hoc rationalization of the score |
+| degraded / nonzero resolution_failures | 2 | the floor of evidence quality where quote resolution already struggled |
+| random | 2 | a baseline, so stratification doesn't exclude the normal case entirely |
+
+**Reporting constraint:** a stratified sample answers "how does faithfulness behave on known
+weak spots", NOT "what is the overall faithfulness rate". The report states the sampling
+design next to the number and never presents it as a population estimate.
+
+Judgment scale: supports / partially supports / does not support. **"Partially supports"
+requires a one-line reason** (quote insufficient for the band? quote correct but pointing the
+wrong way?) — without it the middle category is unanalyzable.
+
 ### 4. Cross-model protocol — DECIDED (owner, 2026-07-22)
 
 D12 permits one calibration round on the delivery model. **That round is spent on
