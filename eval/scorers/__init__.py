@@ -68,6 +68,35 @@ class Case:
     def gate_fired(self) -> bool:
         return bool(self._end.get("gate_fired"))
 
+    def gate_triggers(self) -> list[str]:
+        """Trigger reasons from the gate_event (empty when the gate stayed
+        silent). Firing for the wrong reason is a real failure the binary
+        matrix hides — see the gate-integrity scorer."""
+        for e in self.events:
+            if e.get("type") == "gate_event":
+                return [str(t) for t in (e.get("triggers") or [])]
+        return []
+
+    def tool_calls(self) -> list[dict[str, Any]]:
+        return [e for e in self.events if e.get("type") == "tool_call"]
+
+    def llm_calls(self) -> list[dict[str, Any]]:
+        return [e for e in self.events if e.get("type") == "llm_call"]
+
+    def determinations(self, dimension: str) -> dict[str, str]:
+        """{requirement_id: value} for a dimension's determinations."""
+        for e in self.events:
+            if e.get("type") == "dimension_assessed" and e.get("dimension") == dimension:
+                return {d["requirement"]: d["value"] for d in (e.get("determinations") or [])}
+        return {}
+
+    def degraded_dimensions(self) -> list[str]:
+        return [
+            str(e["dimension"])
+            for e in self.events
+            if e.get("type") == "dimension_assessed" and e.get("degraded")
+        ]
+
     @property
     def recommendation(self) -> str | None:
         rec = self._end.get("recommendation")
@@ -134,12 +163,35 @@ class Corpus:
 class ScorerResult:
     """A scorer's output: named metrics + optional per-row detail + notes.
     Figures are declared as (filename, kind) specs the report step renders —
-    scorers stay pure (no I/O)."""
+    scorers stay pure (no I/O).
+
+    `stability` is MANDATORY for structural scorers computed over runs
+    (finding 011's constraint on everything downstream): a single-run number
+    without a statement about its run-to-run stability is a number without an
+    error bar. Either the metric is computed across the k repeats (report the
+    distribution) or it is a single-run snapshot (say so, and say what moves).
+    """
 
     name: str
     metrics: dict[str, Any]
     rows: list[dict[str, Any]] = field(default_factory=list)
     notes: str = ""
+    stability: "StabilityNote | None" = None
+
+
+@dataclass(frozen=True)
+class StabilityNote:
+    """How this metric behaves across the pass^k repeats (finding 011).
+
+    basis: "across-k" (computed over all repeats — the metric itself carries
+    its spread) or "single-run-snapshot" (one run per pair; membership may
+    churn between repeats even when the headline count barely moves — P1 saw
+    exactly this: gate FN stayed 2 while its members changed 596 -> 3590).
+    """
+
+    basis: str  # "across-k" | "single-run-snapshot"
+    detail: str
+    unstable_pairs: list[str] = field(default_factory=list)
 
 
 Scorer = Callable[[Corpus, Reference], ScorerResult]
