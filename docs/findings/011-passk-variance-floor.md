@@ -58,6 +58,12 @@ while hard_requirements has ~20. Low self-consistency on education is not a few 
 lifting the mean — there is almost no pair in the reference set that the model reproduces
 identically across runs. The property is distribution-wide, not tail-driven.
 
+**Bounded by finding 013 (2026-07-28):** the hypothesis below concerns SCORE
+STABILITY only. Faithfulness data separated the two properties — education was among
+the better-evidenced dimensions while hard_requirements, the most self-consistent one,
+produced every evidence failure. A dimension the model reproduces reliably can be
+reliably badly evidenced; do not carry this hypothesis over to evidence quality.
+
 *Hypothesis for future work (explicitly not a conclusion):* one reading is that a rubric axis
 that is under-specified for humans is also under-determined for a model, so both instruments
 register it as unstable. The data here support only the correlation — both measurements are
