@@ -37,3 +37,12 @@ gate-integrity measurement.
 ## Result — PENDING
 
 Closes in P2 with the stratified gate-integrity numbers and the variant-set composition.
+
+**Mechanism supplied (2026-07-31):** [finding 014](014-low-road-negative-is-structurally-unconstructible.md)
+shows TN=0 is not a sampling accident. The hard-requirement ledger reuses the determinations
+that produce the scoring bands (28/30 ledgers say so in prose), so "meets every must, still
+below the advance floor" asks two coupled variables to move in opposite directions — a
+region occupying 16/216 band combinations and 0/30 reference pairs. The negative class in
+this batch is therefore populated by the **high road only**, and the third bullet above is
+amended accordingly: non-gating variants are built by raising a pair to `advance`, not by
+holding it at `do_not_advance`.

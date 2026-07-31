@@ -282,16 +282,27 @@ def run_variants(
     extractor: Extractor | None,
     assessor: Assessor | None,
     live: bool,
+    only: list[str] | None = None,
 ) -> int:
     """Run the variant batches (eval-design 3b/3c): each variant is a unit
     test with a stated expectation. Every trajectory is tagged variant_id so
     constructed results can never be merged with live-corpus results
-    (gate 4)."""
+    (gate 4).
+
+    `only` runs a subset — used to dry-verify one construction before paying
+    for the batch, the same smoke discipline applied to the construction
+    hypothesis rather than to the pipeline."""
     import functools as _ft
 
     from eval.variants import faulty_completer, load_variants, materialize
 
     variants = load_variants()
+    if only:
+        known = {v.id for v in variants}
+        unknown = [i for i in only if i not in known]
+        if unknown:
+            raise SystemExit(f"unknown variant id(s): {unknown} (known: {sorted(known)})")
+        variants = [v for v in variants if v.id in set(only)]
     print(f"variants: {len(variants)} | provider={provider} model={model}")
     run_ids: list[str] = []
     for n, variant in enumerate(variants, 1):
@@ -319,12 +330,22 @@ def run_variants(
             f"[{n:2d}/{len(variants)}] {variant.id} {variant.batch:14s} "
             f"mean={agg.weighted_mean if agg else None} gate={triggers or '-'} "
             f"rec={final['recommendation']} "
-            f"expected_gate={variant.expected_gate} -> {'MATCH' if ok else 'DIVERGES'}",
+            f"expected_gate={variant.expected_gate} -> "
+            f"{'MATCH' if ok else 'DIVERGES (construction suspect first — 3c gate 5)'}",
             flush=True,
         )
     manifest = runs_dir / f"variants-{run_ids[-1]}.json"
     manifest_json = json.dumps(
-        {"kind": "variants", "provider": provider, "model": model, "run_ids": run_ids}, indent=2
+        {
+            "kind": "variants",
+            "provider": provider,
+            "model": model,
+            "run_ids": run_ids,
+            # a filtered run is a dry check, not the batch — labelled so it can
+            # never be picked up as if it were the full negative set
+            "partial": sorted(only) if only else None,
+        },
+        indent=2,
     )
     manifest.write_text(manifest_json + "\n", encoding="utf-8")
     print(f"manifest: {manifest.relative_to(Path.cwd())}")
@@ -411,6 +432,12 @@ def main() -> int:
         action="store_true",
         help="run the variant batches (data/variants/variants-v1.json)",
     )
+    ap.add_argument(
+        "--only",
+        metavar="ID",
+        nargs="+",
+        help="with --variants: run only these ids (dry-verify a construction before the batch)",
+    )
     group.add_argument(
         "--passk",
         type=int,
@@ -444,7 +471,7 @@ def main() -> int:
     if args.batch:
         return run_batch(RUNS_DIR, provider, model, extractor, assessor)  # always eval mode
     if args.variants:
-        return run_variants(RUNS_DIR, provider, model, extractor, assessor, args.live)
+        return run_variants(RUNS_DIR, provider, model, extractor, assessor, args.live, args.only)
     if args.passk:
         return run_passk(RUNS_DIR, provider, model, extractor, assessor, args.passk, args.smoke)
 

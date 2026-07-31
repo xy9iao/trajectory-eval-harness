@@ -114,7 +114,7 @@ error-recovery failure path are different failure routes and one does not cover 
    escalate chain. The live corpus exercised it on only 20/150 runs, so error recovery's
    real coverage depends entirely on this batch existing.
 
-### 3c. Variant-stage scope gates (owner, 2026-07-28) — four, all binding
+### 3c. Variant-stage scope gates (owner, 2026-07-28; gate 5 added 2026-07-31) — five, all binding
 
 1. **Counts, deliberately small:** gate negatives **6–8**, fault samples **5–6**. The goal is
    to un-degenerate the confusion matrix (finding 004's TN=0) and to give each failure route
@@ -129,6 +129,20 @@ error-recovery failure path are different failure routes and one does not cover 
    constructed; TP/FP/FN come from the real 30 pairs. A single combined confusion matrix
    would let hand-built samples contaminate the credibility of the whole table. Two tables,
    or one table with a source column — decided now, not at report time.
+5. **Divergence defaults to "my construction is wrong", not "the agent is wrong."** When a
+   variant's observed result contradicts its expectation, the first hypothesis is that the
+   perturbation failed to do what the spec claims — because a variant is a test with a
+   *known* answer, and the answer is only known if the construction is sound. A failed
+   construction goes into `construction_failures` in the spec file with (expected, actual,
+   likely cause) and **never into the negative set**: a mislabelled negative manufactures a
+   phantom true-negative and corrupts the very metric the batch exists to un-degenerate.
+   Repeated same-direction failures are finding material, not noise to retry past.
+
+   *Provenance:* the rule was written because two low-road variants (`cf-01` on train 901,
+   `cf-02` on train 2980) were built with perturbations that did not satisfy their pairs'
+   must-ledgers. Both would have been scored as agent false-positives when the agent was in
+   fact correct. Both were caught at spec review, before any run — which is where this class
+   of error is cheap to catch and after which it is not.
 
 ### 3d. Faithfulness sampling — STRATIFIED, not random (owner, 2026-07-28)
 

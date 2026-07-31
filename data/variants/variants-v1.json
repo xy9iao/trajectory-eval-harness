@@ -2,6 +2,33 @@
   "schema": "variants-v1",
   "design": "docs/eval-design.md sections 3b (two batches), 3c (four scope gates)",
   "reporting_rule": "variant results never merge with live-corpus results (3c gate 4)",
+  "construction_failures": [
+    {
+      "id": "cf-01",
+      "intended": "gn-05, low-road gate negative on train 901",
+      "expected": "veto met, mean below 2.5, no gate, do_not_advance",
+      "actual": "never run — rejected at spec review",
+      "cause": "The perturbation did not satisfy the ledger. Train 901 has SEVEN clear unmet items (degree, 1 year data analysis, and all five skills items); the segment addressed two, so hard_requirements would have stayed 0 and the gate would have fired on hard_unmet. The agent would have been RIGHT and the spec wrong.",
+      "structural": "Unfixable on this base: the ledger also carries an indeterminate work-authorization item that no resume edit can resolve, and an indeterminate alone caps the veto and fires hard_indeterminate."
+    },
+    {
+      "id": "cf-02",
+      "intended": "gn-06, low-road gate negative on train 2980",
+      "expected": "veto met, mean below 2.5, no gate, do_not_advance",
+      "actual": "never run — rejected at spec review",
+      "cause": "Same failure mode as cf-01, caught by applying the same check on request. Train 2980 has three clear unmet items (a four-component skills bundle, 10 years progressive experience, 5 years customer-facing collaborative software); the appended 2.5-year configuration-analyst segment satisfied none of them — 2.5 years cannot evidence 10 years progressive.",
+      "structural": "The low road was abandoned entirely rather than re-based. See the geometry argument in the finding cited below: meeting every stated must mechanically lifts the weighted mean into or above the boundary band, so 'meets everything, still uncompetitive' is a near-empty region of the score space. Both low-road attempts failed for the same reason, which is what makes it a property of the rubric rather than two authoring slips."
+    }
+  ],
+  "base_swaps": [
+    {
+      "variant": "gn-04",
+      "from": "train 1050",
+      "to": "train 6220",
+      "reason": "Not a construction failure — the 1050 construction was sound (one unmet, one indeterminate, both targeted). It was swapped for headroom: 1050's reference mean is 2.6, so a correct perturbation could still land inside the [2.5, 3.5) boundary band and fire the gate for a reason unrelated to what the variant tests. 6220 starts at 3.0 with experience and education already at 5, so the post-perturbation mean clears 3.5 even if skills rise only to 2. A variant that can fail for the wrong reason is a weak test."
+    }
+  ],
+  "construction_failure_rule": "A variant whose observed result contradicts its expectation defaults to 'the construction is wrong', not 'the agent is wrong' (eval-design 3c gate 5). Failed constructions are recorded here with (expected, actual, cause) and NEVER enter the negative set — a mislabelled negative manufactures phantom true-negatives in the confusion matrix and corrupts the headline metric. Repeated same-direction failures are finding material.",
   "variants": [
     {
       "id": "gn-01",
@@ -56,48 +83,48 @@
       "batch": "gate_negative",
       "base_pair": {
         "split": "train",
-        "row": 1050
+        "row": 6220
       },
       "perturbation": {
         "type": "append_resume_segment",
-        "text": "Experience Platform Engineer, 01/2020 to 11/2023, Cobalt Data - Seattle, WA. Built and operated Grafana dashboards backed by Prometheus metrics for the ingestion platform, including alerting rules and on-call runbooks. Managed all cloud infrastructure as code in Terraform, with peer-reviewed modules and automated plan/apply pipelines."
+        "text": "Experience Senior Data Engineer, 02/2020 to 12/2023, Cobalt Analytics - Seattle, WA. Owned the analytics warehouse on AWS: Redshift cluster modelling and tuning, S3 staging, Glue and Airflow orchestration, and Python for all transformation and operational scripting. Built and published the executive reporting layer in Tableau and Power BI, including certified datasets and scheduled refreshes for four business units."
       },
-      "changed": "Appended a 3.9-year dated Grafana/Prometheus + Terraform-IaC segment.",
+      "changed": "Appended a 3.8-year dated AWS/Redshift/Airflow/Python + Tableau/Power BI segment.",
       "expected_gate": false,
       "expected_reasons": [],
-      "rationale": "The reference ledger has one unmet item (Grafana/Prometheus operational dashboards) and one indeterminate (Infrastructure-as-Code). The segment evidences both hands-on; experience already scores 5. Expected recommendation: advance."
+      "rationale": "The reference ledger has one clear unmet item (BI Tools, marked 'is a must', no BI tool of any vendor present) and one indeterminate (the AWS half of AWS/Python, which rested entirely on Azure adjacency). BOTH must be cleared, because an indeterminate alone caps the veto and fires hard_indeterminate \u2014 so the segment names AWS services first-hand and two BI tools. The other four musts were already met; experience and education already score 5, leaving wide headroom above the 3.5 advance floor. Expected recommendation: advance."
     },
     {
       "id": "gn-05",
       "batch": "gate_negative",
       "base_pair": {
         "split": "train",
-        "row": 901
+        "row": 5798
       },
       "perturbation": {
         "type": "append_resume_segment",
-        "text": "Education and Training Bachelor of Science: Data Management, 09/2016 to 06/2020, Riverbend University. Experience Junior Data Analyst, 07/2020 to 09/2021, Lakeside Retail Group. Prepared weekly sales summaries in spreadsheets and answered ad hoc questions from store managers."
+        "text": "Experience Electrical Test Technician, 01/2017 to 03/2023, Fairmont Rail Systems - Erie, PA. Performed acceptance and functional testing on traction control assemblies: read and worked from schematics, block diagrams, wire lists and functional diagrams; verified VDC and VAC distribution against specification; diagnosed board-level faults using basic electronics fundamentals. Daily instrumentation included oscilloscope, digital multimeter, signal generator, bench power supply, megohmmeter and calibrated torque tooling, with documented calibration records for each test set."
       },
-      "changed": "Appended a Data Management degree and a 1.2-year dated junior data-analysis segment.",
+      "changed": "Appended a 6.2-year dated electrical-test-technician segment naming the schematics bundle, VDC/VAC systems and the instrumentation set.",
       "expected_gate": false,
       "expected_reasons": [],
-      "rationale": "LOW-ROAD negative: the ledger's two unmet items are the degree field and one year of data analysis. The additions clear both, so the veto should read met \u2014 while the candidate remains weak on the scoring dimensions (the JD's skill requirements are untouched), so the mean should stay below the 2.5 boundary floor. A pair that meets every stated must and is still not competitive is a legitimate no-gate case, and it is the negative route the high road cannot produce. Expected recommendation: do_not_advance."
+      "rationale": "The reference ledger has two clear unmet items (5 years electrical testing, ~0.2 evidenced; and the explicitly 'Must have' schematics/block-diagram/wire-list/functional-diagram bundle with basic electronics and VDC/VAC) plus one indeterminate (instrumentation, two named components absent). The segment targets all three, since the indeterminate would otherwise cap the veto on its own. Education already scores 5 and the added tenure is role-matching, so experience should rise from 3. Expected recommendation: advance."
     },
     {
       "id": "gn-06",
       "batch": "gate_negative",
       "base_pair": {
         "split": "train",
-        "row": 2980
+        "row": 4160
       },
       "perturbation": {
         "type": "append_resume_segment",
-        "text": "Certifications ITIL Foundation v4, issued 03/2021. Experience Software Configuration Analyst, 04/2021 to 10/2023, Grantwood Systems - Columbus, OH. Maintained build configuration baselines and release documentation for two internal applications; coordinated change requests through the review board."
+        "text": "Contact Address: Lansing, Michigan. Experience Senior Business Analyst, 01/2018 to 12/2023, Great Lakes Program Services - Lansing, MI. Provided strategic analysis at the division and agency level for two statewide regulated programs, reporting into the program director. Ran delivery in Agile Scrum throughout: authored user stories with acceptance criteria, groomed the backlog and led sprint planning in JIRA as the team's analyst. Led LEAN process-improvement events and applied LPI review discipline to two agency workflows, cutting cycle time on both."
       },
-      "changed": "Appended a 2.5-year dated configuration-analyst segment plus one certification line.",
+      "changed": "Appended a Michigan address line and a 6-year dated segment naming Agile Scrum/JIRA/user stories/sprint planning, LEAN/LPI, and agency-level strategic analysis.",
       "expected_gate": false,
       "expected_reasons": [],
-      "rationale": "LOW-ROAD negative: the degree item was already met; the additions target the remaining experience-side musts. Skills coverage (0 in the reference) is untouched by design, so the mean should stay below the boundary floor with the veto met. Expected recommendation: do_not_advance."
+      "rationale": "The reference ledger has two clear unmet items (3 years Agile Scrum/JIRA/user stories/sprint planning; 2 years LEAN/LPI) and two indeterminates (5 years strategic analysis at program/division/agency level, and the Michigan-local requirement \u2014 the resume states no candidate location at all). All four are targeted, the location one by the only means a resume has: stating an address. Five ledger items were already met and education scores 5. Expected recommendation: advance."
     },
     {
       "id": "fs-01",

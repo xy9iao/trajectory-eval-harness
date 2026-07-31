@@ -17,7 +17,14 @@ from typing import Any
 
 import pytest
 
-from eval.variants import Variant, load_variants, materialize
+from eval.variants import SPECS, Variant, load_variants, materialize
+
+
+def _raw() -> dict[str, Any]:
+    import json
+
+    return dict(json.loads(SPECS.read_text(encoding="utf-8")))
+
 
 CLOSED_TYPES = {
     "append_resume_segment",
@@ -67,14 +74,39 @@ def test_every_variant_states_what_changed_and_what_is_expected() -> None:
         assert isinstance(v.expected_gate, bool)
 
 
-def test_both_negative_routes_are_represented() -> None:
-    # the high road (meets the musts and scores well -> advance) and the low
-    # road (meets the musts, still weak -> do_not_advance) are different
-    # no-gate cases; a set with only one route tests only half the boundary
+def test_negative_set_is_high_road_only_and_says_so() -> None:
+    # The low road (meets every stated must, still scores below 2.5 -> no gate,
+    # do_not_advance) is ABSENT BY RULING, not by oversight. Mechanism, verified
+    # in finding 014: the hard-requirement ledger REUSES the determinations that
+    # produce skills_coverage and experience_level (28/30 ledgers say so in
+    # prose), so the low road asks two coupled variables to move in opposite
+    # directions. The eligible corner is 16/216 band combinations and 0/30
+    # reference pairs. Two attempts (cf-01, cf-02) failed exactly here. This
+    # test pins the absence to the record so a later reader does not "fix" the
+    # gap by adding a low-road variant back.
     negatives = [v for v in load_variants() if v.batch == "gate_negative"]
-    advance = [v for v in negatives if "advance." in v.rationale]
-    do_not = [v for v in negatives if "do_not_advance." in v.rationale]
-    assert advance and do_not, "gate negatives must cover both advance and do_not_advance"
+    assert all("advance." in v.rationale for v in negatives)
+    assert not any("do_not_advance." in v.rationale for v in negatives), (
+        "a low-road negative is near-impossible under this rubric's score geometry — "
+        "if you are adding one, read the construction_failures block first"
+    )
+    assert _raw()["construction_failures"], "the failed low-road constructions must stay recorded"
+
+
+def test_construction_failures_never_leak_into_the_variant_set() -> None:
+    # 3c gate 5: a variant whose result contradicts its expectation is a broken
+    # CONSTRUCTION until proven otherwise. Recording it as a negative would
+    # manufacture a phantom true-negative and corrupt the headline metric — the
+    # exact failure this whole batch exists to avoid.
+    raw = _raw()
+    live = {v.id for v in load_variants()}
+    for failure in raw["construction_failures"]:
+        assert failure["id"] not in live, (
+            f"{failure['id']} is a failed construction, not a test case"
+        )
+        for field in ("intended", "expected", "actual", "cause"):
+            assert failure.get(field, "").strip(), f"{failure['id']}: missing '{field}'"
+    assert "construction is wrong" in raw["construction_failure_rule"]
 
 
 def test_fault_batch_covers_each_failure_route() -> None:
