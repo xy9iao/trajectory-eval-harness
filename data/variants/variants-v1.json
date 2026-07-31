@@ -1,0 +1,189 @@
+{
+  "schema": "variants-v1",
+  "design": "docs/eval-design.md sections 3b (two batches), 3c (four scope gates)",
+  "reporting_rule": "variant results never merge with live-corpus results (3c gate 4)",
+  "variants": [
+    {
+      "id": "gn-01",
+      "batch": "gate_negative",
+      "base_pair": {
+        "split": "train",
+        "row": 5063
+      },
+      "perturbation": {
+        "type": "append_resume_segment",
+        "text": "Experience Senior Java Engineer, 03/2019 to 12/2023, Meridian Systems - Chicago, IL. Built and maintained production services in Java 11 and Spring Boot, with Hibernate ORM over SQL Server; owned the module's REST API layer end to end. Ran the team's CI/CD pipeline in Jenkins with GIT-based trunk development, tracked delivery in JIRA and documented designs in Confluence."
+      },
+      "changed": "Appended a 4.8-year dated Java/Spring Boot/Hibernate + Jenkins/GIT/JIRA/Confluence segment.",
+      "expected_gate": false,
+      "expected_reasons": [],
+      "rationale": "The reference ledger marks exactly two items unmet: the Java/Spring Boot/SQL/Hibernate bundle and the DevOps CI/CD bundle. The added segment evidences both hands-on, so the ledger should clear to met and skills_coverage should rise from 1; experience (5) and education (5) already sit high, so the mean should clear the 3.5 advance floor. Expected recommendation: advance."
+    },
+    {
+      "id": "gn-02",
+      "batch": "gate_negative",
+      "base_pair": {
+        "split": "train",
+        "row": 3773
+      },
+      "perturbation": {
+        "type": "append_resume_segment",
+        "text": "Experience Lead Business Analyst, 02/2021 to 01/2024, Harbor Public Sector Group - Arlington, VA. Led the business analysis workstream for two federal modernization programs, supervising three junior analysts. Owned requirements elicitation, decomposition into user stories with acceptance criteria, backlog grooming with the product owner, and stakeholder demos at each increment."
+      },
+      "changed": "Appended a 2.9-year dated Business-Analyst-leadership segment.",
+      "expected_gate": false,
+      "expected_reasons": [],
+      "rationale": "The reference ledger's single clear failure is '2 years in a Business Analyst leadership role' \u2014 no BA title and no lead role in any dated segment. The added segment supplies exactly that half; education already scores 5. Expected recommendation: advance."
+    },
+    {
+      "id": "gn-03",
+      "batch": "gate_negative",
+      "base_pair": {
+        "split": "train",
+        "row": 3978
+      },
+      "perturbation": {
+        "type": "append_resume_segment",
+        "text": "Experience Java Developer, 06/2019 to 08/2023, Northwind Software - Austin, TX. Developed and maintained Java services for a claims-processing platform: core business logic in Java 8 and 11, REST endpoints, JUnit test suites, and Maven builds. Worked day to day in an Agile team with code review and pair programming."
+      },
+      "changed": "Appended a 4.2-year dated Java development segment.",
+      "expected_gate": false,
+      "expected_reasons": [],
+      "rationale": "The reference ledger's only unmet item is the Java-years half of the compound qualification (zero Java years evidenced against either the 2- or 4-year floor). The segment clears the higher floor; the degree half was already met and education scores 5. Expected recommendation: advance."
+    },
+    {
+      "id": "gn-04",
+      "batch": "gate_negative",
+      "base_pair": {
+        "split": "train",
+        "row": 1050
+      },
+      "perturbation": {
+        "type": "append_resume_segment",
+        "text": "Experience Platform Engineer, 01/2020 to 11/2023, Cobalt Data - Seattle, WA. Built and operated Grafana dashboards backed by Prometheus metrics for the ingestion platform, including alerting rules and on-call runbooks. Managed all cloud infrastructure as code in Terraform, with peer-reviewed modules and automated plan/apply pipelines."
+      },
+      "changed": "Appended a 3.9-year dated Grafana/Prometheus + Terraform-IaC segment.",
+      "expected_gate": false,
+      "expected_reasons": [],
+      "rationale": "The reference ledger has one unmet item (Grafana/Prometheus operational dashboards) and one indeterminate (Infrastructure-as-Code). The segment evidences both hands-on; experience already scores 5. Expected recommendation: advance."
+    },
+    {
+      "id": "gn-05",
+      "batch": "gate_negative",
+      "base_pair": {
+        "split": "train",
+        "row": 901
+      },
+      "perturbation": {
+        "type": "append_resume_segment",
+        "text": "Education and Training Bachelor of Science: Data Management, 09/2016 to 06/2020, Riverbend University. Experience Junior Data Analyst, 07/2020 to 09/2021, Lakeside Retail Group. Prepared weekly sales summaries in spreadsheets and answered ad hoc questions from store managers."
+      },
+      "changed": "Appended a Data Management degree and a 1.2-year dated junior data-analysis segment.",
+      "expected_gate": false,
+      "expected_reasons": [],
+      "rationale": "LOW-ROAD negative: the ledger's two unmet items are the degree field and one year of data analysis. The additions clear both, so the veto should read met \u2014 while the candidate remains weak on the scoring dimensions (the JD's skill requirements are untouched), so the mean should stay below the 2.5 boundary floor. A pair that meets every stated must and is still not competitive is a legitimate no-gate case, and it is the negative route the high road cannot produce. Expected recommendation: do_not_advance."
+    },
+    {
+      "id": "gn-06",
+      "batch": "gate_negative",
+      "base_pair": {
+        "split": "train",
+        "row": 2980
+      },
+      "perturbation": {
+        "type": "append_resume_segment",
+        "text": "Certifications ITIL Foundation v4, issued 03/2021. Experience Software Configuration Analyst, 04/2021 to 10/2023, Grantwood Systems - Columbus, OH. Maintained build configuration baselines and release documentation for two internal applications; coordinated change requests through the review board."
+      },
+      "changed": "Appended a 2.5-year dated configuration-analyst segment plus one certification line.",
+      "expected_gate": false,
+      "expected_reasons": [],
+      "rationale": "LOW-ROAD negative: the degree item was already met; the additions target the remaining experience-side musts. Skills coverage (0 in the reference) is untouched by design, so the mean should stay below the boundary floor with the veto met. Expected recommendation: do_not_advance."
+    },
+    {
+      "id": "fs-01",
+      "batch": "fault",
+      "base_pair": {
+        "split": "train",
+        "row": 3800
+      },
+      "perturbation": {
+        "type": "truncate_resume",
+        "chars": 150
+      },
+      "changed": "Truncated the resume to 150 characters.",
+      "expected_gate": true,
+      "expected_reasons": [
+        "anomaly"
+      ],
+      "rationale": "Exercises anomaly rule A2 (document under 200 chars). The gate must fire on anomaly regardless of scores; the run must still produce a schema-valid trajectory."
+    },
+    {
+      "id": "fs-02",
+      "batch": "fault",
+      "base_pair": {
+        "split": "train",
+        "row": 3800
+      },
+      "perturbation": {
+        "type": "empty_jd"
+      },
+      "changed": "Replaced the JD with an empty document.",
+      "expected_gate": true,
+      "expected_reasons": [
+        "anomaly"
+      ],
+      "rationale": "Exercises anomaly rule A1 (empty document) on the JD side \u2014 the corpus has never produced one, so this is the only coverage rule A1 will get."
+    },
+    {
+      "id": "fs-03",
+      "batch": "fault",
+      "base_pair": {
+        "split": "train",
+        "row": 3800
+      },
+      "perturbation": {
+        "type": "corrupt_encoding",
+        "start": 200,
+        "end": 1200
+      },
+      "changed": "Re-decoded a 1000-character slice of the resume through the wrong codec (mojibake).",
+      "expected_gate": true,
+      "expected_reasons": [],
+      "rationale": "Encoding damage is NOT on the closed anomaly list, so this tests graceful handling rather than detection: the expectation is that the run completes, the trajectory stays schema-valid, and no crash occurs. Any gate reason is acceptable; expected_reasons is empty to mean 'unconstrained', and the assertion is on validity, not on the trigger set."
+    },
+    {
+      "id": "fs-04",
+      "batch": "fault",
+      "base_pair": {
+        "split": "train",
+        "row": 3800
+      },
+      "perturbation": {
+        "type": "malformed_output",
+        "failures": 1
+      },
+      "changed": "Injected one malformed model response on the first assessment call.",
+      "expected_gate": true,
+      "expected_reasons": [],
+      "rationale": "One retry must recover: expect a retried llm_call with a prior non-ok attempt, NO degraded dimension, and no insufficient_evidence trigger. This is the recovery half of decision 3-ii on real documents rather than in a mock."
+    },
+    {
+      "id": "fs-05",
+      "batch": "fault",
+      "base_pair": {
+        "split": "train",
+        "row": 3800
+      },
+      "perturbation": {
+        "type": "malformed_output",
+        "failures": 2
+      },
+      "changed": "Injected two malformed model responses, exhausting the retry on one dimension.",
+      "expected_gate": true,
+      "expected_reasons": [
+        "insufficient_evidence"
+      ],
+      "rationale": "The escalation half of decision 3-ii, end to end on real documents: the dimension degrades (score null), the aggregate goes partial, and insufficient_evidence must appear in the gate triggers. The live corpus exercised this path on only 20/150 runs, so this variant is where the error-recovery scorer's coverage actually comes from."
+    }
+  ]
+}

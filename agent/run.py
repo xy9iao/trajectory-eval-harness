@@ -275,6 +275,62 @@ def run_batch(
     return 0 if failures == 0 else 1
 
 
+def run_variants(
+    runs_dir: Path,
+    provider: str,
+    model: str,
+    extractor: Extractor | None,
+    assessor: Assessor | None,
+    live: bool,
+) -> int:
+    """Run the variant batches (eval-design 3b/3c): each variant is a unit
+    test with a stated expectation. Every trajectory is tagged variant_id so
+    constructed results can never be merged with live-corpus results
+    (gate 4)."""
+    import functools as _ft
+
+    from eval.variants import faulty_completer, load_variants, materialize
+
+    variants = load_variants()
+    print(f"variants: {len(variants)} | provider={provider} model={model}")
+    run_ids: list[str] = []
+    for n, variant in enumerate(variants, 1):
+        resume_text, jd_text = materialize(variant)
+        source = SyntheticSource(resume_text, jd_text)
+        v_assessor = assessor
+        if variant.perturbation["type"] == "malformed_output" and live:
+            cfg = provider_config()
+            broken = faulty_completer(make_completer(cfg), int(variant.perturbation["failures"]))
+            v_assessor = _ft.partial(assess_dimension_llm, cfg, broken)
+        pair = PairRef.model_validate(variant.base_pair)
+        final, writer = run_pair(
+            source, pair, "eval", runs_dir, provider, model, extractor, v_assessor
+        )
+        writer.emit("variant_tag", variant_id=variant.id, batch=variant.batch)
+        run_ids.append(writer.run_id)
+        gate = final["gate"]
+        fired = gate is not None
+        triggers = list(gate.triggers) if gate else []
+        agg = final["aggregate"]
+        ok = fired == variant.expected_gate and (
+            not variant.expected_reasons or all(r in triggers for r in variant.expected_reasons)
+        )
+        print(
+            f"[{n:2d}/{len(variants)}] {variant.id} {variant.batch:14s} "
+            f"mean={agg.weighted_mean if agg else None} gate={triggers or '-'} "
+            f"rec={final['recommendation']} "
+            f"expected_gate={variant.expected_gate} -> {'MATCH' if ok else 'DIVERGES'}",
+            flush=True,
+        )
+    manifest = runs_dir / f"variants-{run_ids[-1]}.json"
+    manifest_json = json.dumps(
+        {"kind": "variants", "provider": provider, "model": model, "run_ids": run_ids}, indent=2
+    )
+    manifest.write_text(manifest_json + "\n", encoding="utf-8")
+    print(f"manifest: {manifest.relative_to(Path.cwd())}")
+    return 0
+
+
 def run_passk(
     runs_dir: Path,
     provider: str,
@@ -351,6 +407,11 @@ def main() -> int:
         help="resume an interrupted interactive run after editing its review file",
     )
     group.add_argument(
+        "--variants",
+        action="store_true",
+        help="run the variant batches (data/variants/variants-v1.json)",
+    )
+    group.add_argument(
         "--passk",
         type=int,
         metavar="K",
@@ -382,6 +443,8 @@ def main() -> int:
         return _resume_run(args.resume, args.live)
     if args.batch:
         return run_batch(RUNS_DIR, provider, model, extractor, assessor)  # always eval mode
+    if args.variants:
+        return run_variants(RUNS_DIR, provider, model, extractor, assessor, args.live)
     if args.passk:
         return run_passk(RUNS_DIR, provider, model, extractor, assessor, args.passk, args.smoke)
 
