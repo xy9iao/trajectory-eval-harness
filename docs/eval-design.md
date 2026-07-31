@@ -141,6 +141,15 @@ error-recovery failure path are different failure routes and one does not cover 
 | degraded / nonzero resolution_failures | 2 | the floor of evidence quality where quote resolution already struggled |
 | random | 2 | a baseline, so stratification doesn't exclude the normal case entirely |
 
+**Sampling-pool upgrade (2026-07-28):** from the next spot-check onward, one stratum is
+drawn from the **evidence-coverage sentinel's over-threshold pool**
+(`eval/scorers/evidence_coverage.py`) instead of being guessed at. This converts a
+one-off manual discovery into a standing mechanism that aims scarce human minutes at the
+likeliest failures — the role `resolution_failures` plays for degradation. The sentinel
+does not replace the other strata: it has known misses (finding 013's train 5798 sits
+below threshold yet failed human review), so it narrows where to look without defining
+what counts.
+
 **Reporting constraint:** a stratified sample answers "how does faithfulness behave on known
 weak spots", NOT "what is the overall faithfulness rate". The report states the sampling
 design next to the number and never presents it as a population estimate.

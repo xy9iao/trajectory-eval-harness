@@ -23,6 +23,7 @@ system behavior.
 from typing import Any
 
 from eval.scorers import Case, Corpus
+from eval.scorers.evidence_coverage import evidence_coverage_scorer
 from eval.scorers.gate_integrity import gate_integrity_scorer
 from eval.scorers.ledger_consistency import ledger_consistency_scorer
 from eval.scorers.tool_calls import error_recovery_scorer, tool_call_correctness_scorer
@@ -230,3 +231,63 @@ def test_coverage_caveat_is_always_surfaced() -> None:
     result = error_recovery_scorer(_corpus(cases), {})
     assert result.metrics["exercised_on"] == "0/5"
     assert "COVERAGE CAVEAT" in result.notes
+
+
+# --- evidence-coverage sentinel (finding 013) ---
+
+
+def _assessment_case(run_id: str, row: int, dimension: str, n_dets: int, n_spans: int) -> Case:
+    events: list[dict[str, Any]] = [
+        {"type": "run_start", "run_id": run_id, "seq": 0, "pair": {"split": "train", "row": row}},
+        {
+            "type": "dimension_assessed",
+            "dimension": dimension,
+            "score": 3,
+            "degraded": False,
+            "determinations": [
+                {"requirement": f"R{i}", "value": "covered"} for i in range(1, n_dets + 1)
+            ],
+            "evidence_spans": [
+                {"doc": "jd", "start": i * 10, "end": i * 10 + 5} for i in range(n_spans)
+            ],
+        },
+        {"type": "run_end", "gate_fired": True, "recommendation": "flagged"},
+    ]
+    return Case(run_id=run_id, events=events)
+
+
+def test_sentinel_flags_structural_mismatch() -> None:
+    # finding 013's train 5084 shape: 10 determinations, 1 span
+    case = _assessment_case("r1", 5084, "hard_requirements", n_dets=10, n_spans=1)
+    result = evidence_coverage_scorer(_corpus([case]), {})
+    assert result.metrics["over_threshold"] == "1/1"
+    assert result.rows[0]["ratio"] == 10.0
+
+
+def test_sentinel_ignores_normal_coverage() -> None:
+    # 4 determinations / 2 spans = 2.0, the corpus median for hard_requirements
+    case = _assessment_case("r1", 175, "hard_requirements", n_dets=4, n_spans=2)
+    result = evidence_coverage_scorer(_corpus([case]), {})
+    assert result.metrics["over_threshold"] == "0/1"
+
+
+def test_sentinel_semantics_are_declared_not_a_faithfulness_score() -> None:
+    # SEMANTIC-BOUNDARY: the sentinel must never present itself as a
+    # faithfulness measurement. A normal ratio proves nothing about evidence
+    # quality (013: a 1:1 assessment cited the wrong category entirely), and a
+    # high ratio can be legitimate. The scorer states this in its own notes so
+    # a reader of the raw output cannot mistake a flag count for a score.
+    case = _assessment_case("r1", 175, "hard_requirements", n_dets=2, n_spans=2)
+    result = evidence_coverage_scorer(_corpus([case]), {})
+    assert result.metrics["over_threshold"] == "0/1"  # clean by the ratio...
+    assert "NOT A FAITHFULNESS METRIC" in result.notes  # ...but says what that means
+    assert "never report the raw ratio as a score" in result.notes
+    # the headline metric is a COUNT, never the ratio itself
+    assert "ratio" not in result.metrics
+
+
+def test_sentinel_treats_zero_spans_as_maximal_mismatch() -> None:
+    case = _assessment_case("r1", 175, "skills_coverage", n_dets=3, n_spans=0)
+    result = evidence_coverage_scorer(_corpus([case]), {})
+    assert result.metrics["assessments_with_zero_spans"] == 1
+    assert result.rows[0]["ratio"] == "inf"

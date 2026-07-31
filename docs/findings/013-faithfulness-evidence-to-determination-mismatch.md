@@ -83,6 +83,13 @@ assessments each, same manifest):
 So the three sampled failures are not anecdotes: the dimension they came from is
 systematically the one where determinations outnumber their evidence.
 
+**What the distribution does and does not show.** It establishes that cardinality
+mismatch is *prevalent in hard_requirements*. It does NOT establish that the
+high-ratio assessments are unfaithful — only three assessments have been verified by a
+human, and a high ratio can be legitimate (one substantive passage genuinely covering
+many must-items). Prevalence of the structural condition and incidence of actual
+unfaithfulness are two claims; only the first has corpus-wide support.
+
 **(b) Category mismatch.** Two failures cite material that cannot serve as evidence for the
 claim being made:
 
@@ -120,13 +127,23 @@ is structural and mechanically closable:
    span rather than sharing a dimension-level `evidence_spans` list. Under finding 009's
    taxonomy this is a mechanism fix — the class with a 3/3 record on this project, against
    0/2 for prose.
-2. **`determinations / evidence_spans` ratio as a standing sentinel.** The ratio is
-   computable with zero annotation and would have flagged the 10:1 cases automatically.
-   This is a *measurement*, not a repair, so it does not violate the P2-measures-only
-   discipline — proposed as a P2 increment (owner ruling pending), converting a 20-minute
-   manual probe into a permanent automatic indicator, exactly as `resolution_failures` was.
+2. **`determinations / evidence_spans` ratio as a standing sentinel.** — **ADOPTED**
+   (owner ruling 2026-07-28, decisions.md; `eval/scorers/evidence_coverage.py`). A
+   measurement rather than a repair, so it is P2-legal, and it converts a 20-minute manual
+   probe into a permanent automatic pointer — the role `resolution_failures` plays for
+   degradation. Threshold 5x; on this corpus it flags **12/299 assessments, 10 of them
+   hard_requirements**.
 
-Neither is applied now: the cross-model stage must first show whether the pattern is
+   **Binding semantics, and a known miss.** The sentinel says "this warrants human
+   inspection", never "this is unfaithful": a high ratio may be legitimate, and a normal
+   ratio guarantees nothing (5084 run A's category error would have been just as wrong at
+   1:1). Concretely, **it does not catch train 5798** — 18 determinations over 6 spans is
+   3.0, below threshold, yet a human judged it unsupported. Two of three verified failures
+   are inside its pool; one is not. That is the exact sense in which it is a sampling aid,
+   not a detector, and it is why the raw ratio is never reported as a score — only the flag
+   count and where the flags cluster.
+
+Change 1 is not applied now: the cross-model stage must first show whether the pattern is
 provider-specific (the standing reason, cf. findings 009 and 012).
 
 ## Result
