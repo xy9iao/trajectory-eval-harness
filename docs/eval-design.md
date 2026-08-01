@@ -129,13 +129,29 @@ error-recovery failure path are different failure routes and one does not cover 
    constructed; TP/FP/FN come from the real 30 pairs. A single combined confusion matrix
    would let hand-built samples contaminate the credibility of the whole table. Two tables,
    or one table with a source column — decided now, not at report time.
-5. **Divergence defaults to "my construction is wrong", not "the agent is wrong."** When a
-   variant's observed result contradicts its expectation, the first hypothesis is that the
-   perturbation failed to do what the spec claims — because a variant is a test with a
-   *known* answer, and the answer is only known if the construction is sound. A failed
-   construction goes into `construction_failures` in the spec file with (expected, actual,
-   likely cause) and **never into the negative set**: a mislabelled negative manufactures a
-   phantom true-negative and corrupts the very metric the batch exists to un-degenerate.
+5. **Divergence defaults to "my construction is wrong" — and resolves into exactly one of
+   three states.** When a variant's observed result contradicts its expectation, the first
+   hypothesis is that the perturbation failed to do what the spec claims, because a variant
+   is a test with a *known* answer and the answer is only known if the construction is
+   sound. The default holds until a diagnosis overturns it, and the diagnosis must land in
+   one of:
+
+   | state | meaning | where it goes |
+   |---|---|---|
+   | **construction error** | the perturbation did not satisfy what the spec claims | `construction_failures`; **never** the negative set |
+   | **agent–rubric divergence** | the construction is sound; the agent's behavior departs from a written rubric convention | stays a live variant, tagged with the divergence and the finding that owns it |
+   | **undiagnosable** | the cause cannot be established even after local re-resolution | recorded against **neither** side |
+
+   **`undiagnosable` must state why it could not be diagnosed and what was attempted** —
+   specifically whether local re-resolution of the trajectory's opaque ids was run. Without
+   that requirement the category degrades into a bin for "did not bother to look."
+
+   **A diagnosis that needed information outside the trajectory is still a diagnosis** — it
+   is recorded as such (*"this attribution depends on out-of-trajectory information"*), not
+   downgraded to undiagnosable. The distinction matters because trajectories deliberately
+   carry requirement **ids, never requirement text** (the data boundary from finding 007),
+   so id resolution is a normal diagnostic step rather than a failure of the record.
+
    Repeated same-direction failures are finding material, not noise to retry past.
 
    *Provenance:* the rule was written because two low-road variants (`cf-01` on train 901,

@@ -331,7 +331,15 @@ def run_variants(
             f"mean={agg.weighted_mean if agg else None} gate={triggers or '-'} "
             f"rec={final['recommendation']} "
             f"expected_gate={variant.expected_gate} -> "
-            f"{'MATCH' if ok else 'DIVERGES (construction suspect first — 3c gate 5)'}",
+            + (
+                "MATCH"
+                if ok
+                else (
+                    "DIVERGES (known, diagnosed — see known_divergence)"
+                    if variant.known_divergence
+                    else "DIVERGES (construction suspect first — 3c gate 5)"
+                )
+            ),
             flush=True,
         )
     manifest = runs_dir / f"variants-{run_ids[-1]}.json"

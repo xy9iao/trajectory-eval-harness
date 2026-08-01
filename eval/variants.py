@@ -42,6 +42,11 @@ class Variant:
     expected_gate: bool
     expected_reasons: list[str]
     rationale: str
+    # Set when a dry run resolved a divergence to "agent-rubric divergence"
+    # (3c gate 5, state 2): the construction is sound and the departure is the
+    # agent's, so the variant stays live and names the finding that owns it.
+    # A construction error would be removed to `construction_failures` instead.
+    known_divergence: str | None = None
 
     @property
     def pair_key(self) -> tuple[str, int]:
