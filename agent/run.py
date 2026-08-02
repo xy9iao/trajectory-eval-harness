@@ -25,6 +25,7 @@ from langgraph.checkpoint.sqlite import SqliteSaver
 
 from eval.trajectory import load_trajectory, validate_data_hygiene, validate_trajectory
 
+
 from agent.client import make_completer, provider_config
 from agent.graph import (
     ADVANCE_THRESHOLD,
@@ -59,6 +60,16 @@ def load_dotenv(path: Path) -> None:
 
 
 RUNS_DIR = Path(__file__).resolve().parents[1] / "runs"
+
+
+def _display(path: Path) -> str:
+    """Path for display: relative when under cwd, absolute otherwise.
+    A bare relative_to() raises whenever a caller passes a runs_dir
+    outside the project (a pytest tmp_path, for one)."""
+    try:
+        return str(path.relative_to(Path.cwd()))
+    except ValueError:
+        return str(path)
 
 
 def _rubric_version() -> str:
@@ -305,6 +316,7 @@ def run_variants(
         variants = [v for v in variants if v.id in set(only)]
     print(f"variants: {len(variants)} | provider={provider} model={model}")
     run_ids: list[str] = []
+    variant_ids: dict[str, str] = {}
     for n, variant in enumerate(variants, 1):
         resume_text, jd_text = materialize(variant)
         source = SyntheticSource(resume_text, jd_text)
@@ -317,8 +329,14 @@ def run_variants(
         final, writer = run_pair(
             source, pair, "eval", runs_dir, provider, model, extractor, v_assessor
         )
-        writer.emit("variant_tag", variant_id=variant.id, batch=variant.batch)
+        # Variant identity belongs in the MANIFEST, not the trajectory. An
+        # earlier version emitted a `variant_tag` event here and invalidated
+        # all 11 trajectories twice over: an 8th event type against a schema
+        # frozen before P2, written after run_end, which must be final. Gate
+        # 4's isolation never needed it — the manifest already scopes the
+        # batch and declares its kind.
         run_ids.append(writer.run_id)
+        variant_ids[writer.run_id] = variant.id
         gate = final["gate"]
         fired = gate is not None
         triggers = list(gate.triggers) if gate else []
@@ -349,6 +367,7 @@ def run_variants(
             "provider": provider,
             "model": model,
             "run_ids": run_ids,
+            "variant_ids": variant_ids,
             # a filtered run is a dry check, not the batch — labelled so it can
             # never be picked up as if it were the full negative set
             "partial": sorted(only) if only else None,
@@ -356,7 +375,7 @@ def run_variants(
         indent=2,
     )
     manifest.write_text(manifest_json + "\n", encoding="utf-8")
-    print(f"manifest: {manifest.relative_to(Path.cwd())}")
+    print(f"manifest: {_display(manifest)}")
     return 0
 
 
@@ -416,7 +435,7 @@ def run_passk(
     )
     manifest.write_text(manifest_json + "\n", encoding="utf-8")
     print(f"pass^k done: {total - failures}/{total} clean runs")
-    print(f"manifest: {manifest.relative_to(Path.cwd())}")
+    print(f"manifest: {_display(manifest)}")
     return 0 if failures == 0 else 1
 
 
@@ -525,7 +544,7 @@ def main() -> int:
         return 0
     aggregate = final["aggregate"]
     print(f"run_id: {writer.run_id}")
-    print(f"trajectory: {writer.path.relative_to(Path.cwd())}")
+    print(f"trajectory: {_display(writer.path)}")
     print(f"aggregate: {aggregate.model_dump() if aggregate else None}")
     print(f"gate: {final['gate'].triggers if final['gate'] else 'not fired'}")
     print(f"recommendation: {final['recommendation']}")

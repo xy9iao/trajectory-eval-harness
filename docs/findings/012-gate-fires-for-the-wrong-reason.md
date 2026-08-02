@@ -91,6 +91,31 @@ numerator above is the hand-checked one. The discarded 5/30 is recorded because 
 the instructive part: a keyword scan cannot produce a finding's numerator on its own, and a
 2.5× overstatement would have survived into the report unchallenged.
 
+## Reproducibility caveat — added 2026-08-02, and it bounds the claim above
+
+The variant batch was re-run after a trajectory-validity bug was fixed
+(`runs/variants-r20260802T085523-ab0cf0.json`). **On the second batch `gn-01` did not fire the
+gate at all** — mean 4.0, `advance`, a clean match. The availability item was extracted and
+judged `absent` in two of three observed runs of the same variant, not three of three.
+
+Two consequences, both stated rather than resolved:
+
+- **The defect is intermittent, not deterministic.** The chain in the Verification section is
+  correct about what happens *when* the item is extracted; it is not evidence that the item is
+  always extracted. This is [finding 015](015-extraction-ledger-size-is-pair-dependent-unstable.md)
+  acting on 012's evidence — the ledger's contents vary run to run, so a defect that lives in
+  the ledger inherits that variance.
+- **The 2/30 exposure figure rests on single draws** and therefore carries unstated variance of
+  its own. Read it as "at least 2 pairs can produce this", not as a rate.
+
+**Methodological point worth keeping:** a variant is a unit test with a known answer, but the
+system under test is stochastic, so **one run per variant is an underpowered test**. The fault
+batch reproduced exactly across both batches (5/5 twice) because its triggers are deterministic —
+anomaly rules on document length, injected malformed responses. The gate negatives sit near
+decision boundaries, which is precisely where finding 011's variance lives: gn-06 matched in
+batch 1 and diverged in batch 2, gn-01 the reverse. Any future variant stage should run each
+variant k times and report the distribution, exactly as the live corpus does.
+
 ## Why 150 live runs never surfaced this
 
 The defect changes an outcome only when it is the **sole** driver. On the unperturbed corpus
