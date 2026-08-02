@@ -80,6 +80,30 @@ def test_env_overrides_beat_defaults() -> None:
     assert cfg.model == "custom-model"
 
 
+def test_reasoning_models_pin_reasoning_effort_off_for_function_tools() -> None:
+    # Compat, discovered by the cross-model smoke: a reasoning model rejects
+    # function tools on /v1/chat/completions unless reasoning_effort is
+    # explicitly "none" — "Function tools with reasoning_effort are not
+    # supported ... set reasoning_effort to 'none'". Without the pin every
+    # call 400s and the batch produces valid trajectories full of nulls.
+    base = {"LLM_PROVIDER": "openai", "LLM_API_KEY": "x"}
+    for model in ("gpt-5.6-luna", "gpt-5.4-mini", "o3", "o4-mini"):
+        assert provider_config({**base, "LLM_MODEL": model}).reasoning_effort == "none", model
+
+    # non-reasoning models must send NO reasoning_effort at all — an unknown
+    # parameter is itself a 400 on some providers, so silence is the default
+    for model in ("gpt-4o-mini", "deepseek-chat"):
+        assert provider_config({**base, "LLM_MODEL": model}).reasoning_effort is None, model
+
+
+def test_reasoning_effort_is_overridable_in_both_directions() -> None:
+    base = {"LLM_PROVIDER": "openai", "LLM_API_KEY": "x", "LLM_MODEL": "gpt-5.6-luna"}
+    assert provider_config({**base, "LLM_REASONING_EFFORT": "low"}).reasoning_effort == "low"
+    # "unset" suppresses the parameter entirely — the escape hatch for a
+    # provider that rejects the field rather than requiring it
+    assert provider_config({**base, "LLM_REASONING_EFFORT": "unset"}).reasoning_effort is None
+
+
 # --- wire schema is generated from the pydantic model (7b single source) ---
 
 
