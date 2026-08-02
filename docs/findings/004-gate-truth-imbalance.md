@@ -37,3 +37,36 @@ gate-integrity measurement.
 ## Result — PENDING
 
 Closes in P2 with the stratified gate-integrity numbers and the variant-set composition.
+
+**Mechanism supplied (2026-07-31):** [finding 014](014-low-road-negative-is-structurally-unconstructible.md)
+shows TN=0 is not a sampling accident. The hard-requirement ledger reuses the determinations
+that produce the scoring bands (28/30 ledgers say so in prose), so "meets every must, still
+below the advance floor" asks two coupled variables to move in opposite directions — a
+region occupying 16/216 band combinations and 0/30 reference pairs. The negative class in
+this batch is therefore populated by the **high road only**, and the third bullet above is
+amended accordingly: non-gating variants are built by raising a pair to `advance`, not by
+holding it at `do_not_advance`.
+
+**Second mechanism (2026-08-02):** the high road is also structurally hard, for an unrelated
+reason. Building one means satisfying every item the agent's ledger enumerates — but
+[finding 015](015-extraction-ledger-size-is-pair-dependent-unstable.md) shows that on some
+pairs the ledger's *size* is a draw (train 3773 ranged from 2 to 12 items on the same JD).
+A perturbation cannot be written to clear a bar whose height is sampled per run. Three of
+four high-road attempts failed, and the batch closed with **TN=1**.
+
+So TN=0 has two independent structural causes, not one accident: the low road is nearly
+empty by score geometry, and the high road is hard to construct against a moving ledger.
+That conclusion is worth more than the six true negatives the batch was built to collect.
+
+**Third layer — the one that matters most (2026-08-02):** the missing negative class does
+not merely degrade a metric, it makes a whole class of defects **unobservable**. Every one
+of the 30 reference pairs deserved a gate, so no live run could ever show the gate firing
+for the wrong reason. [Finding 012](012-gate-fires-for-the-wrong-reason.md)'s availability-
+requirement defect sat undetected across 150 runs for exactly this reason: both affected
+pairs already failed for legitimate reasons, and the spurious trigger hid behind them. It
+surfaced only when a variant repaired every real failure and left the boilerplate item
+standing alone.
+
+This is the strongest available justification for constructing negatives at all — the batch
+returned one true negative and one fully diagnosed defect that 150 live runs could not have
+produced.

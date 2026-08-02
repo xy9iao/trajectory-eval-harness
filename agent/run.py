@@ -25,6 +25,7 @@ from langgraph.checkpoint.sqlite import SqliteSaver
 
 from eval.trajectory import load_trajectory, validate_data_hygiene, validate_trajectory
 
+
 from agent.client import make_completer, provider_config
 from agent.graph import (
     ADVANCE_THRESHOLD,
@@ -59,6 +60,16 @@ def load_dotenv(path: Path) -> None:
 
 
 RUNS_DIR = Path(__file__).resolve().parents[1] / "runs"
+
+
+def _display(path: Path) -> str:
+    """Path for display: relative when under cwd, absolute otherwise.
+    A bare relative_to() raises whenever a caller passes a runs_dir
+    outside the project (a pytest tmp_path, for one)."""
+    try:
+        return str(path.relative_to(Path.cwd()))
+    except ValueError:
+        return str(path)
 
 
 def _rubric_version() -> str:
@@ -275,6 +286,99 @@ def run_batch(
     return 0 if failures == 0 else 1
 
 
+def run_variants(
+    runs_dir: Path,
+    provider: str,
+    model: str,
+    extractor: Extractor | None,
+    assessor: Assessor | None,
+    live: bool,
+    only: list[str] | None = None,
+) -> int:
+    """Run the variant batches (eval-design 3b/3c): each variant is a unit
+    test with a stated expectation. Every trajectory is tagged variant_id so
+    constructed results can never be merged with live-corpus results
+    (gate 4).
+
+    `only` runs a subset — used to dry-verify one construction before paying
+    for the batch, the same smoke discipline applied to the construction
+    hypothesis rather than to the pipeline."""
+    import functools as _ft
+
+    from eval.variants import faulty_completer, load_variants, materialize
+
+    variants = load_variants()
+    if only:
+        known = {v.id for v in variants}
+        unknown = [i for i in only if i not in known]
+        if unknown:
+            raise SystemExit(f"unknown variant id(s): {unknown} (known: {sorted(known)})")
+        variants = [v for v in variants if v.id in set(only)]
+    print(f"variants: {len(variants)} | provider={provider} model={model}")
+    run_ids: list[str] = []
+    variant_ids: dict[str, str] = {}
+    for n, variant in enumerate(variants, 1):
+        resume_text, jd_text = materialize(variant)
+        source = SyntheticSource(resume_text, jd_text)
+        v_assessor = assessor
+        if variant.perturbation["type"] == "malformed_output" and live:
+            cfg = provider_config()
+            broken = faulty_completer(make_completer(cfg), int(variant.perturbation["failures"]))
+            v_assessor = _ft.partial(assess_dimension_llm, cfg, broken)
+        pair = PairRef.model_validate(variant.base_pair)
+        final, writer = run_pair(
+            source, pair, "eval", runs_dir, provider, model, extractor, v_assessor
+        )
+        # Variant identity belongs in the MANIFEST, not the trajectory. An
+        # earlier version emitted a `variant_tag` event here and invalidated
+        # all 11 trajectories twice over: an 8th event type against a schema
+        # frozen before P2, written after run_end, which must be final. Gate
+        # 4's isolation never needed it — the manifest already scopes the
+        # batch and declares its kind.
+        run_ids.append(writer.run_id)
+        variant_ids[writer.run_id] = variant.id
+        gate = final["gate"]
+        fired = gate is not None
+        triggers = list(gate.triggers) if gate else []
+        agg = final["aggregate"]
+        ok = fired == variant.expected_gate and (
+            not variant.expected_reasons or all(r in triggers for r in variant.expected_reasons)
+        )
+        print(
+            f"[{n:2d}/{len(variants)}] {variant.id} {variant.batch:14s} "
+            f"mean={agg.weighted_mean if agg else None} gate={triggers or '-'} "
+            f"rec={final['recommendation']} "
+            f"expected_gate={variant.expected_gate} -> "
+            + (
+                "MATCH"
+                if ok
+                else (
+                    "DIVERGES (known, diagnosed — see known_divergence)"
+                    if variant.known_divergence
+                    else "DIVERGES (construction suspect first — 3c gate 5)"
+                )
+            ),
+            flush=True,
+        )
+    manifest = runs_dir / f"variants-{run_ids[-1]}.json"
+    manifest_json = json.dumps(
+        {
+            "kind": "variants",
+            "provider": provider,
+            "model": model,
+            "run_ids": run_ids,
+            "variant_ids": variant_ids,
+            # a filtered run is a dry check, not the batch — labelled so it can
+            # never be picked up as if it were the full negative set
+            "partial": sorted(only) if only else None,
+        },
+        indent=2,
+    )
+    manifest.write_text(manifest_json + "\n", encoding="utf-8")
+    print(f"manifest: {_display(manifest)}")
+    return 0
+
+
 def run_passk(
     runs_dir: Path,
     provider: str,
@@ -331,7 +435,7 @@ def run_passk(
     )
     manifest.write_text(manifest_json + "\n", encoding="utf-8")
     print(f"pass^k done: {total - failures}/{total} clean runs")
-    print(f"manifest: {manifest.relative_to(Path.cwd())}")
+    print(f"manifest: {_display(manifest)}")
     return 0 if failures == 0 else 1
 
 
@@ -349,6 +453,17 @@ def main() -> int:
         "--resume",
         metavar="RUN_ID",
         help="resume an interrupted interactive run after editing its review file",
+    )
+    group.add_argument(
+        "--variants",
+        action="store_true",
+        help="run the variant batches (data/variants/variants-v1.json)",
+    )
+    ap.add_argument(
+        "--only",
+        metavar="ID",
+        nargs="+",
+        help="with --variants: run only these ids (dry-verify a construction before the batch)",
     )
     group.add_argument(
         "--passk",
@@ -382,6 +497,8 @@ def main() -> int:
         return _resume_run(args.resume, args.live)
     if args.batch:
         return run_batch(RUNS_DIR, provider, model, extractor, assessor)  # always eval mode
+    if args.variants:
+        return run_variants(RUNS_DIR, provider, model, extractor, assessor, args.live, args.only)
     if args.passk:
         return run_passk(RUNS_DIR, provider, model, extractor, assessor, args.passk, args.smoke)
 
@@ -427,7 +544,7 @@ def main() -> int:
         return 0
     aggregate = final["aggregate"]
     print(f"run_id: {writer.run_id}")
-    print(f"trajectory: {writer.path.relative_to(Path.cwd())}")
+    print(f"trajectory: {_display(writer.path)}")
     print(f"aggregate: {aggregate.model_dump() if aggregate else None}")
     print(f"gate: {final['gate'].triggers if final['gate'] else 'not fired'}")
     print(f"recommendation: {final['recommendation']}")

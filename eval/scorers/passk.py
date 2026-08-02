@@ -17,7 +17,7 @@ a run that degrades a dimension IS a different result, not a missing one.
 import statistics
 from typing import Any
 
-from eval.scorers import Corpus, Reference, ScorerResult
+from eval.scorers import Corpus, Reference, ScorerResult, StabilityNote
 
 DIMENSIONS = ["skills_coverage", "experience_level", "education_domain_fit", "hard_requirements"]
 
@@ -104,5 +104,16 @@ def passk_scorer(corpus: Corpus, reference: Reference) -> ScorerResult:
         notes=(
             f"{len(unstable)} pair(s) flipped at least one dimension or the gate across runs; "
             f"{len(corpus.excluded)} case(s) excluded at load (validation failures)."
+        ),
+        stability=StabilityNote(
+            basis="across-k",
+            detail=(
+                "This scorer IS the stability measurement — every figure it reports is already "
+                "an across-k agreement rate, so there is no separate spread to declare. The "
+                "note is stated rather than omitted because the contract is 'declare the basis', "
+                "and silence is indistinguishable from having forgotten (the report runner "
+                "flags a missing note for exactly that reason)."
+            ),
+            unstable_pairs=[str(u["pair"]) for u in unstable],
         ),
     )

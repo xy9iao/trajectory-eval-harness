@@ -42,6 +42,22 @@ class ProviderConfig:
     base_url: str
     model: str
     api_key: str
+    # None = send no reasoning_effort at all (every non-reasoning model).
+    # See make_completer for why reasoning models need it pinned to "none".
+    reasoning_effort: str | None = None
+
+
+# Models that reject function tools unless reasoning_effort is explicitly
+# "none" on /v1/chat/completions. Matched by prefix so dated snapshots
+# (gpt-5.6-luna-2026-xx-xx) resolve the same way as the floating alias.
+_REASONING_PREFIXES = ("gpt-5", "o1", "o3", "o4")
+
+
+def _reasoning_effort_for(model: str, env: Mapping[str, str]) -> str | None:
+    override = env.get("LLM_REASONING_EFFORT", "").strip()
+    if override:
+        return None if override.lower() == "unset" else override
+    return "none" if model.startswith(_REASONING_PREFIXES) else None
 
 
 def provider_config(env: Mapping[str, str] | None = None) -> ProviderConfig:
@@ -55,11 +71,13 @@ def provider_config(env: Mapping[str, str] | None = None) -> ProviderConfig:
     if not api_key:
         raise ValueError("LLM_API_KEY is not set")
     defaults = _DEFAULTS[provider]
+    model = e.get("LLM_MODEL", "").strip() or defaults["model"]
     return ProviderConfig(
         provider=provider,
         base_url=e.get("LLM_BASE_URL", "").strip() or defaults["base_url"],
-        model=e.get("LLM_MODEL", "").strip() or defaults["model"],
+        model=model,
         api_key=api_key,
+        reasoning_effort=_reasoning_effort_for(model, e),
     )
 
 
@@ -83,6 +101,25 @@ def make_completer(cfg: ProviderConfig) -> Completer:
 
     client = OpenAI(api_key=cfg.api_key, base_url=cfg.base_url)
 
+    # COMPAT ONLY (cross-model protocol, eval-design §4 — the one permitted
+    # calibration round, spent on pipeline compatibility and never semantics).
+    # Reasoning models reject function tools on /v1/chat/completions unless
+    # reasoning_effort is explicitly 'none':
+    #   "Function tools with reasoning_effort are not supported for
+    #    gpt-5.6-luna in /v1/chat/completions. To use function tools, use
+    #    /v1/responses or set reasoning_effort to 'none'."
+    # Without it every call 400s, every dimension degrades, and the batch
+    # produces valid trajectories full of nulls — which is what the 2-pair
+    # smoke caught before any full batch was paid for.
+    #
+    # This knob is a REQUEST-SHAPE fix, not a prompt or rubric change. It does
+    # change what the model is asked to do internally, so any report using it
+    # must say the delivery model ran with reasoning disabled — that belongs in
+    # the results table, not hidden in a client default.
+    extra: dict[str, Any] = {}
+    if cfg.reasoning_effort is not None:
+        extra["reasoning_effort"] = cfg.reasoning_effort
+
     def complete(messages: list[dict[str, Any]], tool_schema: dict[str, Any]) -> RawCompletion:
         response = client.chat.completions.create(
             model=cfg.model,
@@ -92,6 +129,7 @@ def make_completer(cfg: ProviderConfig) -> Completer:
                 "type": "function",
                 "function": {"name": tool_schema["function"]["name"]},
             },
+            **cast(Any, extra),
         )
         usage = response.usage
         calls = response.choices[0].message.tool_calls
