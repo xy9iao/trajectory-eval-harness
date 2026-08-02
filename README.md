@@ -29,6 +29,16 @@ Three are portable as-is; three encode this project's rubric vocabulary and need
 swapped. That split is stated rather than glossed — a harness that claims to measure anything
 usually measures nothing.
 
+**What this is not:** not a benchmark, not a leaderboard, not a hiring tool. The 30-pair reference
+set is a fixed instrument for detecting change in one agent, not a score anyone should compare
+across projects — and the host agent exists to give the harness something to measure, not to be
+deployed on real applicants.
+
+**Known limitation, stated up front:** the constructed negative class is measured at k=1 while the
+system under test has a quantified variance floor ([finding 011](docs/findings/011-passk-variance-floor.md)).
+Negative-class results are therefore existence proofs — "at least N pairs can produce this" — never
+rates. The live corpus is measured at k=5 and does carry rates.
+
 ## Design decisions you can steal
 
 - **Trajectory JSONL is the source of truth.** Every figure in every report regenerates from it.
