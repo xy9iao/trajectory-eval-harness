@@ -18,6 +18,30 @@
       "actual": "never run — rejected at spec review",
       "cause": "Same failure mode as cf-01, caught by applying the same check on request. Train 2980 has three clear unmet items (a four-component skills bundle, 10 years progressive experience, 5 years customer-facing collaborative software); the appended 2.5-year configuration-analyst segment satisfied none of them — 2.5 years cannot evidence 10 years progressive.",
       "structural": "The low road was abandoned entirely rather than re-based. See the geometry argument in the finding cited below: meeting every stated must mechanically lifts the weighted mean into or above the boundary band, so 'meets everything, still uncompetitive' is a near-empty region of the score space. Both low-road attempts failed for the same reason, which is what makes it a property of the rubric rather than two authoring slips."
+    },
+    {
+      "id": "cf-03",
+      "intended": "gn-03, high-road gate negative on train 3978",
+      "expected": "veto met, mean above 3.5, no gate, advance",
+      "actual": "ran live mean=2.0, gate=['hard_unmet'] (batch runs/variants-r20260801T111846-936b6d.json)",
+      "cause": "The perturbation was written against the HUMAN reference ledger, which records a single unmet item (the Java-years half of a compound qualification). The agent's extractor enumerated 13 items, splitting what the human bundled: Angular SPA, Spring Batch, Microservices, JPA/Hibernate and a Master's degree each became their own must. The appended segment covered plain Java/JUnit/Maven only, leaving 8 items absent.",
+      "structural": "Shared root cause with the other two high-road failures, which is why they are recorded together rather than as three authoring slips: the perturbations were written against the human reference ledger's GRANULARITY, and the agent's ledger is finer and more literal. Satisfying the human's unmet set does not satisfy the agent's enumerated set. Not repaired by rewriting to the agent's enumeration — see the rebuild_declined note."
+    },
+    {
+      "id": "cf-04",
+      "intended": "gn-04, high-road gate negative on train 6220",
+      "expected": "veto met, mean above 3.5, no gate, advance",
+      "actual": "ran live mean=3.8, gate=['hard_indeterminate'] (batch runs/variants-r20260801T111846-936b6d.json)",
+      "cause": "Closest miss in the batch and the clearest illustration. Exactly ONE item was not covered, and only as 'partial': the JD's 'Deep Experience and understanding of SQL (MySQL, Postgres, Redshift)'. The segment named Redshift and not the other two, so a compound item was half satisfied -> partial -> veto indeterminate -> hard_indeterminate. The score side worked exactly as designed (mean 3.8, well clear of the boundary band).",
+      "structural": "Shared root cause with the other two high-road failures, which is why they are recorded together rather than as three authoring slips: the perturbations were written against the human reference ledger's GRANULARITY, and the agent's ledger is finer and more literal. Satisfying the human's unmet set does not satisfy the agent's enumerated set. Not repaired by rewriting to the agent's enumeration — see the rebuild_declined note."
+    },
+    {
+      "id": "cf-05",
+      "intended": "gn-05, high-road gate negative on train 5798",
+      "expected": "veto met, mean above 3.5, no gate, advance",
+      "actual": "ran live mean=2.7, gate=['hard_unmet'] (batch runs/variants-r20260801T111846-936b6d.json)",
+      "cause": "Paraphrase where the JD is literal. The JD names '12VDC-72VDC and 24VAC-480VAC systems' and 'computers, data recorders, digital millimeters'; the segment wrote 'VDC and VAC distribution' and a generic instrument list. Both items were judged absent, and the 5-year tenure item came back 'partial' despite a 6.2-year dated segment.",
+      "structural": "Shared root cause with the other two high-road failures, which is why they are recorded together rather than as three authoring slips: the perturbations were written against the human reference ledger's GRANULARITY, and the agent's ledger is finer and more literal. Satisfying the human's unmet set does not satisfy the agent's enumerated set. Not repaired by rewriting to the agent's enumeration — see the rebuild_declined note."
     }
   ],
   "base_swaps": [
@@ -61,55 +85,8 @@
       "changed": "Appended a 2.9-year dated Business-Analyst-leadership segment.",
       "expected_gate": false,
       "expected_reasons": [],
-      "rationale": "The reference ledger's single clear failure is '2 years in a Business Analyst leadership role' \u2014 no BA title and no lead role in any dated segment. The added segment supplies exactly that half; education already scores 5. Expected recommendation: advance."
-    },
-    {
-      "id": "gn-03",
-      "batch": "gate_negative",
-      "base_pair": {
-        "split": "train",
-        "row": 3978
-      },
-      "perturbation": {
-        "type": "append_resume_segment",
-        "text": "Experience Java Developer, 06/2019 to 08/2023, Northwind Software - Austin, TX. Developed and maintained Java services for a claims-processing platform: core business logic in Java 8 and 11, REST endpoints, JUnit test suites, and Maven builds. Worked day to day in an Agile team with code review and pair programming."
-      },
-      "changed": "Appended a 4.2-year dated Java development segment.",
-      "expected_gate": false,
-      "expected_reasons": [],
-      "rationale": "The reference ledger's only unmet item is the Java-years half of the compound qualification (zero Java years evidenced against either the 2- or 4-year floor). The segment clears the higher floor; the degree half was already met and education scores 5. Expected recommendation: advance."
-    },
-    {
-      "id": "gn-04",
-      "batch": "gate_negative",
-      "base_pair": {
-        "split": "train",
-        "row": 6220
-      },
-      "perturbation": {
-        "type": "append_resume_segment",
-        "text": "Experience Senior Data Engineer, 02/2020 to 12/2023, Cobalt Analytics - Seattle, WA. Owned the analytics warehouse on AWS: Redshift cluster modelling and tuning, S3 staging, Glue and Airflow orchestration, and Python for all transformation and operational scripting. Built and published the executive reporting layer in Tableau and Power BI, including certified datasets and scheduled refreshes for four business units."
-      },
-      "changed": "Appended a 3.8-year dated AWS/Redshift/Airflow/Python + Tableau/Power BI segment.",
-      "expected_gate": false,
-      "expected_reasons": [],
-      "rationale": "The reference ledger has one clear unmet item (BI Tools, marked 'is a must', no BI tool of any vendor present) and one indeterminate (the AWS half of AWS/Python, which rested entirely on Azure adjacency). BOTH must be cleared, because an indeterminate alone caps the veto and fires hard_indeterminate \u2014 so the segment names AWS services first-hand and two BI tools. The other four musts were already met; experience and education already score 5, leaving wide headroom above the 3.5 advance floor. Expected recommendation: advance."
-    },
-    {
-      "id": "gn-05",
-      "batch": "gate_negative",
-      "base_pair": {
-        "split": "train",
-        "row": 5798
-      },
-      "perturbation": {
-        "type": "append_resume_segment",
-        "text": "Experience Electrical Test Technician, 01/2017 to 03/2023, Fairmont Rail Systems - Erie, PA. Performed acceptance and functional testing on traction control assemblies: read and worked from schematics, block diagrams, wire lists and functional diagrams; verified VDC and VAC distribution against specification; diagnosed board-level faults using basic electronics fundamentals. Daily instrumentation included oscilloscope, digital multimeter, signal generator, bench power supply, megohmmeter and calibrated torque tooling, with documented calibration records for each test set."
-      },
-      "changed": "Appended a 6.2-year dated electrical-test-technician segment naming the schematics bundle, VDC/VAC systems and the instrumentation set.",
-      "expected_gate": false,
-      "expected_reasons": [],
-      "rationale": "The reference ledger has two clear unmet items (5 years electrical testing, ~0.2 evidenced; and the explicitly 'Must have' schematics/block-diagram/wire-list/functional-diagram bundle with basic electronics and VDC/VAC) plus one indeterminate (instrumentation, two named components absent). The segment targets all three, since the indeterminate would otherwise cap the veto on its own. Education already scores 5 and the added tenure is role-matching, so experience should rise from 3. Expected recommendation: advance."
+      "rationale": "The reference ledger's single clear failure is '2 years in a Business Analyst leadership role' — no BA title and no lead role in any dated segment. The added segment supplies exactly that half; education already scores 5. Expected recommendation: advance.",
+      "known_divergence": "UNDIAGNOSABLE (3c gate 5, state 3) — recorded against NEITHER side. Ran live mean=3.0, gate=['hard_unmet'] (batch runs/variants-r20260801T111846-936b6d.json); the run's ledger held 12 items with 6 not covered. What was attempted: local re-resolution of the requirement ids by re-running extraction on the identical perturbed input, the same procedure that successfully diagnosed gn-01. It failed here because the re-extraction returned a 2-item ledger against the run's 12, so no id in the recorded determinations could be mapped to a requirement. The cause is therefore the extraction instability documented in finding 015, and this entry is itself evidence for it: id resolution after the fact is only reliable while the extractor is stable, which it is not. Not counted as a construction error and not counted against the agent."
     },
     {
       "id": "gn-06",
@@ -125,7 +102,7 @@
       "changed": "Appended a Michigan address line and a 6-year dated segment naming Agile Scrum/JIRA/user stories/sprint planning, LEAN/LPI, and agency-level strategic analysis.",
       "expected_gate": false,
       "expected_reasons": [],
-      "rationale": "The reference ledger has two clear unmet items (3 years Agile Scrum/JIRA/user stories/sprint planning; 2 years LEAN/LPI) and two indeterminates (5 years strategic analysis at program/division/agency level, and the Michigan-local requirement \u2014 the resume states no candidate location at all). All four are targeted, the location one by the only means a resume has: stating an address. Five ledger items were already met and education scores 5. Expected recommendation: advance."
+      "rationale": "The reference ledger has two clear unmet items (3 years Agile Scrum/JIRA/user stories/sprint planning; 2 years LEAN/LPI) and two indeterminates (5 years strategic analysis at program/division/agency level, and the Michigan-local requirement — the resume states no candidate location at all). All four are targeted, the location one by the only means a resume has: stating an address. Five ledger items were already met and education scores 5. Expected recommendation: advance."
     },
     {
       "id": "fs-01",
@@ -160,7 +137,7 @@
       "expected_reasons": [
         "anomaly"
       ],
-      "rationale": "Exercises anomaly rule A1 (empty document) on the JD side \u2014 the corpus has never produced one, so this is the only coverage rule A1 will get."
+      "rationale": "Exercises anomaly rule A1 (empty document) on the JD side — the corpus has never produced one, so this is the only coverage rule A1 will get."
     },
     {
       "id": "fs-03",
@@ -213,5 +190,7 @@
       ],
       "rationale": "The escalation half of decision 3-ii, end to end on real documents: the dimension degrades (score null), the aggregate goes partial, and insufficient_evidence must appear in the gate triggers. The live corpus exercised this path on only 20/150 runs, so this variant is where the error-recovery scorer's coverage actually comes from."
     }
-  ]
+  ],
+  "rebuild_declined": "The three failed high-road constructions were NOT rewritten to match the agent's own enumeration, and the negative set is left under-populated instead (owner ruling 2026-08-02). Two reasons. (1) Epistemic: writing perturbations from the agent's extraction output makes the system under test define its own test's correct answer, so the whole batch would silently expire whenever extraction behavior changed. (2) Empirical: extraction is not a stable target to write against — repeated extraction on identical input returns differently sized ledgers (see the extraction-instability finding), so the number of items a perturbation must satisfy is itself stochastic. Rewriting and re-running until the variants pass would fit the test to the observed answer and forfeit their standing as tests with known answers.",
+  "negative_set_status": "UNDER-POPULATED AND RECORDED AS SUCH. Live gate negatives: 2 (gn-01, gn-06), of which gn-06 matched and gn-01 is a diagnosed agent-rubric divergence owned by finding 012. This is below scope gate 1's 6-8 range: when gate 1 (counts) and gate 5 (never admit a broken construction) conflict, GATE 5 WINS. Gate 1 is a sufficiency heuristic for un-degenerating the confusion matrix; gate 5 is a data-correctness rule. Padding the negative set to hit a count is exactly the plausible-looking wrong number this project exists to avoid. Consequence: TN=1, finding 004 stays open."
 }

@@ -120,6 +120,13 @@ error-recovery failure path are different failure routes and one does not cover 
    to un-degenerate the confusion matrix (finding 004's TN=0) and to give each failure route
    1–2 exemplars — NOT to build a balanced dataset. Beyond that the return on hand-built
    distribution collapses.
+
+   **Precedence, ruled 2026-08-02: when gate 1 and gate 5 conflict, GATE 5 WINS.** Gate 1 is
+   a sufficiency heuristic about how many exemplars are enough; gate 5 is a data-correctness
+   rule. Padding the negative set with a broken construction to reach a count would
+   manufacture exactly the plausible-looking wrong number this project exists to catch. An
+   under-populated negative set is recorded as under-populated — the count is a target, never
+   a quota. **As built: 2 live gate negatives, below this range, by this precedence.**
 2. **Closed perturbation types:** only those listed in 3b. A new type needs a new ruling —
    this is what stops the set from growing a third and fourth category mid-build.
 3. **One-sentence expectation or it isn't built:** every variant states *what changed* and

@@ -52,12 +52,26 @@ def _spec(**over: Any) -> Variant:
 # --- scope gates (3c) ---
 
 
-def test_batch_counts_are_within_the_ratified_ranges() -> None:
-    variants = load_variants()
-    negatives = [v for v in variants if v.batch == "gate_negative"]
-    faults = [v for v in variants if v.batch == "fault"]
-    assert 6 <= len(negatives) <= 8, "gate negatives: ratified range is 6-8"
+def test_fault_batch_count_is_within_the_ratified_range() -> None:
+    faults = [v for v in load_variants() if v.batch == "fault"]
     assert 5 <= len(faults) <= 6, "fault samples: ratified range is 5-6"
+
+
+def test_undersized_negative_set_must_be_declared_not_padded() -> None:
+    # Gate 1 asks for 6-8 gate negatives; gate 5 forbids admitting a broken
+    # construction. When they conflict GATE 5 WINS (ruling 2026-08-02): the
+    # count is a target, never a quota, because padding to hit it manufactures
+    # phantom true-negatives. So an undersized set is legal ONLY while the
+    # spec says out loud that it is undersized and why.
+    negatives = [v for v in load_variants() if v.batch == "gate_negative"]
+    if len(negatives) < 6:
+        status = _raw().get("negative_set_status", "")
+        assert "UNDER-POPULATED" in status, (
+            f"{len(negatives)} gate negatives is below gate 1's range — legal only with an "
+            "explicit negative_set_status declaring it, never by quietly adding variants back"
+        )
+        assert "GATE 5 WINS" in status
+    assert len(negatives) <= 8, "gate negatives: ratified ceiling is 8"
 
 
 def test_perturbation_types_stay_closed() -> None:
