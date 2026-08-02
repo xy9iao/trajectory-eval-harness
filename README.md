@@ -1,5 +1,16 @@
 # trajectory-eval-harness
 
+Same agent, same 30 evaluation pairs, two model providers. The output-level metric says the second
+one is better: **zero false negatives, and a gate decision that is identical across all five
+repeats of every pair.** The trajectory-level metrics say something else — that model **never once
+judged a candidate's hard requirements fully met**, so it can never clear the veto, so it escalates
+*every* candidate to a human. On a reference set where 29 of 30 cases genuinely warrant escalation,
+escalating everything scores 29/30. The perfect stability was the stability of a constant function.
+
+**If this project reported only the confusion matrix, it would have recommended the model that
+reasons worse.** That is what this harness is for.
+→ [the full comparison](docs/phase-reports/p2-cross-model.md)
+
 **An evaluation harness for the *intermediate* behavior of LLM agents.** Most agent evals score the
 final answer. This one scores the trajectory: every tool call, every intermediate judgment, every
 human-in-the-loop gate decision — and reports how much of it survives being run again.
