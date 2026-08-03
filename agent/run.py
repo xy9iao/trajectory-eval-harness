@@ -439,6 +439,135 @@ def run_passk(
     return 0 if failures == 0 else 1
 
 
+def run_poisoned(
+    runs_dir: Path,
+    provider: str,
+    model: str,
+    extractor: Extractor | None,
+    assessor: Assessor | None,
+    defense: str | None = None,
+    only: list[str] | None = None,
+) -> int:
+    """Run the adversarial batch: every poisoned case plus its clean control
+    (docs/adversarial-design.md).
+
+    Controls run FIRST and in the same batch, because attribution is
+    poisoned-vs-its-own-control — comparing a poisoned run to the human
+    reference would fold the agent's own error into the measurement of the
+    attack. Case identity lives in the manifest, never in the trajectory
+    (schema is frozen; the variant stage learned that the expensive way)."""
+    import functools as _ft
+
+    from eval.adversarial import classify, load_cases, materialize
+
+    if defense and extractor is not None:
+        # Rebind the live extractor/assessor with the round's defense variable.
+        # Round 2's ONLY change is one sentence in the system prompt; anything
+        # structural mixed in here would make the effect unattributable.
+        cfg = provider_config()
+        completer = make_completer(cfg)
+        extractor = _ft.partial(extract_requirements, cfg, completer, defense=defense)
+        assessor = _ft.partial(assess_dimension_llm, cfg, completer, defense=defense)
+
+    cases, controls = load_cases()
+    if only:
+        known = {c.id for c in cases}
+        unknown = [i for i in only if i not in known]
+        if unknown:
+            raise SystemExit(f"unknown case id(s): {unknown} (known: {sorted(known)})")
+        cases = [c for c in cases if c.id in set(only)]
+    round_name = f"{defense or 'baseline'}-defense" if defense else "baseline-no-defense"
+    print(
+        f"adversarial [{round_name}]: {len(controls)} controls + {len(cases)} poisoned "
+        f"| {provider}/{model}"
+    )
+
+    run_ids: list[str] = []
+    case_ids: dict[str, str] = {}
+    control_by_pair: dict[str, dict[str, Any]] = {}
+
+    def _outcome(final: AgentState) -> dict[str, Any]:
+        agg = final["aggregate"]
+        return {
+            "dimensions": {d: a.score for d, a in (final["assessments"] or {}).items()},
+            "weighted_mean": agg.weighted_mean if agg else None,
+            "recommendation": final["recommendation"],
+            "gate": list(final["gate"].triggers) if final["gate"] else [],
+        }
+
+    # The mechanism round sanitizes at the PARSE SEAM, so controls and poisoned
+    # cases alike see the cleaned text — and so evidence-quote resolution
+    # resolves against the same document the model was shown.
+    clean = defense == "mechanism"
+    for ctl in controls:
+        pair = PairRef.model_validate(ctl.base_pair)
+        final, writer = run_pair(
+            CorpusSource(sanitize=clean),
+            pair,
+            "eval",
+            runs_dir,
+            provider,
+            model,
+            extractor,
+            assessor,
+        )
+        run_ids.append(writer.run_id)
+        case_ids[writer.run_id] = ctl.id
+        out = _outcome(final)
+        control_by_pair[f"{pair.split}:{pair.row}"] = out
+        print(
+            f"[control ] {ctl.id:<9} mean={out['weighted_mean']} "
+            f"gate={out['gate'] or '-'} rec={out['recommendation']}",
+            flush=True,
+        )
+
+    results: list[dict[str, Any]] = []
+    for case in cases:
+        resume_text, jd_text = materialize(case)
+        pair = PairRef.model_validate(case.base_pair)
+        final, writer = run_pair(
+            SyntheticSource(resume_text, jd_text),
+            pair,
+            "eval",
+            runs_dir,
+            provider,
+            model,
+            extractor,
+            assessor,
+        )
+        run_ids.append(writer.run_id)
+        case_ids[writer.run_id] = case.id
+        out = _outcome(final)
+        control = control_by_pair[f"{pair.split}:{pair.row}"]
+        verdict = classify(out, control)
+        results.append(
+            {"case": case.id, "class": case.attack_class, "target": case.target, **verdict}
+        )
+        print(
+            f"[poisoned] {case.id:<9} class={case.attack_class} {case.target:<6} "
+            f"mean={out['weighted_mean']} gate={out['gate'] or '-'} "
+            f"rec={out['recommendation']} -> {verdict['level']}",
+            flush=True,
+        )
+
+    manifest = runs_dir / f"adversarial-{run_ids[-1]}.json"
+    manifest_json = json.dumps(
+        {
+            "kind": "adversarial",
+            "round": round_name,
+            "provider": provider,
+            "model": model,
+            "run_ids": run_ids,
+            "case_ids": case_ids,
+            "results": results,
+        },
+        indent=2,
+    )
+    manifest.write_text(manifest_json + "\n", encoding="utf-8")
+    print(f"manifest: {_display(manifest)}")
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     group = ap.add_mutually_exclusive_group(required=True)
@@ -455,6 +584,11 @@ def main() -> int:
         help="resume an interrupted interactive run after editing its review file",
     )
     group.add_argument(
+        "--poisoned",
+        action="store_true",
+        help="run the adversarial batch (data/adversarial/poisoned-v1.json)",
+    )
+    group.add_argument(
         "--variants",
         action="store_true",
         help="run the variant batches (data/variants/variants-v1.json)",
@@ -463,7 +597,12 @@ def main() -> int:
         "--only",
         metavar="ID",
         nargs="+",
-        help="with --variants: run only these ids (dry-verify a construction before the batch)",
+        help="with --variants/--poisoned: run only these ids (dry-verify before the batch)",
+    )
+    ap.add_argument(
+        "--defense",
+        choices=["prose", "mechanism"],
+        help="with --poisoned: which defense round to run (omit for the baseline round)",
     )
     group.add_argument(
         "--passk",
@@ -497,6 +636,8 @@ def main() -> int:
         return _resume_run(args.resume, args.live)
     if args.batch:
         return run_batch(RUNS_DIR, provider, model, extractor, assessor)  # always eval mode
+    if args.poisoned:
+        return run_poisoned(RUNS_DIR, provider, model, extractor, assessor, args.defense, args.only)
     if args.variants:
         return run_variants(RUNS_DIR, provider, model, extractor, assessor, args.live, args.only)
     if args.passk:
