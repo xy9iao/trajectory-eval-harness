@@ -30,6 +30,9 @@ from pydantic import BaseModel, ValidationError
 M = TypeVar("M", bound=BaseModel)
 
 # Provider strings are legal ONLY in this module (hygiene-tested).
+# Dev default: the provider used unless LLM_PROVIDER says otherwise.
+DEFAULT_PROVIDER = "deepseek"
+
 _DEFAULTS: dict[str, dict[str, str]] = {
     "deepseek": {"base_url": "https://api.deepseek.com", "model": "deepseek-chat"},
     "openai": {"base_url": "https://api.openai.com/v1", "model": "gpt-4o-mini"},
@@ -64,12 +67,18 @@ def provider_config(env: Mapping[str, str] | None = None) -> ProviderConfig:
     """Resolve the active provider from environment (D3: switch is config,
     not code). LLM_BASE_URL / LLM_MODEL override the provider defaults."""
     e: Mapping[str, str] = os.environ if env is None else env
-    provider = e.get("LLM_PROVIDER", "").strip().lower()
+    provider = e.get("LLM_PROVIDER", "").strip().lower() or DEFAULT_PROVIDER
     if provider not in _DEFAULTS:
         raise ValueError(f"LLM_PROVIDER must be one of {sorted(_DEFAULTS)}, got {provider!r}")
-    api_key = e.get("LLM_API_KEY", "").strip()
+    # Keys are per-provider (DEEPSEEK_API_KEY / OPENAI_API_KEY) so both can sit
+    # in .env at once and switching provider is ONE variable, not a key swap.
+    # A single shared LLM_API_KEY made every cross-model switch a manual edit —
+    # and a forgotten one silently runs the wrong model, which is not a mistake
+    # the output makes obvious.
+    key_var = f"{provider.upper()}_API_KEY"
+    api_key = (e.get(key_var, "") or e.get("LLM_API_KEY", "")).strip()
     if not api_key:
-        raise ValueError("LLM_API_KEY is not set")
+        raise ValueError(f"{key_var} is not set (no LLM_API_KEY fallback either)")
     defaults = _DEFAULTS[provider]
     model = e.get("LLM_MODEL", "").strip() or defaults["model"]
     return ProviderConfig(

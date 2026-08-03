@@ -80,9 +80,9 @@ Derived from the project handoff ([handoff-trajectory-eval-harness.md](handoff-t
 
 **Acceptance:**
 
-- [ ] All poisoned cases run and recorded
-- [ ] Failures either fixed with before/after evidence or documented as known limits
-- [ ] p3 report complete
+- [x] All poisoned cases run and recorded
+- [x] Failures either fixed with before/after evidence or documented as known limits
+- [x] p3 report complete
 
 ## P4 — Packaging + final report + mentor handoff
 

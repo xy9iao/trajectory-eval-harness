@@ -41,16 +41,24 @@ class DocumentSource(Protocol):
 class SyntheticSource:
     """Fixed synthetic documents for tests and the skeleton runner."""
 
-    def __init__(self, resume_text: str, jd_text: str) -> None:
+    def __init__(self, resume_text: str, jd_text: str, sanitize: bool = False) -> None:
         self._docs = (resume_text, jd_text)
+        self._sanitize = sanitize
 
     def load(self, pair: PairRef) -> tuple[str, str]:
-        return self._docs
+        if not self._sanitize:
+            return self._docs
+        from agent.sanitize import sanitize as _clean
+
+        return (_clean(self._docs[0]), _clean(self._docs[1]))
 
 
 class CorpusSource:
     """Real pinned-CSV documents via data/corpus.py (which is not a package —
     hence the explicit path shim, same convention as the data/ tools)."""
+
+    def __init__(self, sanitize: bool = False) -> None:
+        self._sanitize = sanitize
 
     def load(self, pair: PairRef) -> tuple[str, str]:
         import sys
@@ -61,7 +69,12 @@ class CorpusSource:
         from corpus import DOC_COLUMNS, load_row
 
         row = load_row(pair.split, pair.row)
-        return row[DOC_COLUMNS["resume"]], row[DOC_COLUMNS["jd"]]
+        resume, jd = row[DOC_COLUMNS["resume"]], row[DOC_COLUMNS["jd"]]
+        if not self._sanitize:
+            return resume, jd
+        from agent.sanitize import sanitize as _clean
+
+        return _clean(resume), _clean(jd)
 
 
 def parse_resume(source: DocumentSource, pair: PairRef) -> str:

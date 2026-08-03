@@ -31,7 +31,9 @@ VALID_ARGS = {
 
 
 def _cfg(provider: str) -> ProviderConfig:
-    return provider_config({"LLM_PROVIDER": provider, "LLM_API_KEY": "test-key-not-real"})
+    return provider_config(
+        {"LLM_PROVIDER": provider, f"{provider.upper()}_API_KEY": "test-key-not-real"}
+    )
 
 
 def _completer(responses: list[str | None]) -> Any:
@@ -59,19 +61,27 @@ def test_provider_config_resolves_defaults(provider: str) -> None:
 
 def test_unknown_provider_rejected() -> None:
     with pytest.raises(ValueError, match="LLM_PROVIDER"):
-        provider_config({"LLM_PROVIDER": "mystery", "LLM_API_KEY": "x"})
+        provider_config({"LLM_PROVIDER": "mystery", "OPENAI_API_KEY": "x"})
 
 
 def test_missing_key_rejected() -> None:
-    with pytest.raises(ValueError, match="LLM_API_KEY"):
+    with pytest.raises(ValueError, match="_API_KEY"):
         provider_config({"LLM_PROVIDER": PROVIDERS[0]})
+
+
+def test_provider_defaults_to_dev_and_keys_are_per_provider() -> None:
+    # Both keys live in .env at once; switching provider is ONE variable.
+    both = {"DEEPSEEK_API_KEY": "ds", "OPENAI_API_KEY": "oa"}
+    assert provider_config(both).provider == "deepseek"  # dev default when unset
+    assert provider_config(both).api_key == "ds"
+    assert provider_config({**both, "LLM_PROVIDER": "openai"}).api_key == "oa"
 
 
 def test_env_overrides_beat_defaults() -> None:
     cfg = provider_config(
         {
             "LLM_PROVIDER": PROVIDERS[0],
-            "LLM_API_KEY": "x",
+            f"{PROVIDERS[0].upper()}_API_KEY": "x",
             "LLM_BASE_URL": "https://proxy.example.com",
             "LLM_MODEL": "custom-model",
         }
@@ -86,7 +96,7 @@ def test_reasoning_models_pin_reasoning_effort_off_for_function_tools() -> None:
     # explicitly "none" — "Function tools with reasoning_effort are not
     # supported ... set reasoning_effort to 'none'". Without the pin every
     # call 400s and the batch produces valid trajectories full of nulls.
-    base = {"LLM_PROVIDER": "openai", "LLM_API_KEY": "x"}
+    base = {"LLM_PROVIDER": "openai", "OPENAI_API_KEY": "x"}
     for model in ("gpt-5.6-luna", "gpt-5.4-mini", "o3", "o4-mini"):
         assert provider_config({**base, "LLM_MODEL": model}).reasoning_effort == "none", model
 
@@ -97,7 +107,7 @@ def test_reasoning_models_pin_reasoning_effort_off_for_function_tools() -> None:
 
 
 def test_reasoning_effort_is_overridable_in_both_directions() -> None:
-    base = {"LLM_PROVIDER": "openai", "LLM_API_KEY": "x", "LLM_MODEL": "gpt-5.6-luna"}
+    base = {"LLM_PROVIDER": "openai", "OPENAI_API_KEY": "x", "LLM_MODEL": "gpt-5.6-luna"}
     assert provider_config({**base, "LLM_REASONING_EFFORT": "low"}).reasoning_effort == "low"
     # "unset" suppresses the parameter entirely — the escape hatch for a
     # provider that rejects the field rather than requiring it
