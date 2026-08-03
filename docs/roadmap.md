@@ -65,12 +65,12 @@ Derived from the project handoff ([handoff-trajectory-eval-harness.md](handoff-t
 
 **Acceptance:**
 
-- [ ] One reproducible command → eval report (all metrics, agreement by dimension)
-- [ ] Cross-model table complete
-- [ ] Final numbers produced on the delivery model
-- [ ] Scorer self-verification tests green
-- [ ] **Every scorer category has produced ≥1 archived finding** — a scorer with no finding is not complete
-- [ ] p2 report complete
+- [x] One reproducible command → eval report (all metrics, agreement by dimension)
+- [x] Cross-model table complete
+- [x] Final numbers produced on the delivery model
+- [x] Scorer self-verification tests green
+- [~] **Every scorer category has produced ≥1 archived finding** — a scorer with no finding is not complete — **5/6; `tool-call correctness` has none.** Its result (fault batch 5/5 across two batches, coverage caveat resolved) is in the p2 report §5 rather than a numbered finding, by the ruling that closed the research surface. Met in substance, unmet in form.
+- [x] p2 report complete
 
 ## P3 — Adversarial cases
 
