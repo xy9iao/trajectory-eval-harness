@@ -1,3 +1,3 @@
 # examples/
 
-2–3 walkthrough resume–JD pairs for the README/demo. Populated after P0 selects a license-cleared dataset (Decision 5 rules apply here too).
+`sample-batch/` is a committed 3-pair, 15-run slice of the P2 dev-model batch, so `eval.report` produces a real report from a fresh clone with no key and no dataset.

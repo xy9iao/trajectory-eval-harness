@@ -1,3 +1,3 @@
 # agent/
 
-The host: LangGraph graph, HITL gate logic, and tools. Empty until P1 — and P1's first action is committing the trajectory JSONL schema, before any tool code is written (Decision 11).
+The host agent: LangGraph graph and nodes, the two-mode HITL gate, the six orchestration-contract tools, the parse-seam sanitizer, and the trajectory writer.

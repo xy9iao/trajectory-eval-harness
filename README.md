@@ -27,7 +27,8 @@ uv run python -m eval.report --manifest examples/sample-batch/manifest.json
 
 One command, one markdown report, every metric below. **No API key and no dataset needed** — a
 3-pair slice of the real batch (15 runs) is committed, which is possible only because trajectories
-carry requirement ids and character offsets and never document text. No database, no service, no
+carry requirement ids and character offsets and never document text (the reference labels do
+quote the corpus — see Data handling). No database, no service, no
 notebook. The full 30-pair batch lives in the gitignored `runs/` and is what every number in the
 reports cites.
 
@@ -39,7 +40,7 @@ reports cites.
 | **gate integrity** | When the agent escalates to a human, is it right — and does it escalate *for the reason it claims*? | needs your gate vocabulary |
 | **agreement** | How close are the agent's judgments to a human reference, per dimension and per failure stratum? | needs your reference labels |
 | **ledger consistency** | Does the agent contradict its own earlier findings later in the same run? | needs your ledger structure |
-| **tool-call correctness** | Are tool calls structurally correct, and does the retry → degrade → escalate path work? | schema-generic |
+| **tool-call correctness** | Are tool calls structurally correct? (The retry → degrade → escalate path has its own `error_recovery_scorer`, unit-tested but not in the report registry — see the P2 report.) | schema-generic |
 | **evidence coverage** | Which conclusions rest on too little cited evidence to be worth trusting? (a *sentinel*, not a score) | schema-generic |
 
 Three are portable as-is; three encode this project's rubric vocabulary and need their reference
@@ -155,8 +156,10 @@ uv run python -m agent.run --pair train:596 --live
 Public resume–JD datasets only, committed only when the license permits redistribution — otherwise
 a download script plus checksum. Résumés of real people known to the author are never committed and
 never sent to an API. API keys live in `.env` (gitignored; template in `.env.example`), and CI runs
-a secrets scan on every push. Trajectories carry requirement **ids and evidence offsets, never
-document text**, so a committed trajectory cannot leak the corpus.
+a secrets scan on every push. Trajectories carry requirement **ids and evidence offsets, never document text**, so a committed
+trajectory cannot leak the corpus.
+
+**Reference labels are not text-free.** They store row indices, scores and character offsets, and ALSO verbatim requirement strings plus annotator notes that quote the source corpus. The source dataset declares no license; these fragments are retained for research reproducibility, and this repository is not a redistribution of the dataset. Trajectories are text-free — that claim holds and is validator-enforced. Reference labels store row indices, scores, character offsets **and** verbatim requirement strings plus annotator notes that quote the source corpus. The source dataset declares no license; these fragments are retained for research reproducibility, and this repository is not a redistribution of the dataset.
 
 ## Stack
 

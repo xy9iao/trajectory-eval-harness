@@ -87,6 +87,11 @@ def tool_call_correctness_scorer(corpus: Corpus, reference: Reference) -> Scorer
     )
 
 
+# NOT in eval.report's REGISTRY, deliberately: its live-corpus coverage was
+# always thin (20/150 runs) and the fault-variant batch is what actually
+# exercises this path. Kept and unit-tested against planted defects so the
+# contract stays executable; registering it would put a near-constant number
+# in every report and imply coverage the live corpus does not have.
 def error_recovery_scorer(corpus: Corpus, reference: Reference) -> ScorerResult:
     rows: list[dict[str, Any]] = []
     runs_with_retry = runs_recovered = runs_degraded = 0

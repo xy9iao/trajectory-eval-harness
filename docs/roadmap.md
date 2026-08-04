@@ -34,7 +34,7 @@ Derived from the project handoff ([handoff-trajectory-eval-harness.md](handoff-t
 
 1. **First action: draft and commit the trajectory JSONL schema** (Decision 11) — all tools log into it from their first line of code; schema frozen before P2
 2. LangGraph graph: parse resume + JD → structured extraction → per-dimension rubric assessment with **mandatory evidence citations** → aggregate → **gate** → recommendation
-3. Gate triggers (thresholds TBD, revised by P2 numbers): aggregate in the boundary band · any dimension with insufficient evidence · high cross-dimension disagreement · anomalies (empty/garbled resume, suspected injection)
+3. Gate triggers (thresholds TBD, revised by P2 numbers): aggregate in the boundary band · any dimension with insufficient evidence · ~~high cross-dimension disagreement~~ (not implemented — the shipped gate contract is boundary band / veto state / anomaly / insufficient evidence; see p1 report §3) · anomalies (empty/garbled resume, suspected injection)
 4. Gate honors **Decision 15's two modes**: interactive (LangGraph interrupt; human edits/approves a file in `review/`; run resumes) and eval (trigger recorded as a trajectory event, auto-resumed)
 5. Tool surface (≤6, count locked; names revisable at plan time): `parse_resume`, `parse_jd`, `get_rubric`, `assess_dimension`, `submit_assessment`, `flag_for_review`
 6. **Compatibility layer, three hard requirements:** ① provider specifics live in one config/client module — no provider strings in agent/eval code; ② output-schema validation + one retry + visible degradation in a provider-agnostic layer, one malformed-output test per provider; ③ trajectory JSONL carries provider/model/tokens/latency

@@ -1,7 +1,9 @@
 # 015 — The requirement ledger's SIZE is unstable on some pairs, and every hard verdict rests on it
 
 **Status:** open (hypothesis stated, upstream link unverified) · **Phase:** P2 (variant stage)
-**Date:** 2026-08-02 · **Not repaired — deferred to the cross-model stage by ruling.**
+**Date:** 2026-08-02 · **Not repaired — FROZEN (2026-08-04), issue #26.** Deferred past the cross-model stage and then
+closed out with the research surface; the verification procedure below is written down so it stays
+runnable, not because it is queued.
 
 Distinct from [finding 006](006-granularity-consistency.md), which is about the human and the
 agent bundling requirements differently. This one is the agent disagreeing **with itself**:

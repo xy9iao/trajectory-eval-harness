@@ -62,10 +62,10 @@ Method: HuggingFace API (license from dataset metadata; split sizes from `datase
 
 Every fully-redistributable pair dataset found is **synthetic**; the one with genuinely realistic text is **unlicensed**. This is structural, not bad luck: real resumes carry privacy/copyright weight, so uploaders who share them can't or don't license them. Selection is therefore a realism-vs-license-cleanliness tradeoff:
 
-- **Option A — cnamuangtoun via script + checksum (realism-first).** Commit a download script pinned to a HF revision hash + checksum; the 30-pair reference file stores **IDs, labels, and span offsets — never the raw text**. Residual risk: unlicensed use is gray; dataset could vanish (mitigated by pinned revision + checksum). Labeling protocol must sample across the 280 unique JDs.
+- **Option A — cnamuangtoun via script + checksum (realism-first).** Commit a download script pinned to a HF revision hash + checksum; the 30-pair reference file stores IDs, labels, and span offsets **and also verbatim requirement strings plus annotator notes quoting the corpus** (see the accuracy note at the end of this file). Residual risk: unlicensed use is gray; dataset could vanish (mitigated by pinned revision + checksum). Labeling protocol must sample across the 280 unique JDs.
 - **Option B — AzharAli05 (MIT, committable).** Clean license, 10k rows, decision+reason labels; pay in text realism.
 - **Option C — jainishkumar (CC0, committable).** Cleanest license, dual label types; only 500 pairs (enough — the reference set is ~30); newest and least proven.
-- **Option D — component route: snehaanbhawal resumes (CC0) × a JD pool.** Maximum control: engineer the 30 pairs to exercise every rubric dimension and the gate boundary; real resume text; fully committable subset. Cost: no pre-existing pair labels, so the "public dataset base layer" of the layered ground truth (Decision 4) is thinner.
+- **Option D — component route: snehaanbhawal resumes (CC0) × a JD pool.** Maximum control: engineer the 30 pairs to exercise every rubric dimension and the gate boundary; real resume text; fully committable subset. Cost: no pre-existing pair labels, so the "public dataset base layer" of the layered reference standard (Decision 4) is thinner.
 
 ### Selection — 2026-07-13: Route A
 
@@ -80,3 +80,26 @@ Every fully-redistributable pair dataset found is **synthetic**; the one with ge
 Fetch: `python3 data/download_dataset.py`
 
 Rejected rows keep their reasons; this table moves into the p0 phase report.
+
+
+## Accuracy note on what the reference file contains (2026-08-04)
+
+An earlier statement here claimed the reference file holds "IDs, labels, and span offsets — never
+the raw text". **That was not accurate.** `reference/labels-v1.jsonl` also carries verbatim
+requirement strings (111 occurrences) and annotator notes that quote the source documents, across
+all 30 records; `variants/variants-v1.json` and three findings carry shorter fragments.
+
+The source dataset (`cnamuangtoun/resume-job-description-fit`) declares **no license** — re-verified
+2026-08-04 against the HuggingFace API: `cardData.license` is null, there is no license tag, and the
+dataset has no card. The fragments are **retained for research reproducibility**: they are the
+evidence behind findings 009/010/013 and the annotator's own reasoning record. **This repository is
+not a redistribution of the dataset** — the corpus itself is gitignored and reachable only through
+the pinned download script.
+
+`tests/test_repo_hygiene.py` carries the detector for this (two xfail-strict assertions), so the
+state is measured and pinned rather than assumed: if the fragments were ever removed, the tests
+would fail and force this note to be updated.
+
+**The trajectory claim is unaffected and still holds**: trajectories carry requirement ids and
+character offsets only, enforced by `validate_data_hygiene`, which is why `examples/sample-batch`
+can be committed at all.

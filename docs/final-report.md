@@ -38,7 +38,7 @@ indiscriminate one. Trajectory-level metrics can, and here they did.
 | Component | |
 |---|---|
 | **Agent** (P1) | LangGraph, 6 nodes, two-mode HITL gate — `interrupt()` + review artifact + CLI resume for interactive; auto-resume with recorded trigger events for batch eval |
-| **Trajectory schema** (P1) | 7 event types, 7 validator-enforced invariants, frozen before P2; **requirement ids and evidence offsets only, never document text** |
+| **Trajectory schema** (P1) | 7 event types, 7 validator-enforced invariants, frozen before P2; **requirement ids and evidence offsets only, never document text** (validator-enforced; the reference labels are a separate artifact and DO quote the corpus — see `data/README.md`) |
 | **Harness** (P2) | 6 scorers as pure `(corpus, reference) -> ScorerResult` functions over a dumb-pipe runner; one command produces the whole report |
 | **Constructed cases** (P2/P3) | fault-injection variants and poisoned-document cases, each materialized at run time from a gitignored corpus |
 | **Defenses** (P3) | parse-seam sanitization and per-run nonce document fencing |
@@ -58,7 +58,7 @@ uv run python -m eval.reports.passk_report runs/<batch>.json
 | gate integrity | Is the escalation right, and right *for the stated reason*? | needs your gate vocabulary |
 | agreement | How close to a human reference, per dimension and per divergence stratum? | needs your reference labels |
 | ledger consistency | Does the run contradict its own earlier findings? | needs your ledger structure |
-| tool-call correctness | Structural correctness; does retry → degrade → escalate work? | schema-generic |
+| tool-call correctness | Structural correctness of every tool call (retry -> degrade -> escalate is exercised by the fault variants and checked by `error_recovery_scorer`, which is unit-tested but deliberately not in the report registry) | schema-generic |
 | evidence coverage | Which conclusions rest on too little cited evidence? (**sentinel**, not a score) | schema-generic |
 
 Three of six run unchanged elsewhere; three encode this rubric's vocabulary. **The coupling point

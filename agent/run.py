@@ -1,12 +1,15 @@
-"""Skeleton runner: one pair through the stub graph, one trajectory out.
+"""CLI runner: one pair, a batch, pass^k repeats, variants, or poisoned cases.
 
-Stage E scope — eval mode, stub assessments, no LLM, no checkpointer wiring
-(interactive interrupt/resume lands in Stage G). Real pairs need the local
-dataset; --synthetic runs without it.
+Every mode writes schema-valid trajectory JSONL. Real pairs need the local
+dataset; --synthetic runs without it and without a key.
 
 Usage:
     python -m agent.run --synthetic
-    python -m agent.run --pair train:596
+    python -m agent.run --pair train:596 --live
+    python -m agent.run --passk 5 [--smoke] --live
+    python -m agent.run --variants [--only ID ...] --live
+    python -m agent.run --poisoned [--defense prose|mechanism] --live
+    python -m agent.run --resume RUN_ID          # interactive gate, after review
 """
 
 import argparse
@@ -296,9 +299,9 @@ def run_variants(
     only: list[str] | None = None,
 ) -> int:
     """Run the variant batches (eval-design 3b/3c): each variant is a unit
-    test with a stated expectation. Every trajectory is tagged variant_id so
+    test with a stated expectation. Batch identity is recorded in the manifest so
     constructed results can never be merged with live-corpus results
-    (gate 4).
+    (gate 4). Variant identity lives in the MANIFEST, never in the trajectory.
 
     `only` runs a subset — used to dry-verify one construction before paying
     for the batch, the same smoke discipline applied to the construction
@@ -617,7 +620,7 @@ def main() -> int:
     ap.add_argument(
         "--live",
         action="store_true",
-        help="use the real LLM via .env provider config (Stage F); default is the stub",
+        help="use the real LLM via .env provider config (live mode); default is the stub",
     )
     args = ap.parse_args()
 
