@@ -4,6 +4,10 @@ Locked decisions with rationale, derived from the project handoff ([handoff-traj
 
 ## D1 — Python 3.12 + uv, typer CLI, filesystem-only storage
 
+> **[superseded 2026-08 — library only]** Implemented with `argparse`; typer was never added as
+> a dependency. The decision's substance held — a CLI, no bash entry points, cross-platform,
+> filesystem-only. Only the library differs.
+
 **Decision:** Python 3.12 + uv; typer CLI; JSON / JSONL / YAML on the filesystem; no database service; no frontend. Clarification: LangGraph's single-file SQLite checkpointer does not violate this (no server, no schema management); a custom JSON checkpointer is an acceptable alternative.
 **Rationale:** Single user, small data; the product is a CLI plus a reproducible eval report.
 
@@ -11,6 +15,13 @@ Locked decisions with rationale, derived from the project handoff ([handoff-traj
 
 **Decision:** The host agent is built on LangGraph.
 **Rationale:** Real HITL need — assessment pauses at the gate and resumes after human review; interrupts/checkpointing are the framework's actual value. Contrast on record: the owner's stock project hand-writes a linear loop; knowing when a framework earns its keep is the point.
+
+> **[amended 2026-08-03 — configuration shape]** The single shared `LLM_API_KEY` this
+> decision implied was replaced by per-provider keys (`DEEPSEEK_API_KEY` / `OPENAI_API_KEY`),
+> so both can sit in `.env` at once and switching provider is one variable. The decision's
+> substance held — provider is config, not code, and only one module knows providers exist.
+> What changed is that a forgotten manual key swap had silently run a whole batch on the
+> wrong model.
 
 ## D3 — OpenAI-compatible client, provider by env config
 
@@ -20,6 +31,8 @@ Locked decisions with rationale, derived from the project handoff ([handoff-traj
 ## D4 — Ground truth is layered and honestly framed
 
 **Decision:** Public resume–JD datasets as the base + owner rubric-labeled subset + mentor light review of a sample. Treated as a **noisy reference standard**, never "authoritative gold truth"; the framework includes disagreement analysis. Banned phrases: "train the eval agent", "gold-standard ground truth".
+
+**Standing wording rule (added 2026-08-04):** reader-facing current documents (README, phase reports, roadmap, eval-design) say **"reference standard"**. Decision records and historical documents (this file, `p1-design.md`, `labeling-protocol.md`, the handoff, finding 004's filename) keep their original wording, because this decision already defines the restricted sense the term carries in this project — rewriting them would edit a ratified record to match later vocabulary.
 **Rationale:** Any single annotation source is noisy; quantifying and classifying disagreement is research depth, not a weakness.
 
 ## D5 — Data policy

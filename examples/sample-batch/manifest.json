@@ -1,0 +1,23 @@
+{
+  "kind": "batch",
+  "provider": "deepseek",
+  "model": "deepseek-chat",
+  "run_ids": [
+    "r20260728T030245-2c495c",
+    "r20260728T030311-d43882",
+    "r20260728T030329-fd3268",
+    "r20260728T030345-bcecdb",
+    "r20260728T030410-940ef4",
+    "r20260728T030423-bf4623",
+    "r20260728T030440-cb0c32",
+    "r20260728T030458-d4398f",
+    "r20260728T030517-81fcf0",
+    "r20260728T030534-7c86b7",
+    "r20260728T033254-88aed8",
+    "r20260728T033320-5fbcd8",
+    "r20260728T033343-700606",
+    "r20260728T033407-cc705b",
+    "r20260728T033429-b8d5b0"
+  ],
+  "note": "A 3-pair slice of the P2 dev-model batch (k=5, 15 runs), committed so that `git clone` -> `uv sync` -> one command produces a real report with no API key and no dataset. Trajectories are safe to commit BY DESIGN: they carry requirement ids and character offsets, never document text (finding 007's data boundary). The full 30-pair batch lives in the gitignored runs/ and is what every number in the reports cites."
+}

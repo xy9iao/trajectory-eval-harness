@@ -8,7 +8,7 @@ Working design document for Phase 2. Decisions are made by the owner in the desi
 
 - **Structural scorers** — no human annotation; run on every case from the trajectory alone.
   Each is the maturation of a `eval/trajectory.py` invariant into a measured metric:
-  gate-integrity confusion matrix (ground truth = P0 `gate_expected`) · tool-call structural
+  gate-integrity confusion matrix (reference standard = P0 `gate_expected`) · tool-call structural
   correctness · error recovery · **pass^k** stability · ledger consistency (finding 008).
 - **Semantic checks** — human-verified samples: per-dimension agreement vs the reference set
   (stratified by divergence root cause — findings 009/010) · faithfulness spot-check (5–10

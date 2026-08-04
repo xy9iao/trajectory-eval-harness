@@ -20,10 +20,16 @@ is the host, not the point. **The coupling point is a trajectory JSONL schema, n
 code** — anything that emits conforming events can be scored by the same six scorers.
 
 ```bash
-uv run python -m eval.report --manifest runs/passk-r20260728T035619-2d6bcd.json
+git clone https://github.com/xy9iao/trajectory-eval-harness && cd trajectory-eval-harness
+uv sync
+uv run python -m eval.report --manifest examples/sample-batch/manifest.json
 ```
 
-One command, one markdown report, every metric below. No database, no service, no notebook.
+One command, one markdown report, every metric below. **No API key and no dataset needed** — a
+3-pair slice of the real batch (15 runs) is committed, which is possible only because trajectories
+carry requirement ids and character offsets and never document text. No database, no service, no
+notebook. The full 30-pair batch lives in the gitignored `runs/` and is what every number in the
+reports cites.
 
 ## What it measures
 
@@ -85,14 +91,15 @@ The two gate numbers are reported side by side on purpose: *whether* it escalate
 escalates are different measurements, and 7 of 28 correct escalations cite a reason the human
 reference does not.
 
-## What the evaluation found
+## Key findings
 
-The point of the harness is what it surfaced. Full records in [docs/findings/](docs/findings/);
-the three that matter most:
+The point of the harness is what it surfaced. Fifteen records in [docs/findings/](docs/findings/),
+consolidated in the [final report](docs/final-report.md); the four that carry the project:
 
-- **Mechanism beats instruction.** Interventions that change a *structure* (schema, tool contract,
-  state reducer) held 3/3; interventions that add *prose* to a prompt held 0/2.
-  → [009](docs/findings/009-prose-binds-process-not-judgment.md)
+- **Mechanism binds; prose does not.** Across seven interventions in two different problem domains
+  — agent calibration and injection defense — changing a *structure* (a schema, a tool contract, a
+  state reducer, a document fence) moved the measurements **4/4**; adding a sentence to a prompt
+  moved nothing, **0/3**. → [009](docs/findings/009-prose-binds-process-not-judgment.md)
 - **A variance floor bounds every other claim.** The same input re-run gives a different answer
   often enough that any improvement smaller than the noise band is unprovable — measured per
   dimension before any tuning claim was made. → [011](docs/findings/011-passk-variance-floor.md)
@@ -100,6 +107,18 @@ the three that matter most:
   produced *every* evidence-faithfulness failure; the mechanism is structural (10 conclusions
   citing 1 quote), not weak wording.
   → [013](docs/findings/013-faithfulness-evidence-to-determination-mismatch.md)
+- **Injection has two routes, and each needs its own defense.** Role forgery — the text is read as
+  an *instruction* — is closed by structural demarcation. Content contamination — the text is read
+  as *evidence* — is closed by reconciling item by item against a list that lives in a **different
+  document**. A dimension with neither is open to both: across 21 injection attempts the
+  ledger-backed dimension never moved and no candidate was ever advanced, while the one dimension
+  with no ledger was driven from 1 to 5. → [P3 report](docs/phase-reports/p3.md)
+
+**The framework also diagnosed two structural defects in the design it was built on** — a veto whose
+authority is mismatched to its input noise, and one dimension indicted five times by five different
+methods before the common cause was visible. Both are diagnosed, costed, and deliberately unfixed;
+the [final report](docs/final-report.md) says which fix costs twenty lines and which costs the whole
+reference set.
 
 ## Running it on your own agent
 
@@ -115,7 +134,7 @@ the three that matter most:
 ```bash
 uv sync
 cp .env.example .env          # add your key; .env is gitignored
-uv run pytest -q              # 119 tests, no API calls
+uv run pytest -q              # no API calls, no key needed
 uv run python -m agent.run --synthetic          # one run, no dataset, no key
 uv run python -m agent.run --pair train:596 --live
 ```
@@ -147,8 +166,9 @@ the provider selected by env config · pytest + hand-written scorers, no eval fr
 
 ## Project status
 
-NUS-ISS capstone. P0 (rubric + reference labels) and P1 (agent + HITL gate) closed; P2 (the eval
-framework) is in its final stage. Phases and acceptance criteria live in
+NUS-ISS capstone, complete. P0 (rubric + reference set), P1 (agent + HITL gate), P2 (the eval
+framework) and P3 (adversarial cases) are closed; the [final report](docs/final-report.md) is the
+executive layer over all four. Phases and acceptance criteria live in
 [docs/roadmap.md](docs/roadmap.md), locked design decisions in
 [docs/decisions.md](docs/decisions.md), and each phase closes with a public report in
 [docs/phase-reports/](docs/phase-reports/).

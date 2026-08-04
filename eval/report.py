@@ -99,7 +99,14 @@ def render(result: ScorerResult, max_rows: int) -> str:
 
 def build_report(manifest_path: Path, reference: Reference, max_rows: int) -> str:
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    corpus = Corpus.from_manifest(RUNS, manifest_path)
+    # Run directories normally live in runs/, but a self-contained batch keeps
+    # them beside its own manifest (examples/sample-batch). Resolve against the
+    # manifest's directory when the runs are there, so a committed sample batch
+    # works from a fresh clone where runs/ does not exist at all.
+    beside = manifest_path.parent
+    run_ids = manifest["run_ids"]
+    runs_dir = beside if run_ids and (beside / run_ids[0]).is_dir() else RUNS
+    corpus = Corpus.from_manifest(runs_dir, manifest_path)
     kind = manifest.get("kind", "batch")
 
     head = [

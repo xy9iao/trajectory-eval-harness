@@ -74,11 +74,13 @@ def provider_config(env: Mapping[str, str] | None = None) -> ProviderConfig:
     # in .env at once and switching provider is ONE variable, not a key swap.
     # A single shared LLM_API_KEY made every cross-model switch a manual edit —
     # and a forgotten one silently runs the wrong model, which is not a mistake
-    # the output makes obvious.
+    # the output makes obvious. That shared variable is gone, not deprecated:
+    # a single-user project has no external deployment to stay compatible with,
+    # and leaving two accepted spellings is how the next reader picks the wrong one.
     key_var = f"{provider.upper()}_API_KEY"
-    api_key = (e.get(key_var, "") or e.get("LLM_API_KEY", "")).strip()
+    api_key = e.get(key_var, "").strip()
     if not api_key:
-        raise ValueError(f"{key_var} is not set (no LLM_API_KEY fallback either)")
+        raise ValueError(f"{key_var} is not set")
     defaults = _DEFAULTS[provider]
     model = e.get("LLM_MODEL", "").strip() or defaults["model"]
     return ProviderConfig(
