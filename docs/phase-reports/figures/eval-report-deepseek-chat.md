@@ -120,22 +120,22 @@
 
 - **pairs_scored**: `30`
 - **k_seen**: `[5]`
-- **gate_all_agree**: `26/30`
-- **gate_stability_rate**: `0.867`
-- **recommendation_all_agree**: `26/30`
-- **recommendation_stability_rate**: `0.867`
+- **gate_identical_across_k**: `26/30`
+- **gate_self_consistency_rate**: `0.867`
+- **recommendation_identical_across_k**: `26/30`
+- **recommendation_self_consistency_rate**: `0.867`
 
-- **stability (across-k)**: This scorer IS the stability measurement — every figure it reports is already an across-k agreement rate, so there is no separate spread to declare. The note is stated rather than omitted because the contract is 'declare the basis', and silence is indistinguishable from having forgotten (the report runner flags a missing note for exactly that reason).
+- **stability (across-k)**: This scorer IS the stability measurement — every figure it reports is already an across-k self-consistency rate, so there is no separate spread to declare. The note is stated rather than omitted because the contract is 'declare the basis', and silence is indistinguishable from having forgotten (the report runner flags a missing note for exactly that reason).
 - **unstable pairs**: train:596, train:400, train:2189, train:175, train:935, train:2980, train:970, train:1089, train:1050, train:3229, train:3590, train:3861, train:3978, train:3559, train:3773, train:3769, train:4160, train:3800, train:3148, train:5063, train:6220, train:4890, train:5798, train:5699, train:4928, train:5084, train:5707, train:4715
 
 *28 pair(s) flipped at least one dimension or the gate across runs; 0 case(s) excluded at load (validation failures).*
 
 <details><summary>rows (4 of 4)</summary>
 
-- `{"dimension": "skills_coverage", "all_agree": "12/30", "all_agree_rate": 0.4, "mean_within_pair_stdev": 0.445, "max_within_pair_stdev": 1.2, "pairs_with_a_degraded_run": 0, "per_pair_stdevs": [1.2, 0.0, 0.4, 0.0, 0.4, 0.98, 0.0, 0.8, 0.4, 0.8, 0.8, 0.0, 0.4, 0.0, 0.8, 0.98, 0.4, 0.8, 0.0, 0.0, 0.8, 0.98, 0.0, 0.8, 0.8, 0.0, 0.8, 0.0, 0.0, 0.0]}`
-- `{"dimension": "experience_level", "all_agree": "17/30", "all_agree_rate": 0.567, "mean_within_pair_stdev": 0.345, "max_within_pair_stdev": 1.6, "pairs_with_a_degraded_run": 1, "per_pair_stdevs": [0.8, 0.0, 0.0, 0.0, 0.8, 0.0, 0.0, 0.49, 0.0, 0.0, 0.8, 0.8, 1.6, 0.0, 0.0, 0.0, 0.0, 0.8, 0.98, 0.0, 0.0, 0.4, 0.0, 0.4, 0.98, 0.0, 0.707, 0.8, 0.0, 0.0]}`
-- `{"dimension": "education_domain_fit", "all_agree": "7/30", "all_agree_rate": 0.233, "mean_within_pair_stdev": 0.643, "max_within_pair_stdev": 1.0, "pairs_with_a_degraded_run": 1, "per_pair_stdevs": [0.8, 0.0, 0.98, 1.0, 0.0, 0.0, 0.8, 0.98, 0.98, 0.0, 0.8, 0.49, 0.0, 0.8, 0.98, 0.8, 0.4, 0.0, 0.98, 0.8, 0.8, 0.98, 0.98, 0.8, 0.98, 0.98, 0.98, 0.4, 0.8, 0.0]}`
-- `{"dimension": "hard_requirements", "all_agree": "20/30", "all_agree_rate": 0.667, "mean_within_pair_stdev": 0.592, "max_within_pair_stdev": 2.449, "pairs_with_a_degraded_run": 1, "per_pair_stdevs": [2.245, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.96, 0.0, 0.0, 0.0, 1.47, 0.0, 0.0, 0.0, 1.2, 0.0, 0.0, 0.0, 2.0, 0.0, 2.0, 0.0, 2.0, 0.0, 0.0, 2.449, 0.0, 2.449, 0.0]}`
+- `{"dimension": "skills_coverage", "identical_across_k": "12/30", "self_consistency_rate": 0.4, "mean_within_pair_stdev": 0.445, "max_within_pair_stdev": 1.2, "pairs_with_a_degraded_run": 0, "per_pair_stdevs": [1.2, 0.0, 0.4, 0.0, 0.4, 0.98, 0.0, 0.8, 0.4, 0.8, 0.8, 0.0, 0.4, 0.0, 0.8, 0.98, 0.4, 0.8, 0.0, 0.0, 0.8, 0.98, 0.0, 0.8, 0.8, 0.0, 0.8, 0.0, 0.0, 0.0]}`
+- `{"dimension": "experience_level", "identical_across_k": "17/30", "self_consistency_rate": 0.567, "mean_within_pair_stdev": 0.345, "max_within_pair_stdev": 1.6, "pairs_with_a_degraded_run": 1, "per_pair_stdevs": [0.8, 0.0, 0.0, 0.0, 0.8, 0.0, 0.0, 0.49, 0.0, 0.0, 0.8, 0.8, 1.6, 0.0, 0.0, 0.0, 0.0, 0.8, 0.98, 0.0, 0.0, 0.4, 0.0, 0.4, 0.98, 0.0, 0.707, 0.8, 0.0, 0.0]}`
+- `{"dimension": "education_domain_fit", "identical_across_k": "7/30", "self_consistency_rate": 0.233, "mean_within_pair_stdev": 0.643, "max_within_pair_stdev": 1.0, "pairs_with_a_degraded_run": 1, "per_pair_stdevs": [0.8, 0.0, 0.98, 1.0, 0.0, 0.0, 0.8, 0.98, 0.98, 0.0, 0.8, 0.49, 0.0, 0.8, 0.98, 0.8, 0.4, 0.0, 0.98, 0.8, 0.8, 0.98, 0.98, 0.8, 0.98, 0.98, 0.98, 0.4, 0.8, 0.0]}`
+- `{"dimension": "hard_requirements", "identical_across_k": "20/30", "self_consistency_rate": 0.667, "mean_within_pair_stdev": 0.592, "max_within_pair_stdev": 2.449, "pairs_with_a_degraded_run": 1, "per_pair_stdevs": [2.245, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.96, 0.0, 0.0, 0.0, 1.47, 0.0, 0.0, 0.0, 1.2, 0.0, 0.0, 0.0, 2.0, 0.0, 2.0, 0.0, 2.0, 0.0, 0.0, 2.449, 0.0, 2.449, 0.0]}`
 
 </details>
 

@@ -55,9 +55,9 @@ def _corpus(cases: list[Case]) -> Corpus:
 def test_perfectly_stable_pair_reports_full_agreement() -> None:
     cases = [_case(f"r{i}", 1, STABLE, gate_fired=True) for i in range(5)]
     result = passk_scorer(_corpus(cases), {})
-    assert result.metrics["gate_stability_rate"] == 1.0
+    assert result.metrics["gate_self_consistency_rate"] == 1.0
     for row in result.rows:
-        assert row["all_agree_rate"] == 1.0
+        assert row["self_consistency_rate"] == 1.0
         assert row["mean_within_pair_stdev"] == 0.0
 
 
@@ -71,8 +71,8 @@ def test_catches_dimension_flip() -> None:
     result = passk_scorer(_corpus(cases), {})
     exp = next(r for r in result.rows if r["dimension"] == "experience_level")
     skills = next(r for r in result.rows if r["dimension"] == "skills_coverage")
-    assert exp["all_agree_rate"] == 0.0 and exp["mean_within_pair_stdev"] > 0
-    assert skills["all_agree_rate"] == 1.0  # unaffected dim stays stable
+    assert exp["self_consistency_rate"] == 0.0 and exp["mean_within_pair_stdev"] > 0
+    assert skills["self_consistency_rate"] == 1.0  # unaffected dim stays stable
     assert "train:2" in result.notes or any(u for u in [result.notes])
 
 
@@ -86,10 +86,10 @@ def test_catches_gate_flip_with_stable_scores() -> None:
         _case("r3", 3, STABLE, gate_fired=True),
     ]
     result = passk_scorer(_corpus(cases), {})
-    assert result.metrics["gate_stability_rate"] == 0.0  # caught
+    assert result.metrics["gate_self_consistency_rate"] == 0.0  # caught
     # and every dimension still reads stable — proving the gate signal is
     # independent of the dimension-score signal
-    assert all(r["all_agree_rate"] == 1.0 for r in result.rows)
+    assert all(r["self_consistency_rate"] == 1.0 for r in result.rows)
 
 
 def test_degraded_run_counts_as_its_own_outcome() -> None:
@@ -100,7 +100,7 @@ def test_degraded_run_counts_as_its_own_outcome() -> None:
     ]
     result = passk_scorer(_corpus(cases), {})
     skills = next(r for r in result.rows if r["dimension"] == "skills_coverage")
-    assert skills["all_agree_rate"] == 0.0  # None != 3, flagged unstable
+    assert skills["self_consistency_rate"] == 0.0  # None != 3, flagged unstable
     assert skills["pairs_with_a_degraded_run"] == 1
 
 

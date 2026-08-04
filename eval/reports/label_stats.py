@@ -65,7 +65,7 @@ def aggregate_table(recs: list[dict[str, Any]]) -> None:
 def gate_table(recs: list[dict[str, Any]]) -> None:
     n_gate = sum(1 for r in recs if r["gate_expected"])
     reasons = Counter(reason for r in recs for reason in r["gate_reasons"])
-    print("\n## gate_expected ground truth\n")
+    print("\n## gate_expected reference standard\n")
     print(f"- gate_expected: {n_gate}/{len(recs)}")
     print(f"- reasons (a pair can carry several): {dict(reasons.most_common())}")
 

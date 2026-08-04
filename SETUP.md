@@ -34,6 +34,8 @@ uv run python -m eval.report --manifest examples/sample-batch/manifest.json
 Committing trajectories is safe **because of a design decision, not an oversight**: they carry
 requirement ids and character offsets, never document text.
 
+**Reference labels are not text-free.** They store row indices, scores and character offsets, and ALSO verbatim requirement strings plus annotator notes that quote the source corpus. The source dataset declares no license; these fragments are retained for research reproducibility, and this repository is not a redistribution of the dataset. Trajectories are text-free — that claim holds and is validator-enforced.
+
 **What you cannot do unkeyed:** produce trajectories of your own over the real corpus. `runs/` is
 gitignored, so beyond the sample batch a fresh clone has none, and the scorers deliberately skip
 stub-provider runs — a report over stubbed assessments would be a table of numbers describing
@@ -82,8 +84,7 @@ The repo carries a download script and checksums instead — see [data/README.md
 Without it, dataset-dependent tests skip automatically and the eval side still runs against
 committed trajectories.
 
-The 30-pair human reference set (`data/reference/labels-v1.jsonl`) **is** committed: it stores
-row indices, scores and character offsets, never document text.
+Reference labels store row indices, scores, character offsets **and** verbatim requirement strings plus annotator notes that quote the source corpus. The source dataset declares no license; these fragments are retained for research reproducibility, and this repository is not a redistribution of the dataset.
 
 ## Windows
 

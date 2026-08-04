@@ -147,8 +147,10 @@ calibration with before/after, in the same window as finding 015's fix.
 
 ## Result — PENDING
 
-Closes when the exclusion rule lands with its before/after numbers, and when A's overlap with
-011 §3 is tested at the cross-model stage. Recorded now: `gn-01` stays a **live variant**
+**FROZEN, not pending (2026-08-04).** The exclusion rule was deliberately not built — see
+[issue #26](https://github.com/xy9iao/trajectory-eval-harness/issues/26). A's overlap with 011 §3
+was likewise not tested: the research surface was closed after the direction correction. Recorded
+as deferred work with a stated cost, not as work still queued. Recorded now: `gn-01` stays a **live variant**
 tagged `known_divergence` (agent–rubric divergence, not a construction failure), because its
 construction was verified sound before the divergence was attributed to the agent.
 

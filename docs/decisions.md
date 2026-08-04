@@ -16,6 +16,8 @@ Locked decisions with rationale, derived from the project handoff ([handoff-traj
 **Decision:** The host agent is built on LangGraph.
 **Rationale:** Real HITL need — assessment pauses at the gate and resumes after human review; interrupts/checkpointing are the framework's actual value. Contrast on record: the owner's stock project hand-writes a linear loop; knowing when a framework earns its keep is the point.
 
+## D3 — OpenAI-compatible client, provider by env config
+
 > **[amended 2026-08-03 — configuration shape]** The single shared `LLM_API_KEY` this
 > decision implied was replaced by per-provider keys (`DEEPSEEK_API_KEY` / `OPENAI_API_KEY`),
 > so both can sit in `.env` at once and switching provider is one variable. The decision's
@@ -23,14 +25,13 @@ Locked decisions with rationale, derived from the project handoff ([handoff-traj
 > What changed is that a forgotten manual key swap had silently run a whole batch on the
 > wrong model.
 
-## D3 — OpenAI-compatible client, provider by env config
 
 **Decision:** Dev = DeepSeek (cost), delivery = OpenAI. The switch is configuration, not code. Compatibility-layer hard requirements land in P1.
 **Rationale:** Provider specifics isolated in one config/client module keep agent/eval code provider-agnostic — which the P2 cross-model table then proves empirically.
 
 ## D4 — Ground truth is layered and honestly framed
 
-**Decision:** Public resume–JD datasets as the base + owner rubric-labeled subset + mentor light review of a sample. Treated as a **noisy reference standard**, never "authoritative gold truth"; the framework includes disagreement analysis. Banned phrases: "train the eval agent", "gold-standard ground truth".
+**Decision:** Public resume–JD datasets as the base + owner rubric-labeled subset + mentor light review of a sample. Treated as a **noisy reference standard**, never "authoritative gold truth"; the framework includes disagreement analysis. Banned phrases: "train the eval agent", "gold-standard ground truth". **Governance exemption:** this file and the handoff necessarily contain those strings in order to ban them; a repo-wide grep must whitelist the documents that define the rule, or the rule cannot be written down.
 
 **Standing wording rule (added 2026-08-04):** reader-facing current documents (README, phase reports, roadmap, eval-design) say **"reference standard"**. Decision records and historical documents (this file, `p1-design.md`, `labeling-protocol.md`, the handoff, finding 004's filename) keep their original wording, because this decision already defines the restricted sense the term carries in this project — rewriting them would edit a ratified record to match later vocabulary.
 **Rationale:** Any single annotation source is noisy; quantifying and classifying disagreement is research depth, not a weakness.

@@ -54,8 +54,8 @@ def passk_scorer(corpus: Corpus, reference: Reference) -> ScorerResult:
         dim_rows.append(
             {
                 "dimension": dim,
-                "all_agree": f"{agree}/{n}",
-                "all_agree_rate": round(agree / n, 3) if n else None,
+                "identical_across_k": f"{agree}/{n}",
+                "self_consistency_rate": round(agree / n, 3) if n else None,
                 "mean_within_pair_stdev": round(statistics.mean(stdevs), 3) if stdevs else None,
                 "max_within_pair_stdev": round(max(stdevs), 3) if stdevs else None,
                 "pairs_with_a_degraded_run": degraded_pairs,
@@ -95,10 +95,10 @@ def passk_scorer(corpus: Corpus, reference: Reference) -> ScorerResult:
         metrics={
             "pairs_scored": n,
             "k_seen": k_seen,
-            "gate_all_agree": f"{gate_agree}/{n}",
-            "gate_stability_rate": round(gate_agree / n, 3) if n else None,
-            "recommendation_all_agree": f"{rec_agree}/{n}",
-            "recommendation_stability_rate": round(rec_agree / n, 3) if n else None,
+            "gate_identical_across_k": f"{gate_agree}/{n}",
+            "gate_self_consistency_rate": round(gate_agree / n, 3) if n else None,
+            "recommendation_identical_across_k": f"{rec_agree}/{n}",
+            "recommendation_self_consistency_rate": round(rec_agree / n, 3) if n else None,
         },
         rows=dim_rows,
         notes=(
@@ -109,7 +109,7 @@ def passk_scorer(corpus: Corpus, reference: Reference) -> ScorerResult:
             basis="across-k",
             detail=(
                 "This scorer IS the stability measurement — every figure it reports is already "
-                "an across-k agreement rate, so there is no separate spread to declare. The "
+                "an across-k self-consistency rate, so there is no separate spread to declare. The "
                 "note is stated rather than omitted because the contract is 'declare the basis', "
                 "and silence is indistinguishable from having forgotten (the report runner "
                 "flags a missing note for exactly that reason)."

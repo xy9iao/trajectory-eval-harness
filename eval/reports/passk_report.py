@@ -57,13 +57,13 @@ def main() -> int:
 
     print("\n## Per-dimension run-to-run stability\n")
     print(
-        "| dimension | all runs agree | agree rate | mean within-pair stdev | max stdev |"
+        "| dimension | identical across k | self-consistency rate | mean within-pair stdev | max stdev |"
         " pairs with a degraded run |"
     )
     print("|---|---|---|---|---|---|")
     for row in result.rows:
         print(
-            f"| {row['dimension']} | {row['all_agree']} | {row['all_agree_rate']} |"
+            f"| {row['dimension']} | {row['all_agree']} | {row['self_consistency_rate']} |"
             f" {row['mean_within_pair_stdev']} | {row['max_within_pair_stdev']} |"
             f" {row['pairs_with_a_degraded_run']} |"
         )
@@ -74,7 +74,7 @@ def main() -> int:
 
     dims = [r["dimension"] for r in result.rows]
     means = [r["mean_within_pair_stdev"] or 0.0 for r in result.rows]
-    rates = [(r["all_agree_rate"] or 0.0) for r in result.rows]
+    rates = [(r["self_consistency_rate"] or 0.0) for r in result.rows]
     per_pair = [r["per_pair_stdevs"] for r in result.rows]
     k_values = result.metrics["k_seen"]
     k_label = str(k_values[0]) if len(k_values) == 1 else "/".join(map(str, k_values))

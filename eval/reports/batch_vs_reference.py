@@ -1,4 +1,13 @@
-"""Dev-batch vs reference-label comparison (P1; findings 007/008 evidence).
+"""HISTORICAL SCRIPT — kept for provenance, NOT reproducible as-is.
+
+It predates the run-id manifest and selects trajectories by scanning runs/, so
+running it today mixes in later P2/P3 runs and produces figures that do not match
+the ones recorded in the P1 report. The P1 numbers are a record of a batch that
+existed then; they are NOT reconstructed, because rebuilding the old selection
+would mean inventing a manifest after the fact.
+For any current batch use `python -m eval.report --manifest ...`.
+
+Dev-batch vs reference-label comparison (P1; findings 007/008 evidence).
 
 Selects the latest non-stub run per pair from runs/, validates each
 trajectory (structure + hygiene, needs the local dataset), joins to

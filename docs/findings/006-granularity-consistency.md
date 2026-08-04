@@ -34,6 +34,6 @@ Bundled requirements use a **discrete three-value determination** (covered / par
 majority-absent → low band; any partial caps the band at 2; no ratios (design decision 6,
 recorded in rubric v1 `coverage_determination`).
 
-## Result — PENDING
+## Result — CLOSED (P2/P3 complete; no further work planned)
 
 Awaits the P2 Plan-A-vs-Plan-B contrast run (cite run IDs when available).
