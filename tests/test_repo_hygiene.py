@@ -154,7 +154,7 @@ def _corpus_rows() -> dict[int, str]:
     import sys
 
     sys.path.insert(0, str(ROOT / "data"))
-    from corpus import DOC_COLUMNS, load_row  # type: ignore[import-not-found]
+    from corpus import DOC_COLUMNS, load_row
 
     rows = {}
     for line in (
