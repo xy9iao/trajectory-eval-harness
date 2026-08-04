@@ -15,7 +15,7 @@ Derived from the project handoff ([handoff-trajectory-eval-harness.md](handoff-t
 1. Survey public resume–JD matching datasets (Kaggle / HuggingFace); report options with size, label type, **license terms** → owner selects (license permitting redistribution required for committed data; otherwise script + checksum) — table lives in `data/README.md` until it moves into the p0 report
 2. Rubric v1 in YAML: dimensions + weights + criteria + anchor examples
 3. Labeling protocol written, reproducible
-4. **Owner labels ~30 pairs** against the rubric (owner-judgment work, not CC's). Each labeled pair also records **`gate_expected: yes/no` + reason** (boundary score / insufficient evidence / anomaly) — ground truth for the P2 gate-integrity scorer
+4. **Owner labels ~30 pairs** against the rubric (owner-judgment work, not CC's). Each labeled pair also records **`gate_expected: yes/no` + reason** (boundary score / insufficient evidence / anomaly) — the reference standard for the P2 gate-integrity scorer
 5. Mentor reviews ~10 labeled pairs — her first touchpoint (see Mentor protocol below)
 
 **Phase report (p0):** dataset comparison table with rejection reasons · label statistics (score distributions overall and per dimension) · rubric problems surfaced during labeling → rubric v1→v1.x revision log · mentor-review agreement analysis (how many of the 10 diverged, on which dimensions, how resolved — the project's first disagreement dataset, previewing P2's disagreement analysis).
@@ -52,7 +52,7 @@ Derived from the project handoff ([handoff-trajectory-eval-harness.md](handoff-t
 
 **Work:** scorers over trajectories, explicitly split into two tiers (recorded in `docs/eval-design.md`):
 
-- **Structural scorers** (no human annotation needed, run on every case): gate integrity as a should-gate × did-gate confusion matrix (ground truth = P0's `gate_expected`) · tool-call structural correctness (every rubric dimension assessed exactly once; argument validity; call ordering) · error recovery (malformed inputs → graceful path) · **pass^k** (same pair k times; score stability — an unstable screener is a real incident, quantify it)
+- **Structural scorers** (no human annotation needed, run on every case): gate integrity as a should-gate × did-gate confusion matrix (reference standard = P0's `gate_expected`) · tool-call structural correctness (every rubric dimension assessed exactly once; argument validity; call ordering) · error recovery (malformed inputs → graceful path) · **pass^k** (same pair k times; score stability — an unstable screener is a real incident, quantify it)
 - **Semantic checks** (human-verified samples): per-dimension agreement vs the reference set · **faithfulness spot-check** — 5–10 manual verifications that cited evidence exists and supports the score · semantic tool-call correctness (were the *right* spans extracted) folds into this tier rather than pretending to be automatable
 
 **Disagreement analysis:** when agent and reference differ, classify — agent error vs ambiguous label vs rubric gap; findings feed gate-threshold revisions (the eval-informs-design loop, recorded in decisions.md and archived as findings).

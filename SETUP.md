@@ -24,18 +24,27 @@ writes a real trajectory and validates it:
 uv run python -m agent.run --synthetic
 ```
 
-**What you cannot do unkeyed, stated plainly:** produce an eval report. `runs/` is gitignored, so a
-fresh clone contains **no trajectories at all**, and the scorers deliberately skip stub-provider
-runs — a report over stubbed assessments would be a table of numbers describing nothing. Point
-`eval.report` at a batch and it will tell you so rather than print a plausible-looking empty table:
+A full eval report also runs unkeyed, against the committed sample batch — a 3-pair slice of the
+real P2 dev-model run (15 trajectories):
+
+```bash
+uv run python -m eval.report --manifest examples/sample-batch/manifest.json
+```
+
+Committing trajectories is safe **because of a design decision, not an oversight**: they carry
+requirement ids and character offsets, never document text.
+
+**What you cannot do unkeyed:** produce trajectories of your own over the real corpus. `runs/` is
+gitignored, so beyond the sample batch a fresh clone has none, and the scorers deliberately skip
+stub-provider runs — a report over stubbed assessments would be a table of numbers describing
+nothing, so `eval.report` says so rather than printing a plausible-looking empty table:
 
 ```
 - cases scored: 0
 **No valid cases in this batch — nothing was scored.**
 ```
 
-So the honest order is: **key → smoke → batch → report.** The scorers are still readable and
-independently testable without any of that, which is what the 118 unkeyed tests cover.
+So the order for reproducing the *reported* numbers is: **key → smoke → batch → report.**
 
 ## Running with a live model
 

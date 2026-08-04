@@ -38,7 +38,7 @@ The owner has no prior research training and no day-to-day human supervisor. **R
 
 ## Tech stack & hard constraints
 
-- Python 3.12 + uv · typer CLI · filesystem-only storage (JSON / JSONL / YAML) · no database service · no frontend. LangGraph's single-file SQLite checkpointer is permitted (no server, no schema management).
+- Python 3.12 + uv · argparse CLI · filesystem-only storage (JSON / JSONL / YAML) · no database service · no frontend. LangGraph's single-file SQLite checkpointer is permitted (no server, no schema management).
 - **LangGraph** for the agent (real HITL need: interrupts/checkpointing). Contrast on record: the owner's stock project hand-writes the loop — knowing when a framework earns its keep is the point.
 - **OpenAI-compatible client, provider by env config.** Dev = DeepSeek, delivery = OpenAI. Provider specifics live in ONE config/client module — no provider strings in agent/ or eval/ code.
 - **Trajectory JSONL is the source of truth.** Every LLM call logs provider, model, tokens, latency. Schema is defined at the very start of P1, frozen before P2. All report figures must be regenerable from JSONL (scripts in `eval/reports/`).

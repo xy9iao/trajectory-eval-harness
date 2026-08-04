@@ -20,10 +20,16 @@ is the host, not the point. **The coupling point is a trajectory JSONL schema, n
 code** — anything that emits conforming events can be scored by the same six scorers.
 
 ```bash
-uv run python -m eval.report --manifest runs/passk-r20260728T035619-2d6bcd.json
+git clone https://github.com/xy9iao/trajectory-eval-harness && cd trajectory-eval-harness
+uv sync
+uv run python -m eval.report --manifest examples/sample-batch/manifest.json
 ```
 
-One command, one markdown report, every metric below. No database, no service, no notebook.
+One command, one markdown report, every metric below. **No API key and no dataset needed** — a
+3-pair slice of the real batch (15 runs) is committed, which is possible only because trajectories
+carry requirement ids and character offsets and never document text. No database, no service, no
+notebook. The full 30-pair batch lives in the gitignored `runs/` and is what every number in the
+reports cites.
 
 ## What it measures
 
@@ -128,7 +134,7 @@ reference set.
 ```bash
 uv sync
 cp .env.example .env          # add your key; .env is gitignored
-uv run pytest -q              # 119 tests, no API calls
+uv run pytest -q              # no API calls, no key needed
 uv run python -m agent.run --synthetic          # one run, no dataset, no key
 uv run python -m agent.run --pair train:596 --live
 ```

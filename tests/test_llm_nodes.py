@@ -15,7 +15,7 @@ from agent.tools import SyntheticSource, get_rubric
 from agent.types import EvidenceQuote, PairRef
 from eval.trajectory import load_trajectory, validate_data_hygiene, validate_trajectory
 
-CFG = provider_config({"LLM_PROVIDER": "openai", "LLM_API_KEY": "test-key-not-real"})
+CFG = provider_config({"LLM_PROVIDER": "openai", "OPENAI_API_KEY": "test-key-not-real"})
 
 # Synthetic docs, >=200 chars each (clear of anomaly A2), containing the quote targets.
 RESUME_DOC = (
