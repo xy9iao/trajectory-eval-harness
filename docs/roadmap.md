@@ -90,10 +90,10 @@ Derived from the project handoff ([handoff-trajectory-eval-harness.md](handoff-t
 
 **Acceptance:**
 
-- [ ] Final report committed
-- [ ] README carries protagonist sentence + Key Findings
-- [ ] SETUP.md verified on a clean environment
-- [ ] Public-readiness criteria hold: license-cleared data only, secrets scan green (repo has been public since init — see decisions.md log — so these criteria are standing obligations, not a flip-the-switch step)
+- [x] Final report committed
+- [x] README carries protagonist sentence + Key Findings
+- [x] SETUP.md verified on a clean environment
+- [x] Public-readiness criteria hold: license-cleared data only, secrets scan green (repo has been public since init — see decisions.md log — so these criteria are standing obligations, not a flip-the-switch step)
 
 ---
 

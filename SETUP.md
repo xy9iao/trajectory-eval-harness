@@ -6,27 +6,36 @@ Python 3.12 and [uv](https://docs.astral.sh/uv/). No database, no service, no bu
 git clone https://github.com/xy9iao/trajectory-eval-harness
 cd trajectory-eval-harness
 uv sync
-uv run pytest -q          # 124 tests, no API calls, no key needed
+uv run pytest -q          # no API calls, no key needed
 ```
+
+Verified from a fresh clone: **118 passed, 6 skipped.** The six skips are the dataset-dependent
+tests, and they skip by design — see *The dataset is not in the repo* below.
 
 If `uv sync` reports a Python version mismatch, `uv python install 3.12` and re-run — uv manages
 the interpreter itself, so no system Python needs changing.
 
 ## Running without an API key
 
-Everything except live model calls works unkeyed. The stub path exercises the full graph, writes a
-real trajectory, and validates it:
+The test suite and the agent's stub path need no key. The stub path exercises the whole graph,
+writes a real trajectory and validates it:
 
 ```bash
 uv run python -m agent.run --synthetic
 ```
 
-The scorers read trajectories from disk, so **the whole eval side runs unkeyed** against any batch
-already in `runs/`:
+**What you cannot do unkeyed, stated plainly:** produce an eval report. `runs/` is gitignored, so a
+fresh clone contains **no trajectories at all**, and the scorers deliberately skip stub-provider
+runs — a report over stubbed assessments would be a table of numbers describing nothing. Point
+`eval.report` at a batch and it will tell you so rather than print a plausible-looking empty table:
 
-```bash
-uv run python -m eval.report --manifest runs/<batch>.json --out report.md
 ```
+- cases scored: 0
+**No valid cases in this batch — nothing was scored.**
+```
+
+So the honest order is: **key → smoke → batch → report.** The scorers are still readable and
+independently testable without any of that, which is what the 118 unkeyed tests cover.
 
 ## Running with a live model
 
