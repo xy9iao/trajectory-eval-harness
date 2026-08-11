@@ -41,7 +41,7 @@ indiscriminate one. Trajectory-level metrics can, and here they did.
 | **Trajectory schema** (P1) | 7 event types, 7 validator-enforced invariants, frozen before P2; **requirement ids and evidence offsets only, never document text** (validator-enforced; the reference labels are a separate artifact and DO quote the corpus — see `data/README.md`) |
 | **Harness** (P2) | 6 scorers as pure `(corpus, reference) -> ScorerResult` functions over a dumb-pipe runner; one command produces the whole report |
 | **Constructed cases** (P2/P3) | fault-injection variants and poisoned-document cases, each materialized at run time from a gitignored corpus |
-| **Defenses** (P3) | parse-seam sanitization and per-run nonce document fencing |
+| **Defenses** (P3) | per-run nonce document fencing (measured) and parse-seam sanitization (built and unit-tested; a wiring defect kept it from reaching the poisoned cases in the measured round — see p3 report §3b) |
 
 **Reproduce any table or figure:**
 
@@ -90,7 +90,7 @@ fires are reported side by side, always — they are distinct measurements.
 |---|---|
 | Fault injection (5 cases, 2 independent batches) | **5/5 both times** — anomaly rules fire, one malformed response recovers via retry with no degradation, two exhaust it and escalate |
 | Gate negatives (6 attempted) | **1–2 succeeded**; 3 retired as construction errors rather than counted — see §5 |
-| Injection (7 cases × 3 defense rounds) | 1 attack class ever worked; **21 attempts, 0 moved the final decision** |
+| Injection (7 cases × 3 defense rounds) | 1 attack class ever worked; **21 attempts, 0 moved the final decision**. Its effect over control fell **+3.3 → +0.8** once documents were fenced — nearly all measured defensive effect comes from that one component (p3 §1, §3) |
 
 ## 4. Key findings
 
