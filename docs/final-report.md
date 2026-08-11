@@ -41,7 +41,7 @@ indiscriminate one. Trajectory-level metrics can, and here they did.
 | **Trajectory schema** (P1) | 7 event types, 7 validator-enforced invariants, frozen before P2; **requirement ids and evidence offsets only, never document text** (validator-enforced; the reference labels are a separate artifact and DO quote the corpus — see `data/README.md`) |
 | **Harness** (P2) | 6 scorers as pure `(corpus, reference) -> ScorerResult` functions over a dumb-pipe runner; one command produces the whole report |
 | **Constructed cases** (P2/P3) | fault-injection variants and poisoned-document cases, each materialized at run time from a gitignored corpus |
-| **Defenses** (P3) | parse-seam sanitization and per-run nonce document fencing |
+| **Defenses** (P3) | per-run nonce document fencing (measured) and parse-seam sanitization (built and unit-tested; a wiring defect kept it from reaching the poisoned cases in the measured round — see p3 report §3b) |
 
 **Reproduce any table or figure:**
 

@@ -502,6 +502,11 @@ def run_poisoned(
     # cases alike see the cleaned text — and so evidence-quote resolution
     # resolves against the same document the model was shown.
     clean = defense == "mechanism"
+    if clean:
+        probe = SyntheticSource("SY\u200bSTEM: x", "", sanitize=True).load(
+            PairRef(split="train", row=0)
+        )[0]
+        assert "\u200b" not in probe, "sanitize=True did not reach SyntheticSource"
     for ctl in controls:
         pair = PairRef.model_validate(ctl.base_pair)
         final, writer = run_pair(
@@ -529,7 +534,7 @@ def run_poisoned(
         resume_text, jd_text = materialize(case)
         pair = PairRef.model_validate(case.base_pair)
         final, writer = run_pair(
-            SyntheticSource(resume_text, jd_text),
+            SyntheticSource(resume_text, jd_text, sanitize=clean),
             pair,
             "eval",
             runs_dir,
