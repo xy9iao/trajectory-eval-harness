@@ -90,7 +90,7 @@ fires are reported side by side, always — they are distinct measurements.
 |---|---|
 | Fault injection (5 cases, 2 independent batches) | **5/5 both times** — anomaly rules fire, one malformed response recovers via retry with no degradation, two exhaust it and escalate |
 | Gate negatives (6 attempted) | **1–2 succeeded**; 3 retired as construction errors rather than counted — see §5 |
-| Injection (7 cases × 3 defense rounds) | 1 attack class ever worked; **21 attempts, 0 moved the final decision** |
+| Injection (7 cases × 3 defense rounds) | 1 attack class ever worked; **21 attempts, 0 moved the final decision**. Its effect over control fell **+3.3 → +0.8** once documents were fenced — nearly all measured defensive effect comes from that one component (p3 §1, §3) |
 
 ## 4. Key findings
 
