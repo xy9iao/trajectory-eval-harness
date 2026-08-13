@@ -1,108 +1,148 @@
 # Setup
 
-Python 3.12 and [uv](https://docs.astral.sh/uv/). No database, no service, no build step.
+This project requires Python 3.12 and [uv](https://docs.astral.sh/uv/). It uses local files for
+storage; no database service or build step is required.
+
+## Install and verify
+
+The following path needs neither an API key nor the gitignored dataset:
 
 ```bash
-git clone https://github.com/xy9iao/trajectory-eval-harness
+git clone https://github.com/xy9iao/trajectory-eval-harness.git
 cd trajectory-eval-harness
 uv sync
-uv run pytest -q          # no API calls, no key needed
-```
-
-Verified from a fresh clone: **118 passed, 6 skipped.** The six skips are the dataset-dependent
-tests, and they skip by design — see *The dataset is not in the repo* below.
-
-If `uv sync` reports a Python version mismatch, `uv python install 3.12` and re-run — uv manages
-the interpreter itself, so no system Python needs changing.
-
-## Running without an API key
-
-The test suite and the agent's stub path need no key. The stub path exercises the whole graph,
-writes a real trajectory and validates it:
-
-```bash
+uv run pytest -q
 uv run python -m agent.run --synthetic
-```
-
-A full eval report also runs unkeyed, against the committed sample batch — a 3-pair slice of the
-real P2 dev-model run (15 trajectories):
-
-```bash
 uv run python -m eval.report --manifest examples/sample-batch/manifest.json
 ```
 
-Committing trajectories is safe **because of a design decision, not an oversight**: they carry
-requirement ids and character offsets, never document text.
+The synthetic run exercises the complete graph, writes a trajectory, and validates it. The sample
+report scores a committed 3-pair, 15-trajectory slice of the P2 dev-model batch. On a fresh clone,
+dataset-dependent tests skip by design; the suite should have no unexpected failures. The `xfail`
+checks document retained source-text fragments and are explained in
+[data/README.md](data/README.md) — one of the two also needs the dataset, so a fresh clone reports a
+single `xfailed` rather than two.
 
-**Reference labels are not text-free.** They store row indices, scores and character offsets, and ALSO verbatim requirement strings plus annotator notes that quote the source corpus. The source dataset declares no license; these fragments are retained for research reproducibility, and this repository is not a redistribution of the dataset. Trajectories are text-free — that claim holds and is validator-enforced.
-
-**What you cannot do unkeyed:** produce trajectories of your own over the real corpus. `runs/` is
-gitignored, so beyond the sample batch a fresh clone has none, and the scorers deliberately skip
-stub-provider runs — a report over stubbed assessments would be a table of numbers describing
-nothing, so `eval.report` says so rather than printing a plausible-looking empty table:
-
-```
-- cases scored: 0
-**No valid cases in this batch — nothing was scored.**
-```
-
-So the order for reproducing the *reported* numbers is: **key → smoke → batch → report.**
-
-## Running with a live model
-
-Keys are **per provider**, so both can sit in `.env` at once and switching provider is one
-variable rather than a key swap:
+If `uv sync` reports a Python version mismatch, run:
 
 ```bash
-cp .env.example .env        # then fill in the keys you have
+uv python install 3.12
+uv sync
 ```
 
+## Download the dataset
+
+Live runs over the reference pairs require the pinned source dataset:
+
 ```bash
-DEEPSEEK_API_KEY=sk-...
-OPENAI_API_KEY=sk-...
+uv run python data/download_dataset.py
+```
+
+The script downloads `train.csv` and `test.csv` from a fixed Hugging Face revision into
+`data/raw/` and verifies both files with SHA-256 checksums. A checksum mismatch stops the setup;
+do not run experiments against a different file under the same name.
+
+`data/raw/` is gitignored because the source dataset declares no license. The repository contains
+the pinned download script and checksums, but does not redistribute the corpus. See
+[data/README.md](data/README.md) for the dataset decision and its limitations.
+
+### Raw CSV contract
+
+The corpus loader expects UTF-8 CSV files with this schema:
+
+| Column | Required | Meaning |
+|---|---:|---|
+| `resume_text` | yes | Raw resume text passed to the agent |
+| `job_description_text` | yes | Raw job-description text passed to the agent |
+| `label` | no for agent loading; present in the pinned dataset | Original dataset fit label |
+
+Files must be named `train.csv` and `test.csv` and placed under `data/raw/`. References use the
+split name plus the zero-based CSV row position, for example `train:596`. Do not reorder or rewrite
+the pinned files: stored row references and character offsets are meaningful only against the
+checksum-verified bytes.
+
+The current loader implements this pinned schema; arbitrary resume or job-description formats are
+not accepted automatically.
+
+## Configure a live model
+
+Copy the environment template and add only the key or keys you use:
+
+```bash
+cp .env.example .env
+```
+
+```dotenv
+DEEPSEEK_API_KEY=your-deepseek-key
+OPENAI_API_KEY=your-openai-key
 # LLM_PROVIDER=deepseek     # deepseek (default) | openai
-# LLM_MODEL=                # optional; each provider has a default
+# LLM_MODEL=                # optional provider-model override
 ```
 
-`.env` is gitignored and CI runs a secrets scan on every push. Keys never appear in code, logs or
-trajectories.
+Keys are provider-specific, so both may remain in `.env` while `LLM_PROVIDER` selects one.
+`.env` is gitignored, and CI scans every push for secrets. Keys are never written to trajectories.
+
+## Run the agent and evaluation
+
+Download the dataset and configure the selected provider before using `--live`:
 
 ```bash
 uv run python -m agent.run --pair train:596 --live      # one pair
-uv run python -m agent.run --passk 5 --smoke --live     # 2 pairs x 5, the cost/compat check
-uv run python -m agent.run --passk 5 --live             # the full 30-pair batch
+uv run python -m agent.run --passk 5 --smoke --live     # 2 pairs x 5 runs
+uv run python -m agent.run --passk 5 --live             # 30 pairs x 5 runs
 ```
 
-**Run the smoke first.** It is two pairs and a few cents, and it has caught a provider
-incompatibility, a scorer scoping bug, and a wall-clock estimate that was wrong by 4x — each of
-which would have cost a full batch to discover.
+Run the smoke batch before the full batch. Provider behavior, cost, and wall-clock time may change,
+so verify the pipeline on 10 runs before paying for 150.
 
-## The dataset is not in the repo
+Each run writes `runs/<run-id>/trajectory.jsonl`. A pass^k batch also prints and writes a manifest
+such as `runs/passk-<run-id>.json`. Score that exact batch with:
 
-`data/raw/` is gitignored: the source dataset declares no license, so nothing is redistributed.
-The repo carries a download script and checksums instead — see [data/README.md](data/README.md).
-Without it, dataset-dependent tests skip automatically and the eval side still runs against
-committed trajectories.
+```bash
+uv run python -m eval.report --manifest runs/passk-<run-id>.json
+```
 
-Reference labels store row indices, scores, character offsets **and** verbatim requirement strings plus annotator notes that quote the source corpus. The source dataset declares no license; these fragments are retained for research reproducibility, and this repository is not a redistribution of the dataset.
+`runs/` is gitignored because trajectories, manifests, and checkpoints are local experimental
+state. Reports are regenerated from the manifest's explicit run IDs and do not mix in other local
+runs.
+
+The committed sample metrics are reproducible from `examples/sample-batch/`. Full historical runs
+remain local because `runs/` is gitignored, so a fresh clone cannot regenerate every published
+number from its original trajectories. A new live rerun follows the same method but may not produce
+identical scores because model APIs and sampling are not deterministic.
+
+## Troubleshooting
+
+| Symptom | Resolution |
+|---|---|
+| Python version mismatch during `uv sync` | Run `uv python install 3.12`, then `uv sync`. |
+| `data/raw/train.csv not found` | Run `uv run python data/download_dataset.py`. |
+| Dataset checksum mismatch | Remove the mismatched local file and rerun the pinned downloader; do not bypass verification. |
+| Missing provider API key | Add the selected provider's key to `.env`; confirm `LLM_PROVIDER`. |
+| Live provider rejects the configured model | Remove an unnecessary `LLM_MODEL` override or set a model supported by that provider. |
+| Report scores zero cases | Confirm the manifest points to live, schema-valid trajectories rather than stub runs. |
 
 ## Windows
 
-Everything is stdlib path handling and uv, so no shell-specific steps — but two notes:
+Use PowerShell or WSL. In PowerShell, replace the POSIX copy command with:
 
-- Use PowerShell or WSL; the commands above assume a POSIX-ish shell for `cp`.
-- Trajectories are written UTF-8 explicitly and a repo-hygiene test fails on any text I/O that
-  omits an encoding, so the default-codepage problem cannot reappear silently.
+```powershell
+Copy-Item .env.example .env
+```
 
-## Layout
+All project text I/O declares UTF-8 explicitly, so it does not depend on the platform default
+codepage.
 
-| Path | |
+## Repository layout
+
+| Path | Purpose |
 |---|---|
-| `eval/` | the harness — scorers, corpus loading, trajectory validator, report runner |
-| `agent/` | the host agent — LangGraph graph, HITL gate, tools, sanitization |
-| `rubrics/` | versioned YAML rubric |
-| `data/` | reference labels, constructed-case specs, dataset loader |
-| `docs/` | final report, phase reports, findings, design records |
-| `runs/` | trajectories and batch manifests (gitignored) |
+| `eval/` | Scorers, trajectory validation, and report runner |
+| `agent/` | LangGraph host agent, HITL gate, tools, and sanitization |
+| `rubrics/` | Versioned YAML rubric |
+| `data/` | Reference labels, constructed-case specifications, and dataset loader |
+| `docs/` | Final report, phase reports, findings, and design records |
+| `runs/` | Local trajectories and batch manifests (gitignored) |
 
-Start at [docs/final-report.md](docs/final-report.md).
+For the research results and design narrative, start with
+[docs/final-report.md](docs/final-report.md).
