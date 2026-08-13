@@ -1,6 +1,7 @@
 # trajectory-eval-harness
 
 [![CI](https://github.com/xy9iao/trajectory-eval-harness/actions/workflows/ci.yml/badge.svg)](https://github.com/xy9iao/trajectory-eval-harness/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 ![Python](https://img.shields.io/badge/Python-3.12+-3776AB?logo=python&logoColor=white)
 ![LangGraph](https://img.shields.io/badge/LangGraph-1.2-1C3C3C?logo=langchain&logoColor=white)
 ![Pydantic](https://img.shields.io/badge/Pydantic-v2-E92063?logo=pydantic&logoColor=white)
@@ -257,6 +258,14 @@ with its cost: [#26](https://github.com/xy9iao/trajectory-eval-harness/issues/26
 manifest · [#33](https://github.com/xy9iao/trajectory-eval-harness/issues/33) component ablation for
 the injection defenses.
 
-## Author
+## License
 
-Xinyang Qiao — sole author.
+**MIT** — see [LICENSE](LICENSE). It covers the code, tests, rubric and documentation authored here.
+
+It deliberately does **not** relicense material derived from the source dataset, which declares no
+license of its own: the reference labels quote that corpus, as do shorter fragments in the variant
+specs and three findings. Those are retained for research reproducibility, not relicensed — the
+scope note in `LICENSE` says exactly which files, and [data/README.md](data/README.md) explains why
+they are kept.
+
+© 2026 Xinyang Qiao — sole author.
