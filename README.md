@@ -124,7 +124,7 @@ authority is mismatched to its input noise, and one dimension indicted five time
 methods before the common cause was visible. Both are diagnosed, costed, and deliberately unfixed;
 the final report says which fix costs twenty lines and which costs the whole reference set.
 
-## Design decisions you can steal
+## Design decisions
 
 - **Trajectory JSONL is the source of truth.** Every figure regenerates from it; numbers that cannot
   cite a run ID do not enter documents.
@@ -218,54 +218,8 @@ pure functions, while the 30-pair reference set took an entire phase.
 └── runs/                 # trajectories and manifests (gitignored)
 ```
 
-## Known limitations
-
-Stated here rather than left for a reader to discover.
-
-- **n = 30 pairs, one rubric, two models.** A fixed instrument for detecting change in one agent.
-- **Constructed cases are measured at k=1** while the system has a quantified variance floor — they
-  are **existence proofs, never rates.** This is an internal inconsistency in the method, caught when
-  the same constructed case flipped between two batches.
-- **True negatives are scarce for three independent structural reasons**, not by sampling accident;
-  drawing more pairs would not fix it.
-- **The faithfulness probe was a stratified sample of known weak spots** — 10 hand-judged cases.
-  **No overall faithfulness rate exists in this work and none can be derived from it.**
-- **Injection results stand on one substrate**, chosen for zero control noise — itself only a k=5
-  property, and a sixth draw fell outside it.
-- **Rendering-layer attacks are not representable on a plain-text corpus.** They stay live for
-  PDF/DOCX ingestion in production. **This is the boundary of this work, not of the problem.**
-
-## Data handling
-
-Public resume–JD data only. The source dataset declares **no license** (re-verified 2026-08-04 via
-the HuggingFace API), so the corpus itself is gitignored and reachable only through a pinned
-download script plus checksum — **this repository is not a redistribution of the dataset.**
-Trajectories carry requirement ids and character offsets and **never document text**, enforced by
-the validator. The reference labels are a separate artifact and *do* quote the corpus; see
-[data/README.md](data/README.md) for the accuracy note. API keys live in `.env` (gitignored), and CI
-runs a secrets scan on every push.
-
-## Status
-
-NUS-ISS capstone, **complete**. P0 (rubric + reference set), P1 (agent + HITL gate), P2 (the eval
-framework) and P3 (adversarial cases) are closed, each with a public report; P4 delivered the
-[final report](docs/final-report.md). Phases and acceptance criteria in
-[docs/roadmap.md](docs/roadmap.md), locked design decisions in [docs/decisions.md](docs/decisions.md).
-
-Three issues are open **on purpose** — each records something diagnosed but deliberately not built,
-with its cost: [#26](https://github.com/xy9iao/trajectory-eval-harness/issues/26) extractor fixes ·
-[#31](https://github.com/xy9iao/trajectory-eval-harness/issues/31) experimental conditions in the
-manifest · [#33](https://github.com/xy9iao/trajectory-eval-harness/issues/33) component ablation for
-the injection defenses.
-
 ## License
 
-**MIT** — see [LICENSE](LICENSE). It covers the code, tests, rubric and documentation authored here.
+MIT — see [LICENSE](LICENSE), which also states what it does not cover.
 
-It deliberately does **not** relicense material derived from the source dataset, which declares no
-license of its own: the reference labels quote that corpus, as do shorter fragments in the variant
-specs and three findings. Those are retained for research reproducibility, not relicensed — the
-scope note in `LICENSE` says exactly which files, and [data/README.md](data/README.md) explains why
-they are kept.
-
-© 2026 Xinyang Qiao — sole author.
+© 2026 Xinyang Qiao
