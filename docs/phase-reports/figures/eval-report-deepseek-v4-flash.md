@@ -1,7 +1,7 @@
 # Eval report — `passk-r20260728T035619-2d6bcd.json`
 
 - **batch kind**: batch
-- **provider / model**: deepseek / deepseek-chat
+- **provider / model**: deepseek / deepseek-v4-flash
 - **runs in manifest**: 150
 - **cases scored**: 150
 - **excluded (validation)**: 0

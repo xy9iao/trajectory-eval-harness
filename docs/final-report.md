@@ -12,7 +12,7 @@ carry the full detail; this document is the executive layer.
 
 Same agent, same 30 evaluation pairs, two model providers, identical rubric and prompts.
 
-| | `deepseek-chat` | `gpt-4o-mini` |
+| | `deepseek-v4-flash` | `gpt-4o-mini` |
 |---|---|---|
 | Gate confusion, per run | TP 139 · FN 6 · FP 5 | **TP 145 · FN 0 · FP 5** |
 | Gate decision identical across k=5 | 26/30 | **30/30** |
@@ -66,7 +66,7 @@ is the trajectory schema, not the agent's code.**
 
 ## 3. Consolidated metrics
 
-**Live corpus** — 30 pairs, k=5, `deepseek-chat`, `runs/passk-r20260728T035619-2d6bcd.json`:
+**Live corpus** — 30 pairs, k=5, `deepseek-v4-flash`, `runs/passk-r20260728T035619-2d6bcd.json`:
 
 | | |
 |---|---|

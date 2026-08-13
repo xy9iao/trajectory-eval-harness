@@ -4,8 +4,8 @@
 009 and 010; §3's mechanism observation is recorded, not acted on. **Phase:** P2
 
 **Reproduction:** `python eval/reports/passk_report.py runs/passk-r20260728T035619-2d6bcd.json`
-— k=5 × 30 reference pairs, deepseek-chat, 150/150 runs structurally valid, 0 excluded.
-Figure: `docs/phase-reports/figures/passk-deepseek-chat.png`.
+— k=5 × 30 reference pairs, deepseek-v4-flash, 150/150 runs structurally valid, 0 excluded.
+Figure: `docs/phase-reports/figures/passk-deepseek-v4-flash.png`.
 
 Three sections, three certainty levels: §1 settles an open account (high), §2 reports a
 cross-validation (medium — correlation, explicitly not causation), §3 describes a mechanism

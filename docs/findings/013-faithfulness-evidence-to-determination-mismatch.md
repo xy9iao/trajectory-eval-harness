@@ -6,7 +6,7 @@ taken — P2 measures; the cross-model stage decides whether this is provider-sp
 
 **Reproduction:** `python -m eval.faithfulness --manifest
 runs/passk-r20260728T035619-2d6bcd.json --show` over the k=5 corpus (150 runs,
-deepseek-chat); verdicts in `data/reference/faithfulness-v1.jsonl`. Corpus-wide ratio
+deepseek-v4-flash); verdicts in `data/reference/faithfulness-v1.jsonl`. Corpus-wide ratio
 figures recomputed from the same manifest.
 
 ## Method, and what it can and cannot say

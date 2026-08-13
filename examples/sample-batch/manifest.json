@@ -1,7 +1,7 @@
 {
   "kind": "batch",
   "provider": "deepseek",
-  "model": "deepseek-chat",
+  "model": "deepseek-v4-flash",
   "run_ids": [
     "r20260728T030245-2c495c",
     "r20260728T030311-d43882",

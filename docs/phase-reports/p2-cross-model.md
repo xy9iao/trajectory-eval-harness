@@ -1,6 +1,6 @@
 # P2 — Cross-model comparison (section draft for the phase report)
 
-**Dev model:** `deepseek-chat` · `runs/passk-r20260728T035619-2d6bcd.json` · 150 runs, 0 invalid
+**Dev model:** `deepseek-v4-flash` · `runs/passk-r20260728T035619-2d6bcd.json` · 150 runs, 0 invalid
 **Delivery model:** `gpt-4o-mini` · `runs/passk-r20260802T144149-e8d83a.json` · 150 runs, 0 invalid
 Same 30 reference pairs, k=5, identical rubric (v1.3), identical prompts.
 
@@ -13,7 +13,7 @@ that makes the pre-registered predictions below testable.
 
 ## The table
 
-| | deepseek-chat | gpt-4o-mini |
+| | deepseek-v4-flash | gpt-4o-mini |
 |---|---|---|
 | Gate confusion, per run (PRIMARY) | TP 139 · FN 6 · FP 5 | **TP 145 · FN 0 · FP 5** |
 | Gate confusion, by-pair majority (SECONDARY) | TP 28 · FN 1 · FP 1 | TP 29 · FN 0 · FP 1 |
@@ -63,7 +63,7 @@ delivery model would be an uncontaminated test rather than a post-hoc story.
 
 ### 1. "Education is the least self-consistent dimension." — **DISCONFIRMED**
 
-On `deepseek-chat`, education was the worst dimension by a wide margin: 7/30 pairs stable,
+On `deepseek-v4-flash`, education was the worst dimension by a wide margin: 7/30 pairs stable,
 mean within-pair σ 0.643. On `gpt-4o-mini` it is among the *best*: 23/30, σ 0.107 — a
 six-fold reduction in spread. `hard_requirements` is now the least stable dimension (13/30).
 
@@ -75,7 +75,7 @@ different shapes.
 
 ### 2. "The veto is bistable, swinging 0↔5." — **DISCONFIRMED, with a mechanism**
 
-On `deepseek-chat` the prediction held: of 9 pairs whose veto moved across k, **5 swing 0↔5** —
+On `deepseek-v4-flash` the prediction held: of 9 pairs whose veto moved across k, **5 swing 0↔5** —
 "every item covered" versus "some item absent", with nothing in between.
 
 On `gpt-4o-mini` there is no bistability, because **one of the two states never occurs.** The

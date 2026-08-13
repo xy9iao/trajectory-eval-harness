@@ -34,7 +34,7 @@ M = TypeVar("M", bound=BaseModel)
 DEFAULT_PROVIDER = "deepseek"
 
 _DEFAULTS: dict[str, dict[str, str]] = {
-    "deepseek": {"base_url": "https://api.deepseek.com", "model": "deepseek-chat"},
+    "deepseek": {"base_url": "https://api.deepseek.com", "model": "deepseek-v4-flash"},
     "openai": {"base_url": "https://api.openai.com/v1", "model": "gpt-4o-mini"},
 }
 
