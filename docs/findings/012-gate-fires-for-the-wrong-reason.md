@@ -4,7 +4,7 @@
 (2026-08-02), Change deliberately deferred. · **Phase:** P2
 
 **Reproduction:** `gate_integrity_scorer` over the k=5 pass^k corpus
-(`runs/passk-r20260728T035619-2d6bcd.json`, 150 runs, deepseek-chat), reference =
+(`runs/passk-r20260728T035619-2d6bcd.json`, 150 runs, deepseek-v4-flash), reference =
 `data/reference/labels-v1.jsonl`. Variant evidence:
 `runs/variants-r20260801T111846-936b6d.json` (variant numbers are never merged with
 live-corpus numbers — eval-design 3c gate 4).

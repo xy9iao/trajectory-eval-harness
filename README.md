@@ -22,7 +22,7 @@ reproducible command. Demonstrated on a resume–JD screening agent with a human
 
 Same agent, same 30 evaluation pairs, two model providers, identical rubric and prompts.
 
-| | `deepseek-chat` | `gpt-4o-mini` |
+| | `deepseek-v4-flash` | `gpt-4o-mini` |
 |---|---|---|
 | Gate confusion, per run | TP 139 · FN 6 · FP 5 | **TP 145 · FN 0 · FP 5** |
 | Gate decision identical across k=5 | 26/30 | **30/30** |
@@ -65,7 +65,7 @@ functions**, so a scorer is independently testable and adding one is a single re
 
 ## By the numbers (measured)
 
-30 pairs · k=5 · 150 runs per model · `deepseek-chat` unless noted.
+30 pairs · k=5 · 150 runs per model · `deepseek-v4-flash` unless noted.
 
 | Metric | Value | Source |
 | --- | --- | --- |

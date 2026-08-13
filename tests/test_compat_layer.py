@@ -102,7 +102,7 @@ def test_reasoning_models_pin_reasoning_effort_off_for_function_tools() -> None:
 
     # non-reasoning models must send NO reasoning_effort at all — an unknown
     # parameter is itself a 400 on some providers, so silence is the default
-    for model in ("gpt-4o-mini", "deepseek-chat"):
+    for model in ("gpt-4o-mini", "deepseek-v4-flash"):
         assert provider_config({**base, "LLM_MODEL": model}).reasoning_effort is None, model
 
 

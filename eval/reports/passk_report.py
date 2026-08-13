@@ -63,7 +63,7 @@ def main() -> int:
     print("|---|---|---|---|---|---|")
     for row in result.rows:
         print(
-            f"| {row['dimension']} | {row['all_agree']} | {row['self_consistency_rate']} |"
+            f"| {row['dimension']} | {row['identical_across_k']} | {row['self_consistency_rate']} |"
             f" {row['mean_within_pair_stdev']} | {row['max_within_pair_stdev']} |"
             f" {row['pairs_with_a_degraded_run']} |"
         )

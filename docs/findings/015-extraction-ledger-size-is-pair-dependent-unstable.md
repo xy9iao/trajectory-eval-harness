@@ -16,7 +16,7 @@ Diagnosing the variant batch required resolving the trajectory's opaque requirem
 **12-item** ledger, the re-extraction returned **2 items**, and no id could be mapped. That
 prompted a direct measurement.
 
-Repeated extraction, same model (`deepseek-chat`), identical input, item counts observed:
+Repeated extraction, same model (`deepseek-v4-flash`), identical input, item counts observed:
 
 | pair | draws observed | range | verdict |
 |---|---|---|---|

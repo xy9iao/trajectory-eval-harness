@@ -255,7 +255,7 @@ a second rubric change on the same dimension family as #3, making the before/aft
 unattributable — it waits for the post-v1.2 rerun; if 0/1 divergence persists, v1.3 opens
 separately. The credibility of every before/after table rests on this rule.
 
-**Cost ledger (running):** dev full-batch round 1 (2026-07-20/21, deepseek-chat): 742,420 in
+**Cost ledger (running):** dev full-batch round 1 (2026-07-20/21, deepseek-v4-flash): 742,420 in
 / 95,970 out · calibration rerun round 2 (2026-07-21): 549,120 in / 67,989 out (cheaper —
 fewer retries). Delivery-model final run appends here — "what does one full eval round cost"
 gets a measured answer.
