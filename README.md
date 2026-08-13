@@ -142,13 +142,22 @@ possible only because trajectories carry ids and offsets and never document text
 ```bash
 git clone https://github.com/xy9iao/trajectory-eval-harness.git && cd trajectory-eval-harness
 uv sync
-uv run python -m eval.report --manifest examples/sample-batch/manifest.json   # a real report
-uv run pytest -q                                                             # 124 tests
+uv run python -m eval.report --manifest examples/sample-batch/manifest.json   # score a batch
+uv run python -m agent.run --synthetic                                        # run the agent once
+uv run pytest -q                                                              # 124 tests
 ```
 
-Live runs need a key and the dataset — [SETUP.md](SETUP.md) covers that, including what cannot be
-done unkeyed. **Start with `--passk 5 --smoke --live`** (2 pairs, a few cents): that smoke has
-caught a provider incompatibility, a scorer scoping bug, and a wall-clock estimate wrong by 4×.
+With a key and the dataset ([SETUP.md](SETUP.md) covers both, and says what cannot be done without
+them):
+
+```bash
+uv run python -m agent.run --pair train:596 --live      # one pair
+uv run python -m agent.run --passk 5 --smoke --live     # 2 pairs × 5 — the cost/compat check
+uv run python -m agent.run --passk 5 --live             # the full 30-pair batch, then score it
+```
+
+**Run the smoke first.** Two pairs and a few cents, and it has caught a provider incompatibility, a
+scorer scoping bug, and a wall-clock estimate wrong by 4×.
 
 ## Development
 
