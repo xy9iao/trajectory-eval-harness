@@ -53,7 +53,10 @@ class ProviderConfig:
 # Models that reject function tools unless reasoning_effort is explicitly
 # "none" on /v1/chat/completions. Matched by prefix so dated snapshots
 # (gpt-5.6-luna-2026-xx-xx) resolve the same way as the floating alias.
-_REASONING_PREFIXES = ("gpt-5", "o1", "o3", "o4")
+# DeepSeek v4 and reasoner default to thinking mode, which rejects a forced
+# tool_choice with "Thinking mode does not support this tool_choice" — the
+# same class of incompatibility as the gpt-5 family, so the same knob applies.
+_REASONING_PREFIXES = ("gpt-5", "o1", "o3", "o4", "deepseek-v4", "deepseek-reasoner")
 
 
 def _reasoning_effort_for(model: str, env: Mapping[str, str]) -> str | None:

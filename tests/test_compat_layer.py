@@ -96,13 +96,18 @@ def test_reasoning_models_pin_reasoning_effort_off_for_function_tools() -> None:
     # explicitly "none" — "Function tools with reasoning_effort are not
     # supported ... set reasoning_effort to 'none'". Without the pin every
     # call 400s and the batch produces valid trajectories full of nulls.
+    #
+    # DeepSeek's thinking models reach the same place by a different error:
+    # they default to thinking mode, which rejects a forced tool_choice with
+    # "Thinking mode does not support this tool_choice". Same knob, so they
+    # share this list rather than growing a second mechanism.
     base = {"LLM_PROVIDER": "openai", "OPENAI_API_KEY": "x"}
-    for model in ("gpt-5.6-luna", "gpt-5.4-mini", "o3", "o4-mini"):
+    for model in ("gpt-5.6-luna", "gpt-5.4-mini", "o3", "o4-mini", "deepseek-v4-flash"):
         assert provider_config({**base, "LLM_MODEL": model}).reasoning_effort == "none", model
 
     # non-reasoning models must send NO reasoning_effort at all — an unknown
     # parameter is itself a 400 on some providers, so silence is the default
-    for model in ("gpt-4o-mini", "deepseek-v4-flash"):
+    for model in ("gpt-4o-mini", "deepseek-chat"):
         assert provider_config({**base, "LLM_MODEL": model}).reasoning_effort is None, model
 
 
