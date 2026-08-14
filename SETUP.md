@@ -17,7 +17,8 @@ uv run python -m eval.report --manifest examples/sample-batch/manifest.json
 ```
 
 The synthetic run exercises the complete graph, writes a trajectory, and validates it. The sample
-report scores a committed 3-pair, 15-trajectory slice of the P2 dev-model batch. On a fresh clone,
+report scores a committed 3-pair, 15-trajectory batch on the current default model — a standalone
+sample, not a slice of the P2 batches (see `examples/sample-batch/manifest.json`). On a fresh clone,
 dataset-dependent tests skip by design; the suite should have no unexpected failures. The `xfail`
 checks document retained source-text fragments and are explained in
 [data/README.md](data/README.md) — one of the two also needs the dataset, so a fresh clone reports a

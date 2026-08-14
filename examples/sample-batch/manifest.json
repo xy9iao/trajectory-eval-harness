@@ -3,21 +3,21 @@
   "provider": "deepseek",
   "model": "deepseek-v4-flash",
   "run_ids": [
-    "r20260728T030245-2c495c",
-    "r20260728T030311-d43882",
-    "r20260728T030329-fd3268",
-    "r20260728T030345-bcecdb",
-    "r20260728T030410-940ef4",
-    "r20260728T030423-bf4623",
-    "r20260728T030440-cb0c32",
-    "r20260728T030458-d4398f",
-    "r20260728T030517-81fcf0",
-    "r20260728T030534-7c86b7",
-    "r20260728T033254-88aed8",
-    "r20260728T033320-5fbcd8",
-    "r20260728T033343-700606",
-    "r20260728T033407-cc705b",
-    "r20260728T033429-b8d5b0"
+    "r20260814T065834-263343",
+    "r20260814T065850-595181",
+    "r20260814T065908-a33212",
+    "r20260814T065925-a63471",
+    "r20260814T065942-c48759",
+    "r20260814T065959-47e748",
+    "r20260814T070013-6f999a",
+    "r20260814T070029-79ad1f",
+    "r20260814T070045-00e3d1",
+    "r20260814T070101-246552",
+    "r20260814T070117-171f6c",
+    "r20260814T070136-f63d8e",
+    "r20260814T070153-299b80",
+    "r20260814T070209-93b964",
+    "r20260814T070225-6f92ad"
   ],
-  "note": "A 3-pair slice of the P2 dev-model batch (k=5, 15 runs), committed so that `git clone` -> `uv sync` -> one command produces a real report with no API key and no dataset. Trajectories are safe to commit BY DESIGN: they carry requirement ids and character offsets, never document text (finding 007's data boundary). The full 30-pair batch lives in the gitignored runs/ and is what every number in the reports cites."
+  "note": "A standalone 3-pair k=5 batch (15 runs) on the current default model, committed so that `git clone` -> `uv sync` -> one command produces a real report with no API key and no dataset. Trajectories are safe to commit BY DESIGN: they carry requirement ids and character offsets, never document text (finding 007's data boundary). NOT a slice of the P2 batches: the reported numbers were produced in July 2026 against the model DeepSeek then served under this same alias, and the provider has since changed what that alias resolves to. This sample was regenerated on 2026-08-14 so that the model it names is the model that produced it; the P2 numbers were left as recorded rather than restated, because rerunning them would replace measurements the reports and findings cite. The full 30-pair batches live in the gitignored runs/."
 }

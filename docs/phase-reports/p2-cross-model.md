@@ -3,6 +3,8 @@
 **Dev model:** `deepseek-v4-flash` · `runs/passk-r20260728T035619-2d6bcd.json` · 150 runs, 0 invalid
 **Delivery model:** `gpt-4o-mini` · `runs/passk-r20260802T144149-e8d83a.json` · 150 runs, 0 invalid
 Same 30 reference pairs, k=5, identical rubric (v1.3), identical prompts.
+`deepseek-v4-flash` names the model served under that alias in July 2026, which is not what the
+alias resolves to now — see [p2.md](p2.md) for why these batches were left as measured.
 
 **Calibration discipline.** One calibration round was spent, entirely on request-shape
 compatibility, never on semantics (eval-design §4). It was needed only for the

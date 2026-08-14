@@ -136,8 +136,8 @@ the final report says which fix costs twenty lines and which costs the whole ref
 
 ## Quick start
 
-No key and no dataset needed: a 3-pair, 15-run slice of the real batch is committed, which is
-possible only because trajectories carry ids and offsets and never document text.
+No key and no dataset needed: a real 3-pair, 15-run batch is committed, which is possible only
+because trajectories carry ids and offsets and never document text.
 
 ```bash
 git clone https://github.com/xy9iao/trajectory-eval-harness.git && cd trajectory-eval-harness
