@@ -65,24 +65,21 @@ functions**, so a scorer is independently testable and adding one is a single re
 
 ## By the numbers (measured)
 
-30 pairs · k=5 · 150 runs per model · `deepseek-chat` unless noted.
+Beyond the table above — 30 pairs · k=5 · 150 runs per model · `deepseek-chat` unless noted.
 
-| Metric | Value | Source |
-| --- | --- | --- |
-| Gate accuracy, per run | **TP 139 · FN 6 · FP 5** | `runs/passk-r20260728T035619-2d6bcd.json` |
-| Fired for the reference's stated reason | **21/28** — reported beside accuracy, always | `gate_integrity_scorer` |
-| Gate decision stable across k=5 | **26/30 pairs** | `passk_scorer` |
-| Agreement vs human reference | skills 0.287 · exp 0.570 · edu 0.592 · hard 0.799 | `agreement_scorer` |
-| Human inter-annotator agreement | 36/40 dimensions · **10/10 gate decisions** | 2 blind annotators, 10 pairs ([010](docs/findings/010-mentor-agreement-adjacency-axis.md)) |
-| Self-contradictions within a run | 15, on 8/30 pairs | `ledger_consistency_scorer` |
-| Fault-injection cases | **5/5, reproduced across 2 batches** | `runs/variants-*.json` |
-| Injection defense | 1 attack class ever worked; **21 attempts, 0 moved the decision** | [p3 report](docs/phase-reports/p3.md) |
-| Injection effect once documents were fenced | **+3.3 → +0.8** over control | p3 §1 |
-| Trajectory validity | **300/300 runs schema-clean** across both models | `eval/trajectory.py` |
-| Automated tests | **124**, CI-gated (ruff · ruff format · mypy strict · pytest) | `.github/workflows/ci.yml` |
+| Metric | Value |
+| --- | --- |
+| Agreement vs human reference | skills 0.287 · exp 0.570 · edu 0.592 · hard 0.799 |
+| Human inter-annotator agreement | 36/40 dimensions · **10/10 gate decisions** ([010](docs/findings/010-mentor-agreement-adjacency-axis.md)) |
+| Self-contradictions within a run | 15, on 8/30 pairs |
+| Fault-injection cases | **5/5, reproduced across 2 batches** |
+| Injection defense | 1 attack class ever worked; **21 attempts, 0 moved the decision** ([p3](docs/phase-reports/p3.md)) |
+| Injection effect once documents were fenced | **+3.3 → +0.8** over control |
+| Trajectory validity | **300/300 runs schema-clean** across both models |
+| Automated tests | **124**, CI-gated |
 
-**PRIMARY is the per-run figure, never a k=5 majority vote** — the deployed system runs once, so
-reporting the majority would describe a configuration that does not exist.
+Every figure regenerates from the manifest it came from; the gate figures are per-run, never a k=5
+majority vote — the deployed system runs once.
 
 ## What it measures
 
@@ -124,7 +121,7 @@ authority is mismatched to its input noise, and one dimension indicted five time
 methods before the common cause was visible. Both are diagnosed, costed, and deliberately unfixed;
 the final report says which fix costs twenty lines and which costs the whole reference set.
 
-## Design decisions you can steal
+## Design decisions
 
 - **Trajectory JSONL is the source of truth.** Every figure regenerates from it; numbers that cannot
   cite a run ID do not enter documents.
@@ -133,43 +130,34 @@ the final report says which fix costs twenty lines and which costs the whole ref
   error and was wrong.
 - **Every metric computed over runs declares its stability.** A number without a statement about
   run-to-run movement is a number without an error bar; the runner warns when a scorer omits it.
-- **Validation exclusion is surfaced, never swallowed** — invalid trajectories are dropped from all
-  scorers *and* listed in the report header with their run IDs.
-- **Constructed cases never share a table with observed results**, enforced in code.
 - **Divergence defaults to "my construction is wrong."** Six constructed cases were retired rather
   than counted — admitting them would have manufactured phantom true negatives in the exact metric
   they existed to repair.
 
 ## Quick start
 
-No API key and no dataset needed — a 3-pair, 15-run slice of the real batch is committed, which is
+No key and no dataset needed: a 3-pair, 15-run slice of the real batch is committed, which is
 possible only because trajectories carry ids and offsets and never document text.
 
 ```bash
-git clone https://github.com/xy9iao/trajectory-eval-harness.git
-cd trajectory-eval-harness
+git clone https://github.com/xy9iao/trajectory-eval-harness.git && cd trajectory-eval-harness
 uv sync
-uv run python -m eval.report --manifest examples/sample-batch/manifest.json
+uv run python -m eval.report --manifest examples/sample-batch/manifest.json   # score a batch
+uv run python -m agent.run --synthetic                                        # run the agent once
+uv run pytest -q                                                              # 124 tests
 ```
 
-One command, one markdown report, every metric above. No database, no service, no notebook.
+With a key and the dataset ([SETUP.md](SETUP.md) covers both, and says what cannot be done without
+them):
 
 ```bash
-uv run pytest -q                                   # no API calls, no key
-uv run python -m agent.run --synthetic             # one agent run, no dataset, no key
+uv run python -m agent.run --pair train:596 --live      # one pair
+uv run python -m agent.run --passk 5 --smoke --live     # 2 pairs × 5 — the cost/compat check
+uv run python -m agent.run --passk 5 --live             # the full 30-pair batch, then score it
 ```
 
-Live runs need a key and the dataset — see [SETUP.md](SETUP.md), which states plainly what cannot be
-done unkeyed.
-
-```bash
-uv run python -m agent.run --passk 5 --smoke --live   # 2 pairs × 5 — the cost/compat check
-uv run python -m agent.run --passk 5 --live           # the full 30-pair batch
-```
-
-**Run the smoke first.** It is two pairs and a few cents, and it has caught a provider
-incompatibility, a scorer scoping bug, and a wall-clock estimate wrong by 4× — each of which would
-otherwise have cost a full batch to discover.
+**Run the smoke first.** Two pairs and a few cents, and it has caught a provider incompatibility, a
+scorer scoping bug, and a wall-clock estimate wrong by 4×.
 
 ## Development
 
@@ -183,89 +171,30 @@ CI (GitHub Actions) enforces exactly these gates on every push/PR, plus a gitlea
 
 ## Running it on your own agent
 
-1. Emit trajectory JSONL per [docs/trajectory-schema.md](docs/trajectory-schema.md) — 7 event types,
-   7 validator-enforced invariants.
-2. Record a run-id manifest per batch: `{"kind", "provider", "model", "run_ids": [...]}`.
-3. Supply reference labels for the agreement and gate scorers, or run the three schema-generic
-   scorers alone.
-4. `uv run python -m eval.report --manifest <your-manifest>.json --out report.md`
+Emit trajectory JSONL per [docs/trajectory-schema.md](docs/trajectory-schema.md), record a run-id
+manifest per batch, and point `eval.report` at it. Reference labels are needed only by the three
+rubric-coupled scorers; the other three run on the schema alone.
 
-The methodology transfers completely; the structural layer mostly reuses; the semantic layer must be
+The methodology transfers completely, the structural layer mostly reuses, the semantic layer must be
 rebuilt. **The expense is in annotation, not engineering** — the scorers are a few hundred lines of
 pure functions, while the 30-pair reference set took an entire phase.
 
 ## Project structure
 
 ```
-├── eval/                 # the harness
-│   ├── scorers/          # one file per scorer, each a pure function with planted-defect tests
-│   ├── report.py         # dumb-pipe runner: manifest scope, validation exclusion, isolation banner
-│   ├── trajectory.py     # schema validator + data-hygiene invariants
-│   ├── variants.py       # constructed fault/gate cases
-│   └── adversarial.py    # poisoned-case materialization + effect classification
-├── agent/                # the host agent
-│   ├── graph.py          # LangGraph: 6 nodes, conditional gate edge
-│   ├── hitl.py           # interrupt() gate; review.py for the human artifact
-│   ├── client.py         # THE only module that knows providers exist (CI-asserted)
-│   └── sanitize.py       # parse-seam defense: carrier stripping + role-marker neutralization
-├── rubrics/              # versioned YAML rubric (v1.3): dimensions, weights, anchors, veto
-├── data/                 # reference labels, constructed-case specs, dataset loader
-├── examples/sample-batch # committed 15-run slice so the quick start works from a fresh clone
-├── docs/
-│   ├── final-report.md   # executive layer over all four phases
-│   ├── findings/         # 15 archived findings, five-part format
-│   └── phase-reports/    # p0–p3 + the cross-model comparison
-└── runs/                 # trajectories and manifests (gitignored)
+├── eval/          # the harness: scorers/, report.py runner, trajectory validator,
+│                  # constructed fault cases (variants.py) and poisoned cases (adversarial.py)
+├── agent/         # the host: LangGraph graph, HITL gate, parse-seam sanitizer,
+│                  # client.py — the only module that knows providers exist (CI-asserted)
+├── rubrics/       # versioned YAML rubric (v1.3)
+├── data/          # reference labels, case specs, dataset loader (corpus gitignored)
+├── examples/      # committed 15-run slice so the quick start works from a fresh clone
+├── docs/          # final-report.md · findings/ (15) · phase-reports/ (p0–p3 + cross-model)
+└── runs/          # trajectories and manifests (gitignored)
 ```
-
-## Known limitations
-
-Stated here rather than left for a reader to discover.
-
-- **n = 30 pairs, one rubric, two models.** A fixed instrument for detecting change in one agent.
-- **Constructed cases are measured at k=1** while the system has a quantified variance floor — they
-  are **existence proofs, never rates.** This is an internal inconsistency in the method, caught when
-  the same constructed case flipped between two batches.
-- **True negatives are scarce for three independent structural reasons**, not by sampling accident;
-  drawing more pairs would not fix it.
-- **The faithfulness probe was a stratified sample of known weak spots** — 10 hand-judged cases.
-  **No overall faithfulness rate exists in this work and none can be derived from it.**
-- **Injection results stand on one substrate**, chosen for zero control noise — itself only a k=5
-  property, and a sixth draw fell outside it.
-- **Rendering-layer attacks are not representable on a plain-text corpus.** They stay live for
-  PDF/DOCX ingestion in production. **This is the boundary of this work, not of the problem.**
-
-## Data handling
-
-Public resume–JD data only. The source dataset declares **no license** (re-verified 2026-08-04 via
-the HuggingFace API), so the corpus itself is gitignored and reachable only through a pinned
-download script plus checksum — **this repository is not a redistribution of the dataset.**
-Trajectories carry requirement ids and character offsets and **never document text**, enforced by
-the validator. The reference labels are a separate artifact and *do* quote the corpus; see
-[data/README.md](data/README.md) for the accuracy note. API keys live in `.env` (gitignored), and CI
-runs a secrets scan on every push.
-
-## Status
-
-NUS-ISS capstone, **complete**. P0 (rubric + reference set), P1 (agent + HITL gate), P2 (the eval
-framework) and P3 (adversarial cases) are closed, each with a public report; P4 delivered the
-[final report](docs/final-report.md). Phases and acceptance criteria in
-[docs/roadmap.md](docs/roadmap.md), locked design decisions in [docs/decisions.md](docs/decisions.md).
-
-Three issues are open **on purpose** — each records something diagnosed but deliberately not built,
-with its cost: [#26](https://github.com/xy9iao/trajectory-eval-harness/issues/26) extractor fixes ·
-[#31](https://github.com/xy9iao/trajectory-eval-harness/issues/31) experimental conditions in the
-manifest · [#33](https://github.com/xy9iao/trajectory-eval-harness/issues/33) component ablation for
-the injection defenses.
 
 ## License
 
-**MIT** — see [LICENSE](LICENSE). It covers the code, tests, rubric and documentation authored here.
+MIT — see [LICENSE](LICENSE), which also states what it does not cover.
 
-It deliberately does **not** relicense material derived from the source dataset, which declares no
-license of its own: the reference labels quote that corpus, as do shorter fragments in the variant
-specs and three findings. Those are retained for research reproducibility, not relicensed — the
-scope note in `LICENSE` says exactly which files, and [data/README.md](data/README.md) explains why
-they are kept.
-
-© 2026 Xinyang Qiao — sole author.
+© 2026 Xinyang Qiao
